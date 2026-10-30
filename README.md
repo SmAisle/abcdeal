@@ -76,3 +76,10 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
   - Menu: a "More from smAisle" section with a Daily 15 tile.
 - Taps are counted in abc-usage.x (d15_done, d15_menu, sm_cover) and sent with the check-in. The owner page has a "Taps to other smAisle games" table.
 - In the future app, links go through window.ABC_APP.open(key) when it exists.
+
+## v24
+- Move cards once they're in your word, in both A, B, C, Deal and Deal 'Em:
+  - Drag a card in your word left or right to move it.
+  - Drag a card from your hand (or the board) onto your word to put it at that spot. When the word is full, dropping it on a card replaces that card.
+  - Drag a card off your word to take it back. A plain tap still takes it back too.
+- How to Play mentions dragging.

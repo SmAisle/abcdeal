@@ -61,6 +61,10 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 #handRow{--w:52px}
 #handRow.two{flex-wrap:wrap;row-gap:8px;margin:0 auto}
 #wordRow{--w:46px;min-height:calc(var(--w)*1.4)}
+/* Dragging: move a card within your word, drag one from your hand to a spot, or drag it off the word to take it back */
+#handRow .card,#boardRow .card,#wordRow .card{touch-action:none}
+.card.drag{z-index:30;transition:none!important;pointer-events:none}.card.drag .face{box-shadow:4px 6px 0 rgba(0,0,0,.3)}
+#wordRow.over{outline:2px dashed var(--ink2);outline-offset:5px;border-radius:4px}
 
 /* Cards: big letter, corner letter and points, like a deck of cards */
 .card{width:var(--w);height:calc(var(--w)*1.4);position:relative;perspective:600px;flex:none;border:0;padding:0;background:none}
@@ -298,7 +302,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
   <div id="hp1">
   <ul class="rules">
     <li><b>Goal:</b> beat the dealer in today's <b>5 hands</b>. Everyone gets the same cards, and so does the dealer.</li>
-    <li><b>Spell a word:</b> tap your cards to fill the slots, then tap <b>Play word</b>. Hand 1 needs <b>3 letters</b>, up to <b>7 letters</b> in hand 5.</li>
+    <li><b>Spell a word:</b> tap your cards to fill the slots, then tap <b>Play word</b>. Drag a card to move it, or tap it to take it back. Hand 1 needs <b>3 letters</b>, up to <b>7 letters</b> in hand 5.</li>
     <li><b>Cards:</b> 5 in hand 1, one more each hand, up to 9. The dealer shows you one card. There are always words to find, and your best word always beats the dealer's.</li>
     <li><b>Points:</b> add up the numbers on your cards. Your <b>first letter</b> counts ×1 in hand 1, up to <b>×5</b> in hand 5.<div class="pts">1: A E I L N O R S T U · 2: D G · 3: B C M P<br>4: F H V W Y · 5: K · 8: J X · 10: Q Z</div></li>
     <li><b>The dealer</b> flips its cards and plays its best word. Higher score wins; a tie is a push. No word? The dealer busts.</li>
@@ -480,7 +484,7 @@ function difficulty(day){const e=expectedWins(day);return e>=4?1:e>=3.5?2:e>=3?3
 function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/864e5)+1}
 //module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
 
-const VERSION='23',VDATE='Oct 30',GAME='abc';
+const VERSION='24',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -585,11 +589,11 @@ function render(deal){
   // your hand
   const hr=$('handRow'),br=$('boardRow');hr.innerHTML='';br.innerHTML='';hr.classList.toggle('swapping',swapMode);
   cards.forEach((c,i)=>{const el=cardEl(c,{down:fly,cls:((h.done?(h.used||[]).includes(i):sel.includes(i))?'used':'')+(mix?' dealt':'')});
-    if(fly)el.dataset.up=1;if(mix)el.style.animationDelay=(280+i*45)+'ms';el.setAttribute('role','button');el.setAttribute('aria-label',`${c}, ${VALUES[c]} points`);el.onclick=()=>tapCard(i);(HOLDEM()&&i<B?br:hr).appendChild(el)});
+    if(fly)el.dataset.up=1;if(mix)el.style.animationDelay=(280+i*45)+'ms';el.setAttribute('role','button');el.setAttribute('aria-label',`${c}, ${VALUES[c]} points`);el.onclick=()=>{if(!dragJust())tapCard(i)};dragify(el,'hand',i);(HOLDEM()&&i<B?br:hr).appendChild(el)});
   // word slots: exactly the length this hand needs
   const wr=$('wordRow');wr.innerHTML='';const w=h.done?(h.word||''):word();
   if(h.done&&h.bust){const s=document.createElement('div');s.className='bust';s.textContent=h.fold?'FOLD':'BUST';wr.appendChild(s)}
-  else for(let i=0;i<len;i++){let el;if(i<w.length){el=cardEl(w[i]);if(!h.done){el.onclick=()=>{sel.splice(i,1);render()}}}else{el=document.createElement('div');el.className='slot'}
+  else for(let i=0;i<len;i++){let el;if(i<w.length){el=cardEl(w[i]);if(!h.done){el.onclick=()=>{if(dragJust())return;sel.splice(i,1);render()};dragify(el,'word',i)}}else{el=document.createElement('div');el.className='slot'}
     if(i===0&&MULT[S.cur]>1){el.classList.add('mx');el.dataset.m='×'+MULT[S.cur]}wr.appendChild(el)}
   // one quiet line: points so far and how many words are possible
   const n=countWords(S.cards,len),poss=n?`${n} word${n>1?'s':''} possible`:'only rare words here';
@@ -608,6 +612,27 @@ function render(deal){
   const t=$('table');for(let k=.92;k>.4&&t.scrollHeight>t.clientHeight+1;k-=.06)size(k);
   if(!h.done&&!busy)checkStuck();
 }
+/* ---------- Dragging cards ----------
+   Word card: drag left or right to move it, or off the word to take it back.
+   Hand card: drag onto the word to put it at that spot (onto a card to replace it when the word is full).
+   A press that doesn't move is still a tap. */
+let dragT=0;const dragJust=()=>Date.now()-dragT<350;
+function dropAt(x,skip){const cs=[...$('wordRow').querySelectorAll('.card')];let t=0;cs.forEach((c,j)=>{if(j===skip)return;const r=c.getBoundingClientRect();if(r.left+r.width/2<x)t++});return t}
+function overWord(x,y){const r=$('wordRow').getBoundingClientRect(),pad=r.height*.6;return y>r.top-pad&&y<r.bottom+pad&&x>r.left-30&&x<r.right+30}
+function dragify(el,kind,i){
+  el.addEventListener('pointerdown',e=>{if(H().done||busy||swapMode||e.button>0)return;const sx=e.clientX,sy=e.clientY;let on=false;
+    try{el.setPointerCapture(e.pointerId)}catch(_){}
+    const wr=$('wordRow'),mv=ev=>{const dx=ev.clientX-sx,dy=ev.clientY-sy;if(!on&&Math.hypot(dx,dy)>8){on=true;el.classList.add('drag')}
+      if(!on)return;ev.preventDefault();el.style.transform=`translate(${dx}px,${dy}px) scale(1.06)`;
+      const ov=overWord(ev.clientX,ev.clientY);wr.classList.toggle('over',ov)},
+    end=ev=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',end);el.removeEventListener('pointercancel',end);wr.classList.remove('over');
+      if(!on)return;dragT=Date.now();const x=ev.clientX,y=ev.clientY,ov=ev.type==='pointerup'&&overWord(x,y);
+      if(kind==='word'){const v=sel.splice(i,1)[0];if(ov)sel.splice(Math.min(dropAt(x,i),sel.length),0,v)}
+      else if(ov){const k=sel.indexOf(i);if(k>=0){sel.splice(k,1);sel.splice(Math.min(dropAt(x,k),sel.length),0,i)}
+        else if(sel.length<LEN())sel.splice(Math.min(dropAt(x,-1),sel.length),0,i);
+        else{const cs=[...wr.querySelectorAll('.card')];let best=0,bd=1e9;cs.forEach((c,j)=>{const r=c.getBoundingClientRect(),d=Math.abs(r.left+r.width/2-x);if(d<bd){bd=d;best=j}});sel[best]=i}}
+      render()};
+    el.addEventListener('pointermove',mv);el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end)})}
 /* ---------- Actions ---------- */
 function tapCard(i){const h=H();if(h.done||busy)return;
   if(swapMode){if(sel.includes(i))return;S.cards[i]=DAY.swapCard[S.cur];h.swapped=true;swapMode=false;save();render();
