@@ -315,7 +315,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
     <li><b>Goal:</b> beat the dealer in today's <b>5 hands</b>. Everyone gets the same cards, and so does the dealer.</li>
     <li><b>Spell a word:</b> tap your cards to fill the slots, then tap <b>Play word</b>. Drag a card to any slot to start from the end or the middle, onto another card to swap them, or tap it to take it back. Hand 1 needs <b>3 letters</b>, up to <b>7 letters</b> in hand 5.</li>
     <li><b>Cards:</b> 5 in hand 1, one more each hand, up to 9. The dealer shows you one card. There are always words to find, and your best word always beats the dealer's.</li>
-    <li><b>Points:</b> add up the numbers on your cards. Your <b>first letter</b> counts ×1 in hand 1, up to <b>×5</b> in hand 5.<div class="pts">1: A E I L N O R S T U · 2: D G · 3: B C M P<br>4: F H V W Y · 5: K · 8: J X · 10: Q Z</div></li>
+    <li><b>Points:</b> add up the numbers on your cards. One spot in each word is the <b>bonus</b>: its letter counts ×2 in hand 2, up to <b>×5</b> in hand 5. The bonus spot moves every hand.<div class="pts">1: A E I L N O R S T U · 2: D G · 3: B C M P<br>4: F H V W Y · 5: K · 8: J X · 10: Q Z</div></li>
     <li><b>The dealer</b> flips its cards and plays its best word. Higher score wins; a tie is a push. No word? The dealer busts.</li>
     <li><b>Stars:</b> win hands to earn them.<table class="stars" id="starTbl"><tr><th>Hands won</th><th>3</th><th>4</th><th>5</th></tr><tr><th>Stars</th><td>⭐</td><td>⭐⭐</td><td>⭐⭐⭐</td></tr></table></li>
   </ul>
@@ -427,7 +427,11 @@ const WORDS_DEALER={"3":"ABAABSACEACTADDADSAFFAFTAGEAGOAIDAIMAIRALAALEALLALSALTA
 const VALUES={A:1,B:3,C:3,D:2,E:1,F:4,G:2,H:4,I:1,J:8,K:5,L:1,M:3,N:1,O:1,P:3,Q:10,R:1,S:1,T:1,U:1,V:4,W:4,X:8,Y:4,Z:10};
 const COUNTS={A:9,B:2,C:2,D:4,E:12,F:2,G:3,H:2,I:9,J:1,K:1,L:4,M:2,N:6,O:8,P:2,Q:1,R:6,S:4,T:6,U:4,V:2,W:2,X:1,Y:2,Z:1};
 const LENGTHS=[3,4,5,6,7];
-const MULT=[1,2,3,4,5]; /* first letter of the word counts this many times, by hand */
+const MULT=[1,2,3,4,5]; /* the bonus spot's letter counts this many times, by hand */
+/* The bonus spot moves around: from MOVE_FROM on, each hand puts it on a slot picked from the date (the same for everyone).
+   Before that it was always the first letter, so past days score the way they did. */
+const MOVE_FROM='2026-10-31';
+function bonusSlots(date){return LENGTHS.map((len,h)=>date<MOVE_FROM||h===0?0:hashStr('bonus|'+date+'|'+h)%len)}
 const SIZES=[5,6,7,8,9]; /* cards dealt (you and the dealer): one more each hand */
 const HANDS=LENGTHS.length;
 /* Draw and Swap cost more as hands are worth more: hand 1 is 2 and 1, hand 5 is 6 and 5. */
@@ -445,11 +449,11 @@ const DEALER_LIST=unpack(WORDS_DEALER).filter(w=>w.length<=7).map(w=>[w,count(w)
 
 function count(s){const c={};for(const ch of s)c[ch]=(c[ch]||0)+1;return c}
 function fits(need,have){for(const k in need)if((have[k]||0)<need[k])return false;return true}
-function score(word,h=0){if(!word)return 0;let s=0;for(const ch of word)s+=VALUES[ch]||0;return s+(MULT[h]-1)*(VALUES[word[0]]||0)}
+function score(word,h=0,b=0){if(!word)return 0;let s=0;for(const ch of word)s+=VALUES[ch]||0;return s+(MULT[h]-1)*(VALUES[word[b]]||0)}
 function isWord(w){return w.length>=3&&ALL.has(w)}
-/* Best common word for hand h (its length and first-letter multiplier): highest score, then alphabetical. */
-function best(letters,h){const len=LENGTHS[h];const have=count(letters.join(''));let bw='',bs=0;
-  for(const [w,c] of DEALER_LIST){if(w.length!==len||!fits(c,have)||!usesHole(c,letters))continue;const s=score(w,h);if(s>bs||(s===bs&&w<bw)){bw=w;bs=s}}
+/* Best common word for hand h (its length, and its multiplier on bonus slot b): highest score, then alphabetical. */
+function best(letters,h,b=0){const len=LENGTHS[h];const have=count(letters.join(''));let bw='',bs=0;
+  for(const [w,c] of DEALER_LIST){if(w.length!==len||!fits(c,have)||!usesHole(c,letters))continue;const s=score(w,h,b);if(s>bs||(s===bs&&w<bw)){bw=w;bs=s}}
   return {word:bw,score:bs}}
 /* Is there any word at all (full list) of exactly len letters in these cards? */
 const BY_LEN={};
@@ -457,7 +461,7 @@ function anyWord(letters,len){if(!BY_LEN[len])BY_LEN[len]=[...ALL].filter(w=>w.l
   return BY_LEN[len].some(c=>fits(c,have)&&usesHole(c,letters))}
 /* How many common words of exactly len letters these cards can make */
 /* Points for every common word your cards can make this hand */
-function wordScores(letters,h){const len=LENGTHS[h],have=count(letters.join('')),out=[];for(const [w,c] of DEALER_LIST)if(w.length===len&&fits(c,have)&&usesHole(c,letters))out.push(score(w,h));return out}
+function wordScores(letters,h,b=0){const len=LENGTHS[h],have=count(letters.join('')),out=[];for(const [w,c] of DEALER_LIST)if(w.length===len&&fits(c,have)&&usesHole(c,letters))out.push(score(w,h,b));return out}
 const MIN_WORDS=4,WIN_SHARE=0.5;
 function countWords(letters,len){const have=count(letters.join(''));let n=0;for(const [w,c] of DEALER_LIST)if(w.length===len&&fits(c,have)&&usesHole(c,letters))n++;return n}
 function removeLetters(cards,word){const left=cards.slice();for(const ch of word){const i=left.indexOf(ch);if(i>=0)left.splice(i,1)}return left}
@@ -473,16 +477,17 @@ function freshDeck(r){const d=[];for(const k in COUNTS)for(let i=0;i<COUNTS[k];i
    hand (hands 2-5), meaning it has no word at all. */
 /* Your cards and the dealer's from a shuffled deck: n each, or in Hold'em a shared board of n-2 plus 2 each */
 function split(deck,n){if(!HOLE)return [deck.slice(0,n),deck.slice(n,2*n)];const b=n-HOLE,board=deck.slice(0,b);return [board.concat(deck.slice(b,b+HOLE)),board.concat(deck.slice(b+HOLE,b+2*HOLE))]}
-function dealDay(date){const bustHand=hashStr('bust|'+date)%10<3?1+hashStr('which|'+date)%4:-1;
-  const day={you:[],dealer:[],yourBest:[],dealerBest:[],drawCard:[],swapCard:[]};
-  for(let h=0;h<HANDS;h++){const r=rng(hashStr((HOLE?'abcholdem|':'abcdeal3|')+date+'|'+h)),n=SIZES[h];let pick=null;
+/* A moving bonus spreads scores out, so from MOVE_FROM the dealer may beat a little less of your hand (60%, not 50%): about the same difficulty as before */
+function dealDay(date){const share=date<MOVE_FROM?WIN_SHARE:0.6;const bustHand=hashStr('bust|'+date)%10<3?1+hashStr('which|'+date)%4:-1;
+  const day={you:[],dealer:[],yourBest:[],dealerBest:[],drawCard:[],swapCard:[],bonus:bonusSlots(date)};
+  for(let h=0;h<HANDS;h++){const b=day.bonus[h],r=rng(hashStr((HOLE?'abcholdem|':'abcdeal3|')+date+'|'+h)),n=SIZES[h];let pick=null;
     for(let tries=0;tries<4000&&!pick;tries++){const deck=freshDeck(r),[you,dealer]=split(deck,n);
-      const y=best(you,h);if(!y.word)continue;const ys=wordScores(you,h),late=tries>=2000;
-      if(ys.length<(h<HANDS-1?(late?3:MIN_WORDS):(late?1:2)))continue;const d=best(dealer,h);
+      const y=best(you,h,b);if(!y.word)continue;const ys=wordScores(you,h,b),late=tries>=2000;
+      if(ys.length<(h<HANDS-1?(late?3:MIN_WORDS):(late?1:2)))continue;const d=best(dealer,h,b);
       if(h===bustHand){if(d.word||anyWord(dealer,LENGTHS[h]))continue}
-      else{if(!d.word)continue;const win=ys.filter(x=>x>d.score).length;if(win<1||(!late&&win>Math.max(1,Math.floor(ys.length*WIN_SHARE))))continue}
+      else{if(!d.word)continue;const win=ys.filter(x=>x>d.score).length;if(win<1||(!late&&win>Math.max(1,Math.floor(ys.length*share))))continue}
       pick={you,dealer,y,d,draw:deck[2*n],swap:deck[2*n+1]}}
-    if(!pick){const deck=freshDeck(r),[you,dealer]=split(deck,n);pick={you,dealer,draw:deck[2*n],swap:deck[2*n+1]};pick.y=best(pick.you,h);pick.d=best(pick.dealer,h)}
+    if(!pick){const deck=freshDeck(r),[you,dealer]=split(deck,n);pick={you,dealer,draw:deck[2*n],swap:deck[2*n+1]};pick.y=best(pick.you,h,b);pick.d=best(pick.dealer,h,b)}
     day.you.push(pick.you);day.dealer.push(pick.dealer);day.yourBest.push(pick.y);day.dealerBest.push(pick.d);day.drawCard.push(pick.draw);day.swapCard.push(pick.swap)}
   day.bestTotal=day.yourBest.reduce((a,b)=>a+b.score,0);return day}
 
@@ -490,14 +495,14 @@ function dealDay(date){const bustHand=hashStr('bust|'+date)%10<3?1+hashStr('whic
    of the common words it can make. Expected hands won: 4+ = 1, 3.5+ = 2, 3+ = 3, 2.5+ = 4, less = 5. */
 const DIFFW=['','Easy','Gentle','Medium','Tough','Hard'];
 function expectedWins(day){let E=0;for(let h=0;h<HANDS;h++){const have=count(day.you[h].join(''));
-    const ws=DEALER_LIST.filter(([w,c])=>w.length===LENGTHS[h]&&fits(c,have)&&usesHole(c,day.you[h])).map(([w])=>score(w,h)).sort((a,b)=>b-a);
+    const ws=DEALER_LIST.filter(([w,c])=>w.length===LENGTHS[h]&&fits(c,have)&&usesHole(c,day.you[h])).map(([w])=>score(w,h,day.bonus[h])).sort((a,b)=>b-a);
     const top=ws.slice(0,Math.ceil(ws.length/2)),d=day.dealerBest[h];if(top.length)E+=top.filter(x=>!d.word||x>d.score).length/top.length}
   return E}
 function difficulty(day){const e=expectedWins(day);return e>=4?1:e>=3.5?2:e>=3?3:e>=2.5?4:5}
 function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/864e5)+1}
-//module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
+//module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,bonusSlots,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
 
-const VERSION='37',VDATE='Oct 30',GAME='abc';
+const VERSION='38',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -600,7 +605,8 @@ const placed=()=>sel.filter(i=>i!=null).length;
 function freeSlot(){for(let j=0;j<LEN();j++)if(sel[j]==null)return j;return -1}
 function trimSel(){while(sel.length&&sel[sel.length-1]==null)sel.pop()}
 /* Points so far: your letters, with the multiplier only once a card sits in the first slot */
-function previewScore(){let s=0;sel.forEach(i=>{if(i!=null)s+=VALUES[S.cards[i]]||0});return sel[0]!=null?s+(MULT[S.cur]-1)*(VALUES[S.cards[sel[0]]]||0):s}
+function previewScore(){let s=0;sel.forEach(i=>{if(i!=null)s+=VALUES[S.cards[i]]||0});const b=BON();return sel[b]!=null?s+(MULT[S.cur]-1)*(VALUES[S.cards[sel[b]]]||0):s}
+const BON=()=>DAY.bonus?DAY.bonus[S.cur]:0;
 function cost(h){const i=S.hands.indexOf(h);return (h.drew?DRAW_COST[i]:0)+(h.swapped?SWAP_COST[i]:0)}
 function totalPts(){return S.hands.filter(h=>h.done).reduce((a,h)=>a+h.net,0)}
 
@@ -654,7 +660,7 @@ function render(deal){
   if(h.done&&h.bust){const s=document.createElement('div');s.className='bust';s.textContent=h.fold?'FOLD':'BUST';wr.appendChild(s)}
   else for(let i=0;i<len;i++){let el;const L=slotL(i);if(L){el=cardEl(L);if(locked(i)){el.classList.add('lock');el.onclick=()=>{if(hintMode){hintMode=false;render()}toast('Your hint letter stays put')}}else if(!h.done){el.onclick=()=>{if(dragJust())return;if(hintMode)return revealAt(i);sel[i]=null;trimSel();sfx('take');render()};dragify(el,'word',i)}}else{el=document.createElement('div');el.className='slot';el.onclick=()=>{if(hintMode)revealAt(i)}}
     if(hintMode&&!h.done)el.classList.add('pick');
-    if(i===0&&MULT[S.cur]>1){el.classList.add('mx');el.dataset.m='×'+MULT[S.cur]}wr.appendChild(el)}
+    if(i===BON()&&MULT[S.cur]>1){el.classList.add('mx');el.dataset.m='×'+MULT[S.cur]}wr.appendChild(el)}
   // one quiet line: points so far and how many words are possible
   const n=countWords(S.cards,len),poss=n?`${n} word${n>1?'s':''} possible`:'only rare words here';
   if(h.done)$('preview').innerHTML=h.bust?(h.fold?'You folded':'You busted'):`<b>${h.score}</b> pts${cost(h)?` − ${cost(h)} = <b>${h.net}</b>`:''}`;
@@ -733,7 +739,7 @@ $('foldBtn').onclick=()=>{const h=H();if(h.done||busy)return;
 $('hintBtn').onclick=()=>{only('');if(H().done)return;hintMode=true;render();toast('Tap a slot to reveal its letter',2200)};
 function hintWord(){const len=LEN(),have=count(S.cards.join(''));let bw='',bm=-1,bs=-1;
   for(const [w,c] of DEALER_LIST){if(w.length!==len||!fits(c,have)||!usesHole(c,S.cards))continue;
-    let m=0;for(let k=0;k<len;k++)if(sel[k]!=null&&S.cards[sel[k]]===w[k])m++;const sc=score(w,S.cur);if(m>bm||(m===bm&&sc>bs)){bw=w;bm=m;bs=sc}}
+    let m=0;for(let k=0;k<len;k++)if(sel[k]!=null&&S.cards[sel[k]]===w[k])m++;const sc=score(w,S.cur,BON());if(m>bm||(m===bm&&sc>bs)){bw=w;bm=m;bs=sc}}
   return bw}
 function revealAt(j){hintMode=false;const h=H(),w=hintWord();if(!w){render();toast('No common word in this hand. Folding is the move.',2200);return}
   const L=w[j];for(let k=0;k<LEN();k++)if(sel[k]===undefined)sel[k]=null;
@@ -757,7 +763,7 @@ function play(){const w=word();if(w.length!==LEN())return;
 /* w is your word, or null for a bust (no word possible) or a fold (gave up). Either loses the hand and throws away your cards. */
 function resolve(w,fold){const h=H();h.fold=!!fold;busy=true;swapMode=false;const d=DAY.dealerBest[S.cur];
   h.snap=S.cards.slice();h.used=w?sel.slice():h.snap.map((_,i)=>i);h.bust=!w;h.word=w||'';
-  h.score=w?score(w,S.cur):0;h.net=w?Math.max(0,h.score-cost(h)):0;h.dealerWord=d.word||'BUST';h.dealerScore=d.score;
+  h.score=w?score(w,S.cur,BON()):0;h.net=w?Math.max(0,h.score-cost(h)):0;h.dealerWord=d.word||'BUST';h.dealerScore=d.score;
   h.result=!w?'L':!d.word?'W':h.net>d.score?'W':h.net<d.score?'L':'P';
   S.cards=S.cards.filter((_,i)=>!h.used.includes(i));
   const cards=[...$('dealerRow').children];if(fold)sfx('fold');cards.forEach((el,i)=>setTimeout(()=>{if(el.classList.contains('down'))sfx('flip');el.classList.remove('down')},120+i*110));
@@ -765,7 +771,7 @@ function resolve(w,fold){const h=H();h.fold=!!fold;busy=true;swapMode=false;cons
 
 function showBanner(h){const b=$('banner'),d=DAY.dealerBest[S.cur];
   const title=h.bust?(h.fold?'Fold':'Bust!'):!d.word?'Dealer busts!':{W:'You win!',L:'Dealer wins',P:'Push'}[h.result];
-  const yb=best(h.snap,S.cur);
+  const yb=best(h.snap,S.cur,BON());
   const tip=!yb.word?(h.bust?'There was no common word in that hand.':''):h.fold?`You could have played <b>${yb.word}</b> for ${yb.score} points`:h.bust?`Best word was worth ${yb.score} points`:h.score>=yb.score?'You found the best word!':`Best word was worth ${yb.score} points`;
   /* Both words side by side, the winner highlighted */
   const row=(who,w,p,win)=>`<tr${win?' class="win"':''}><th>${who}</th><td class="w">${w}</td><td>${p}</td></tr>`;
@@ -894,11 +900,11 @@ $('doneStats').onclick=()=>{backTo='done';showStats()};
 $('statsBack').onclick=()=>{if(backTo==='done')only('done');else goBack()};
 
 /* First-time intro: 4 short screens, like The Daily 15 */
-const mini=(w,m)=>`<div class="qrow">${[...w].map((l,i)=>{const v=VALUES[l];return `<div class="card${i===0&&m?' mx':''}" ${i===0&&m?`data-m="×${m}"`:''}><div class="in"><div class="face"><span class="tl">${l}</span><span class="big">${l}</span><span class="br">${v}</span></div></div></div>`}).join('')}</div>`;
+const mini=(w,m,at=0)=>`<div class="qrow">${[...w].map((l,i)=>{const v=VALUES[l];return `<div class="card${i===at&&m?' mx':''}" ${i===at&&m?`data-m="×${m}"`:''}><div class="in"><div class="face"><span class="tl">${l}</span><span class="big">${l}</span><span class="br">${v}</span></div></div></div>`}).join('')}</div>`;
 const QS=[
   [mini('ABC'),'Beat the dealer','Everyone gets the same <b>5 hands</b> today, and the dealer gets the same cards for everyone too. Spell a word worth more points than the dealer’s.'],
   ['<div style="font-family:var(--head);font-weight:900;font-size:40px;letter-spacing:.06em">3 · 4 · 5 · 6 · 7</div>','Longer every hand','Hand 1 needs a <b>3-letter</b> word, up to <b>7 letters</b> in hand 5. You get 5 cards, then one more each hand.'],
-  [mini('HAVES',5),'Big first letters','Add up the points on your cards. Your <b>first letter</b> counts ×1 in hand 1, up to <b>×5</b> in hand 5.'],
+  [mini('WALTZ',5,4),'The bonus spot','Add up the points on your cards. One spot is the <b>bonus</b>: its letter counts up to <b>×5</b>. It moves every hand, so put your big letter there.'],
   ['','Earn stars','Win hands to earn stars. Finish every day for a streak.'+$('starTbl').outerHTML]];
 let qStep=0,qHelp=false;
 function qShow(){const q=QS[qStep];$('qPic').innerHTML=q[0];$('qPic').hidden=!q[0];$('qTitle').textContent=q[1];$('qText').innerHTML=q[2];
