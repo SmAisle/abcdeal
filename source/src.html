@@ -322,7 +322,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 <script>
 /*WORDS*/
 /*LOGIC*/
-const VERSION='13',VDATE='Oct 30',GAME='abc';
+const VERSION='14',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -477,7 +477,7 @@ function resolve(w,fold){const h=H();h.fold=!!fold;busy=true;swapMode=false;cons
 function showBanner(h){const b=$('banner'),d=DAY.dealerBest[S.cur];
   const title=h.bust?(h.fold?'Fold':'Bust!'):!d.word?'Dealer busts!':{W:'You win!',L:'Dealer wins',P:'Push'}[h.result];
   const yb=best(h.snap,S.cur);
-  const tip=!yb.word?(h.bust?'There was no common word in that hand.':''):h.bust?`Best word was worth ${yb.score} points`:h.score>=yb.score?'You found the best word!':`Best word was worth ${yb.score} points`;
+  const tip=!yb.word?(h.bust?'There was no common word in that hand.':''):h.fold?`You could have played <b>${yb.word}</b> for ${yb.score} points`:h.bust?`Best word was worth ${yb.score} points`:h.score>=yb.score?'You found the best word!':`Best word was worth ${yb.score} points`;
   const vs=h.bust?`Dealer ${d.word?d.score:'busts too'}`:`You ${h.net} · Dealer ${d.word?d.score:'bust'}`;
   b.className='on '+h.result;b.innerHTML=`<h3>${title}</h3><div class="vs">${vs}</div>${tip?`<div class="tip">${tip}</div>`:''}`;
   /* stays up until Next hand */}
