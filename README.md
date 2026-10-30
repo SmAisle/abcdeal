@@ -169,3 +169,6 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 
 ## v48
 - Clock check on open (the spec is in /mnt/project-files/clock-check/README.md). A HEAD request to the page itself reads the server's Date header. If the phone's clock is off by 10+ minutes, CLOCK_SKEW corrects today(), the next-deal countdown and the daily rollover, and a toast says "Your phone's date is off, so this is today's real deal (No. N)". It never blocks play, and offline, file:// or the Claude copy fall back to the phone clock. If a game is already in progress on the wrong day, the correction waits until the next open.
+
+## v49
+- The dealer's common-word list is now open-licensed (ENABLE + 12dicts, public domain; built by the word-lists thread, see /mnt/project-files/word-lists). Deals already published are kept exactly as they were in FROZEN_DEALS (frozenDay() in logic.js), difficulty included. On those days the live "words possible" count can move by 1 or 2.
