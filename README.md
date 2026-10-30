@@ -101,3 +101,6 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 - Points so far count the first-letter multiplier only once the first slot is filled.
 - Fixes swapping with the first card: the drop spot now comes from where the slots sat when the drag began.
 - Sounds: bells (soft glass) for place, take back, not a word, win, dealer bust, push, fold and day done, picked from the sound board. Dealer wins keeps the falling pair. Card sounds unchanged.
+
+## v29
+- The Sound: On/Off toggle moved to the top-right corner of the menu, the same small chip as The Daily 15, and the Menu heading is left-aligned to match.
