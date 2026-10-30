@@ -68,7 +68,7 @@ function draw(){
   const bestP=d=>{const f=fin(d); return f.length?Math.max(...f.map(x=>+(x.p||{})[d]||0)):"";}, perfect=d=>fin(d).filter(x=>+x.w[d]>=5).length;
   const days=[]; for(let i=0;i<14;i++){ const d=ago(i); days.push([d,diff(d),opened(d),played(d),finished(d),avg(d,"w"),avg(d,"p"),bestP(d),perfect(d),hands(d),cnt(x=>x.first===d)]); }
   const tbl=(title,rows)=>`<div><h2>${title}</h2><table>${rows.map(([k,v])=>`<tr><td>${esc(k)}</td><td>${num(v)}</td></tr>`).join("")||`<tr><td class="muted">None yet</td><td></td></tr>`}</table></div>`;
-  const hs=sum("hands"), ws=sum("wins");
+  const hs=sum("hands"), ws=sum("wins"), xs=k=>DEV.reduce((t,d)=>t+(d.x&&+d.x[k]||0),0);
   $("#usage").innerHTML=`<div class="stats">${stat(opened(today),"opened today")}${stat(played(today),"played today")}${stat(cnt(d=>d.last>=w),"active this week")}${stat(cnt(d=>d.last>=m),"active this month")}${stat(DEV.length,"devices ever")}${stat(cnt(d=>d.first>=w),"new this week")}${stat(num(hs),"hands played")}${stat(hs?Math.round(ws/hs*100)+"%":"–","hands won")}${stat(num(top),"best day (points)")}</div>
   <p class="muted">Counts phones and computers, not people. A device checks in when it opens the game and after each hand, from the website version only, after agreeing to the terms. The Claude-link version isn't counted.</p>
   <h2>Last 14 days</h2><div style="overflow-x:auto"><table><tr><th>Day</th><th>Difficulty</th><th>Opened</th><th>Played</th><th>Done</th><th>Avg won</th><th>Avg pts</th><th>Best pts</th><th>5/5</th><th>Hands</th><th>New</th></tr>${days.map(r=>`<tr>${r.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`).join("")}</table></div>
@@ -76,6 +76,7 @@ function draw(){
   ${tbl("Streaks, active this week",[["On a streak of 3+ days",cnt(d=>d.last>=w&&+d.streak>=3)],["On a streak of 7+ days",cnt(d=>d.last>=w&&+d.streak>=7)]])}
   ${tbl("App version, active this month",tallyBy("v").map(([k,v])=>["Version "+k,v]))}
   ${tbl("Device, active this month",tallyBy("desk"))}
+  ${tbl("Taps to other smAisle games",[["The Daily 15, results card",xs("d15_done")],["The Daily 15, menu",xs("d15_menu")],["smAisle, front page",xs("sm_cover")],["Devices that tapped one",cnt(d=>d.x&&Object.values(d.x).some(v=>+v>0))]])}
   </div>`;
 }
 </script>
