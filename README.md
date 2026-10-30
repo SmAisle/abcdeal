@@ -38,3 +38,7 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 ## v15
 - Play again (for fun) on the results card, like The Daily 15: replays the same deal, never saved, and does not count toward stats or streak.
 - 💯 on the results card and in the share text when you score every possible point.
+
+## v16
+- Hands 1-4 have at least 4 common words (hand 5: at least 2). The dealer's word beats at least half of your words, but your best word always wins. A robot now wins about 3.3 hands a day instead of 4.6.
+- Difficulty thresholds recalibrated: expected wins 4+ Easy, 3.5+ Gentle, 3+ Medium, 2.5+ Tough, less Hard.
