@@ -95,9 +95,10 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 @keyframes deal{from{transform:translateY(-30px);opacity:0}}
 .bust{font-family:var(--head);font-weight:900;font-size:2rem;letter-spacing:.12em;color:var(--red);height:calc(var(--w)*1.4);display:grid;place-items:center}
 .mx{position:relative}
-.mx::after{content:attr(data-m);position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--card);font:800 11px/1 var(--sans);letter-spacing:.06em;padding:3px 6px;z-index:2;white-space:nowrap}
+.mx::after{content:attr(data-m) ' BONUS';position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--red);color:#fff;font:800 12px/1 var(--sans);letter-spacing:.06em;padding:4px 8px;z-index:2;white-space:nowrap}
+.card.mx{outline:3px solid var(--red);outline-offset:2px;border-radius:4px}
 .slot{width:var(--w);height:calc(var(--w)*1.4);border:1.5px dashed rgba(26,24,20,.35);border-radius:3px;flex:none}
-.slot.mx{border-style:solid;border-color:var(--ink);background:rgba(26,24,20,.04)}
+.slot.mx{border:2.5px solid var(--red);background:rgba(179,38,30,.08)}
 .middle{display:flex;flex-direction:column;align-items:center;gap:10px}
 #preview{font:italic 14px var(--body);color:var(--ink2);min-height:1.3em;text-align:center}
 #preview b{font-style:normal;font-family:var(--sans);font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
@@ -526,7 +527,7 @@ function difficulty(day){const e=expectedWins(day);return e>=4?1:e>=3.5?2:e>=3?3
 function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/864e5)+1}
 //module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,bonusSlots,holiday,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
 
-const VERSION='43',VDATE='Oct 30',GAME='abc';
+const VERSION='44',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
