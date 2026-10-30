@@ -474,7 +474,10 @@ function anyWord(letters,len){if(!BY_LEN[len])BY_LEN[len]=[...ALL].filter(w=>w.l
 /* Points for every common word your cards can make this hand */
 function wordScores(letters,h,b=0){const len=LENGTHS[h],have=count(letters.join('')),out=[];for(const [w,c] of DEALER_LIST)if(w.length===len&&fits(c,have)&&usesHole(c,letters))out.push(score(w,h,b));return out}
 const MIN_WORDS=4,WIN_SHARE=0.5;
-function countWords(letters,len){const have=count(letters.join(''));let n=0;for(const [w,c] of DEALER_LIST)if(w.length===len&&fits(c,have)&&usesHole(c,letters))n++;return n}
+/* every dictionary word of one length, with its letter counts, built once per length */
+const FULL_BY_LEN={};function fullList(len){return FULL_BY_LEN[len]||(FULL_BY_LEN[len]=[...ALL].filter(w=>w.length===len).map(w=>[w,count(w)]))}
+/* how many words you can make: the whole dictionary, so a hand of uncommon words still shows its count */
+function countWords(letters,len){const have=count(letters.join(''));let n=0;for(const [w,c] of fullList(len))if(w.length===len&&fits(c,have)&&usesHole(c,letters))n++;return n}
 function removeLetters(cards,word){const left=cards.slice();for(const ch of word){const i=left.indexOf(ch);if(i>=0)left.splice(i,1)}return left}
 
 /* Holiday Edition, like The Daily 15: on six holidays the dealer plays a festive word in every hand (3 to 7 letters),
@@ -544,9 +547,9 @@ function expectedWins(day){let E=0;for(let h=0;h<HANDS;h++){const have=count(day
   return E}
 function difficulty(day){if(day.diff)return day.diff;const e=expectedWins(day);return e>=4?1:e>=3.5?2:e>=3?3:e>=2.5?4:5}
 function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/864e5)+1}
-//module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,bonusSlots,holiday,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
+//module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,bonusSlots,holiday,isWord,best,fullList,dealDay,dayNumber,removeLetters,HANDS};
 
-const VERSION='50',VDATE='Oct 30',GAME='abc';
+const VERSION='51',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -724,7 +727,7 @@ function render(deal){
     if(hintMode&&!h.done)el.classList.add('pick');
     if(i===BON()&&MULT[S.cur]>1){el.classList.add('mx');el.dataset.m='×'+MULT[S.cur]}wr.appendChild(el)}
   // one quiet line: points so far and how many words are possible
-  const n=countWords(S.cards,len),poss=n?`${n} word${n>1?'s':''} possible`:'only rare words here';
+  const n=countWords(S.cards,len),poss=n?`${n} word${n>1?'s':''} possible`:'no words possible';
   if(h.done)$('preview').innerHTML=h.bust?(h.fold?'You folded':'You busted'):`<b>${h.score}</b> pts${cost(h)?` − ${cost(h)} = <b>${h.net}</b>`:''}`;
   else if(swapMode)$('preview').textContent='Tap a card to swap it out';
   else if(hintMode)$('preview').innerHTML='<b>💡</b> Tap a slot to reveal its letter';
@@ -806,11 +809,12 @@ $('foldBtn').onclick=()=>{const h=H();if(h.done||busy)return;
 /* Hint: you pick a slot and it shows that slot's letter. The word is the common word that best fits the letters
    you already have in place, so a hint never undoes your work when it doesn't have to. */
 $('hintBtn').onclick=()=>{only('');if(H().done)return;hintMode=true;render();toast('Tap a slot to reveal its letter',2200)};
+/* common words first; only when none fit does a hint use the rest of the dictionary */
 function hintWord(){const len=LEN(),have=count(S.cards.join(''));let bw='',bm=-1,bs=-1;
-  for(const [w,c] of DEALER_LIST){if(w.length!==len||!fits(c,have)||!usesHole(c,S.cards))continue;
-    let m=0;for(let k=0;k<len;k++)if(sel[k]!=null&&S.cards[sel[k]]===w[k])m++;const sc=score(w,S.cur,BON());if(m>bm||(m===bm&&sc>bs)){bw=w;bm=m;bs=sc}}
+  for(const list of [DEALER_LIST,fullList(len)]){if(bw)break;for(const [w,c] of list){if(w.length!==len||!fits(c,have)||!usesHole(c,S.cards))continue;
+    let m=0;for(let k=0;k<len;k++)if(sel[k]!=null&&S.cards[sel[k]]===w[k])m++;const sc=score(w,S.cur,BON());if(m>bm||(m===bm&&sc>bs)){bw=w;bm=m;bs=sc}}}
   return bw}
-function revealAt(j){hintMode=false;const h=H(),w=hintWord();if(!w){render();toast('No common word in this hand. Folding is the move.',2200);return}
+function revealAt(j){hintMode=false;const h=H(),w=hintWord();if(!w){render();toast('No word in this hand. Folding is the move.',2200);return}
   const L=w[j];for(let k=0;k<LEN();k++)if(sel[k]===undefined)sel[k]=null;
   if(sel[j]!=null&&S.cards[sel[j]]===L){render();toast(`${L} is right`);return}
   /* the card to use: a free one, or one sitting in a slot where this word doesn't want it */

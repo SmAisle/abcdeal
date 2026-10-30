@@ -175,3 +175,7 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 
 ## v50
 - Tapping a locked hint letter asks "🔓 Unlock?". Unlocking frees the card to move or take back, and the hint's star stays spent.
+
+## v51
+- The "N words possible" count under the cards now uses the whole dictionary, so every usable word counts (today's last hand shows 4: WHATNOT, ETHANOL, ANETHOL, TOWNLET). A hand with none says "no words possible".
+- Hints still pick a common word first, and fall back to the full dictionary when no common word fits.

@@ -38,7 +38,10 @@ function anyWord(letters,len){if(!BY_LEN[len])BY_LEN[len]=[...ALL].filter(w=>w.l
 /* Points for every common word your cards can make this hand */
 function wordScores(letters,h,b=0){const len=LENGTHS[h],have=count(letters.join('')),out=[];for(const [w,c] of DEALER_LIST)if(w.length===len&&fits(c,have)&&usesHole(c,letters))out.push(score(w,h,b));return out}
 const MIN_WORDS=4,WIN_SHARE=0.5;
-function countWords(letters,len){const have=count(letters.join(''));let n=0;for(const [w,c] of DEALER_LIST)if(w.length===len&&fits(c,have)&&usesHole(c,letters))n++;return n}
+/* every dictionary word of one length, with its letter counts, built once per length */
+const FULL_BY_LEN={};function fullList(len){return FULL_BY_LEN[len]||(FULL_BY_LEN[len]=[...ALL].filter(w=>w.length===len).map(w=>[w,count(w)]))}
+/* how many words you can make: the whole dictionary, so a hand of uncommon words still shows its count */
+function countWords(letters,len){const have=count(letters.join(''));let n=0;for(const [w,c] of fullList(len))if(w.length===len&&fits(c,have)&&usesHole(c,letters))n++;return n}
 function removeLetters(cards,word){const left=cards.slice();for(const ch of word){const i=left.indexOf(ch);if(i>=0)left.splice(i,1)}return left}
 
 /* Holiday Edition, like The Daily 15: on six holidays the dealer plays a festive word in every hand (3 to 7 letters),
@@ -108,4 +111,4 @@ function expectedWins(day){let E=0;for(let h=0;h<HANDS;h++){const have=count(day
   return E}
 function difficulty(day){if(day.diff)return day.diff;const e=expectedWins(day);return e>=4?1:e>=3.5?2:e>=3?3:e>=2.5?4:5}
 function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/864e5)+1}
-if(typeof module!=='undefined')module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,bonusSlots,holiday,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
+if(typeof module!=='undefined')module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,bonusSlots,holiday,isWord,best,fullList,dealDay,dayNumber,removeLetters,HANDS};
