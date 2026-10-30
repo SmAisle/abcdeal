@@ -246,7 +246,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 <div class="sheet" id="help" hidden><div class="box2">
   <h2>How to Play</h2>
   <ul class="rules">
-    <li><b>Goal:</b> beat the dealer in today's <b>5 hands</b>. Everyone gets the same cards.</li>
+    <li><b>Goal:</b> beat the dealer in today's <b>5 hands</b>. Everyone gets the same cards, and so does the dealer, so you can compare scores.</li>
     <li><b>Spell a word:</b> tap your cards to fill the slots, then tap <b>Play word</b>. Hand 1 needs <b>3 letters</b>, then 4, 5, 6 and <b>7 letters</b> in hand 5.</li>
     <li><b>Cards:</b> 5 in hand 1, one more each hand, up to 9. The dealer gets the same number and shows you one card. There are always at least 4 common words to find (2 in hand 5), and your best word always beats the dealer's.</li>
     <li><b>Points:</b> add up the numbers on your cards. Your <b>first letter</b> counts ×1 in hand 1, ×2 in hand 2, up to <b>×5</b> in hand 5.<div class="pts">1: A E I L N O R S T U · 2: D G · 3: B C M P<br>4: F H V W Y · 5: K · 8: J X · 10: Q Z</div></li>
@@ -393,7 +393,7 @@ function difficulty(day){const e=expectedWins(day);return e>=4?1:e>=3.5?2:e>=3?3
 function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/864e5)+1}
 //module.exports={difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
 
-const VERSION='16',VDATE='Oct 30',GAME='abc';
+const VERSION='17',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -624,7 +624,7 @@ $('statsBack').onclick=()=>{if(backTo==='done')only('done');else goBack()};
 /* First-time intro: 4 short screens, like The Daily 15 */
 const mini=(w,m)=>`<div class="qrow">${[...w].map((l,i)=>{const v=VALUES[l];return `<div class="card${i===0&&m?' mx':''}" ${i===0&&m?`data-m="×${m}"`:''}><div class="in"><div class="face"><span class="tl">${l}</span><span class="big">${l}</span><span class="br">${v}</span></div></div></div>`}).join('')}</div>`;
 const QS=[
-  [mini('ABC'),'Beat the dealer','Everyone gets the same <b>5 hands</b> today. Spell a word worth more points than the dealer’s.'],
+  [mini('ABC'),'Beat the dealer','Everyone gets the same <b>5 hands</b> today, and the dealer gets the same cards for everyone too. Spell a word worth more points than the dealer’s.'],
   ['<div style="font-family:var(--head);font-weight:900;font-size:40px;letter-spacing:.06em">3 · 4 · 5 · 6 · 7</div>','Longer every hand','Hand 1 needs a <b>3-letter</b> word, up to <b>7 letters</b> in hand 5. You get 5 cards, then one more each hand.'],
   [mini('HAVES',5),'Big first letters','Add up the points on your cards. Your <b>first letter</b> counts ×1 in hand 1, up to <b>×5</b> in hand 5.'],
   ['','Earn stars','Win hands to earn stars. Finish every day for a streak.'+$('starTbl').outerHTML]];
