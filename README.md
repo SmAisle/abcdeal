@@ -9,7 +9,7 @@ A daily word game in the style of the NYT games, played like blackjack with lett
 - Front page, intro, How to Play, Stats and results match The Daily 15. Stars by hands won: 3 = ⭐, 4 = ⭐⭐, 5 = ⭐⭐⭐. Streak = days in a row with all 5 hands finished.
 - Fold gives up a hand. Draw and Swap are turned off (DRAW_SWAP=false in src.html).
 
-- Version shows in the menu, How to Play and the stats sheet (v10 · Oct 30).
+- Version shows in the menu, How to Play and the stats sheet (v11 · Oct 30).
 - `index.html` is the whole game (built from `source/` with `python3 source/build.py`). Words: ENABLE list (public domain) for checking your word; the dealer, word counts and "best word" use a common-word list (The Daily 15 list for 3-4 letters, plus frequent ENABLE words for 5-7 letters, with rude words removed).
 
 ## Usage

@@ -31,7 +31,7 @@ button,.card{touch-action:manipulation}
 body{background:var(--paper);background-image:radial-gradient(rgba(0,0,0,.035) 1px,transparent 1px);background-size:4px 4px;color:var(--ink);font-family:var(--body);overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 button{font-family:inherit;color:inherit;cursor:pointer}
 button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-#app{height:100%;display:flex;flex-direction:column;gap:6px;max-width:520px;margin:0 auto;padding:6px max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 12px) max(16px,env(safe-area-inset-left,0px))}
+#app{height:100%;display:flex;flex-direction:column;gap:6px;max-width:560px;margin:0 auto;padding:6px max(10px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 12px) max(10px,env(safe-area-inset-left,0px))}
 
 /* Top bar, like The Daily 15's game screen */
 .top{display:flex;align-items:center;gap:8px;border-bottom:3px double var(--ink);padding:2px 0 6px}
@@ -52,13 +52,14 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .pip.P{border-color:var(--ink);color:var(--ink);background:var(--paper2)}
 
 /* Table: plain paper between two rules */
-#table{flex:1;min-height:0;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);background:var(--paper);display:flex;flex-direction:column;justify-content:space-between;padding:12px 0;gap:10px;position:relative}
+#table{flex:1;min-height:0;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);background:var(--paper);display:flex;flex-direction:column;justify-content:space-around;padding:10px 0;gap:8px;position:relative}
 .seat{display:flex;flex-direction:column;align-items:center;gap:8px}
 .label{font:700 11px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);display:flex;gap:8px;align-items:center}
 .label b{color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:.04em}
 .row{display:flex;gap:6px;justify-content:center;flex-wrap:nowrap;width:100%}
 #dealerRow{--w:40px}
 #handRow{--w:52px}
+#handRow.two{flex-wrap:wrap;row-gap:8px;margin:0 auto}
 #wordRow{--w:46px;min-height:calc(var(--w)*1.4)}
 
 /* Cards: big letter, corner letter and points, like a deck of cards */
@@ -308,7 +309,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 <script>
 /*WORDS*/
 /*LOGIC*/
-const VERSION='10',VDATE='Oct 30',GAME='abc';
+const VERSION='11',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -372,7 +373,9 @@ function starStr(n){return n?'⭐'.repeat(n):''}
 
 /* ---------- Render ---------- */
 /* Size cards so n of them fit across the table */
-function fit(row,n,max){const W=$('table').clientWidth-8,g=n>7?4:6;row.style.gap=g+'px';row.style.setProperty('--w',Math.max(26,Math.min(max,Math.floor((W-g*(n-1))/n)))+'px')}
+function fit(row,n,max){const W=$('table').clientWidth-4,g=n>7?4:6;row.style.gap=g+'px';const w=Math.max(26,Math.min(max,Math.floor((W-g*(n-1))/n)));row.style.setProperty('--w',w+'px');return w}
+/* Your hand: one row while the cards stay big; otherwise two rows of bigger cards */
+function fitHand(n){const hr=$('handRow'),one=fit(hr,n,74);if(one>=56||n<6){hr.classList.remove('two');hr.style.maxWidth='';return}const per=Math.ceil(n/2),w=fit(hr,per,74);hr.style.maxWidth=(w*per+6*(per-1)+2)+'px';hr.classList.add('two')}
 let stuckT=0;
 function checkStuck(){const h=H();clearTimeout(stuckT);if(h.done||busy)return false;if(anyWord(S.cards,LEN()))return false;
   if(DRAW_SWAP&&(!h.drew||!h.swapped)){const opt=!h.drew&&!h.swapped?'Draw or swap':!h.drew?'Draw':'Swap';$('preview').innerHTML=`<b>No ${LEN()}-letter word here.</b> ${opt}, or bust.`;return true}
@@ -385,7 +388,7 @@ function render(deal){
   $('tracker').innerHTML=S.hands.map((x,i)=>`<div class="pip ${x.done?x.result:''} ${i===S.cur&&!x.done?'now':''}" title="Hand ${i+1}: ${LENGTHS[i]} letters">${x.done?x.result:LENGTHS[i]}</div>`).join('');
   $('totalPts').textContent=totalPts();
   $('wordLabel').textContent=`Hand ${S.cur+1} · ${len} letters`;
-  fit($('dealerRow'),SIZES[S.cur],40);fit($('handRow'),Math.max(cards.length,7),56);fit($('wordRow'),len,46);
+  fit($('dealerRow'),SIZES[S.cur],50);fitHand(cards.length);fit($('wordRow'),len,64);
   // dealer: one card up until you play
   const dr=$('dealerRow');dr.innerHTML='';
   DAY.dealer[S.cur].forEach((c,i)=>{const el=cardEl(c,{down:!(h.done||i===0),cls:deal?'dealt':''});if(deal)el.style.animationDelay=(i*40)+'ms';dr.appendChild(el)});
