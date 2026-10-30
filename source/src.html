@@ -323,7 +323,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
   <div id="hp2" hidden>
   <ul class="rules">
     <li><b>🃏 A, B, C, Deal ’Em:</b> a second deal every day, played like Texas Hold’em. You and the dealer share the board in the middle and each get 2 cards of your own. Your word must use at least one of them.</li>
-    <li><b>🏳️ Fold:</b> can't find a word? You get <b>2 💡 hints</b> a day: the Fold button is a Hint button until they're used. Pick any slot and see its letter; each hint costs one star. After that the button is Fold. Or give up the hand and see a word you could have played.</li>
+    <li><b>🏳️ Fold:</b> can't find a word? You get <b>1 💡 hint</b> a day: the Fold button is a Hint button until you use it. Pick any slot and see its letter; it costs one star. After that the button is Fold. Or give up the hand and see a word you could have played.</li>
     <li><b>💯 Perfect:</b> play the best word in every hand to score every possible point.</li>
     <li><b>📊 Difficulty:</b> a careful robot plays each deal ahead of time and rates it from Easy to Hard.</li>
     <li><b>🔥 Streak:</b> finish each day's deal on its day to build your streak. Archive deals played late don't count.</li>
@@ -422,7 +422,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 <script>
 /*WORDS*/
 /*LOGIC*/
-const VERSION='34',VDATE='Oct 30',GAME='abc';
+const VERSION='35',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -531,8 +531,8 @@ function totalPts(){return S.hands.filter(h=>h.done).reduce((a,h)=>a+h.net,0)}
 
 
 /* ---------- Stars ---------- */
-/* Up to 2 hints a day; each takes one star off the day, like The Daily 15 */
-const MAX_HINTS=2;
+/* One hint a day; each takes one star off the day, like The Daily 15 */
+const MAX_HINTS=1;
 const hintsUsed=()=>S?(S.hints||(S.hinted?1:0)):0,hintsLeft=()=>Math.max(0,MAX_HINTS-hintsUsed());
 function starsFor(w,hint){return Math.max(0,(w>=5?3:w>=4?2:w>=3?1:0)-(+hint||0))}
 function starStr(n){return n?'⭐'.repeat(n):''}
@@ -585,7 +585,7 @@ function render(deal){
   $('drawBtn').querySelector('small').textContent='−'+DRAW_COST[S.cur];$('swapBtn').querySelector('small').textContent='−'+SWAP_COST[S.cur];
   $('drawBtn').disabled=h.done||h.drew||busy;$('swapBtn').disabled=h.done||h.swapped||busy;$('swapBtn').classList.toggle('on',swapMode);
   $('mixBtn').disabled=h.done||busy;$('clearBtn').disabled=h.done||busy||!placed();$('foldBtn').disabled=h.done||busy;
-  const hl=hintsLeft()&&!h.done&&countWords(S.cards,len)>0;$('foldBtn').innerHTML=hl?`💡 Hint <small>${hintsLeft()}</small>`:'Fold';
+  const hl=hintsLeft()&&!h.done&&countWords(S.cards,len)>0;$('foldBtn').innerHTML=hl?(MAX_HINTS>1?`💡 Hint <small>${hintsLeft()}</small>`:'💡 Hint'):'Fold';
   const g=$('goBtn');
   if(!h.done){g.textContent=w.length<len?`Play word (${w.length}/${len})`:'Play word';g.disabled=busy||w.length!==len}
   else if(S.hands.every(x=>x.done)){g.textContent='See today’s result';g.disabled=false}
@@ -642,7 +642,7 @@ $('foldBtn').onclick=()=>{const h=H();if(h.done||busy)return;
   const hl=hintsLeft(),hm=hl>0&&n>0;
   $('foldH').textContent=hm?'💡 Hint':'🏳️ Fold';
   $('foldQ').textContent=hm?`Stuck on hand ${S.cur+1}? Reveal a letter.`:`Give up hand ${S.cur+1}? The dealer wins it.`;
-  $('foldWarn').textContent=hm?`Each hint costs one star. ${hl} of ${MAX_HINTS} left today.`:n?`There ${n>1?`are ${n} words`:'is 1 word'} in your hand.`:'';
+  $('foldWarn').textContent=hm?(MAX_HINTS>1?`Each hint costs one star. ${hl} of ${MAX_HINTS} left today.`:'It costs one star. You get one hint a day.'):n?`There ${n>1?`are ${n} words`:'is 1 word'} in your hand.`:'';
   $('foldTbl').innerHTML=(hintsLeft()>0&&n>0?'':`<p class="fine" style="margin:4px 0 0">${w} won so far, ${left} hand${left===1?'':'s'} left after this.</p>`)+$('starTbl').outerHTML.replace('id="starTbl"','');
   $('hintBtn').hidden=!hm;$('hintBtn').innerHTML=`💡 Reveal a letter<small>Pick any slot and see its letter. −1 ⭐</small>`;
   $('foldYes').className=hm?'go alt':'go';
