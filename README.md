@@ -108,3 +108,6 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 ## v30
 - Share text: the hands line now reads "4/5 hands won · ⏱ 3:42" on its own line under the squares, like The Daily 15's "12/15 words".
 - Place sound is option 2 from the sound board: a plain card snap.
+
+## v31
+- Share text drops the colored squares. It now reads "4/5 won · ⏱ 3:42" under the title line.
