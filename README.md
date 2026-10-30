@@ -9,7 +9,7 @@ A daily word game in the style of the NYT games, played like blackjack with lett
 - Front page, intro, How to Play, Stats and results match The Daily 15. Stars by hands won: 3 = ⭐, 4 = ⭐⭐, 5 = ⭐⭐⭐. Streak = days in a row with all 5 hands finished.
 - Fold gives up a hand. Draw and Swap are turned off (DRAW_SWAP=false in src.html).
 
-- Version shows in the menu, How to Play and the stats sheet (v11 · Oct 30).
+- Version shows in the menu, How to Play and the stats sheet (v12 · Oct 30).
 - `index.html` is the whole game (built from `source/` with `python3 source/build.py`). Words: ENABLE list (public domain) for checking your word; the dealer, word counts and "best word" use a common-word list (The Daily 15 list for 3-4 letters, plus frequent ENABLE words for 5-7 letters, with rude words removed).
 
 ## Usage
@@ -21,3 +21,9 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 ## Ideas for later
 
 - Texas Hold'em mode: a few shared face-up cards in the middle plus a couple of private cards each, so you and the dealer race to the best word from the same pool. Jeff likes it; holding off for now (Oct 30).
+
+## v12
+- Cards are dealt one at a time at the start of each hand, you then the dealer.
+- Every hand has at least 2 common words for you (hand 5: 2 when it can, at least 1).
+- Difficulty 1-5 (Easy, Gentle, Medium, Tough, Hard) like The Daily 15: a careful robot plays each deal ahead of time. Shown on the results card.
+- Check-in adds w, p and d maps (hands won, points, difficulty per finished day). The owner page's Last 14 days table shows Difficulty, Avg won, Avg pts, Best pts and 5/5 like The Daily 15.

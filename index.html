@@ -122,6 +122,8 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .rules{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:12px;font-size:14px;line-height:1.5}
 .fine{font-size:12px;color:var(--ink2)}
 .ver{text-align:center;font-size:11px;opacity:.5;font-family:var(--sans)}
+.diff{font-family:var(--sans);font-weight:800;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);white-space:nowrap}
+.dbox{display:inline-flex;gap:2px;vertical-align:-1px;margin:0 6px 0 4px}.dbox i{width:9px;height:9px;border:1.5px solid var(--ink);box-sizing:border-box}.dbox i.on{background:var(--ink)}
 .stars{width:100%;border-collapse:collapse;margin-top:6px;text-align:center;background:#fff}
 .stars th,.stars td{border:2px solid var(--ink);padding:6px 4px}
 .stars th{font-family:var(--sans);font-size:13px;font-weight:800}
@@ -246,10 +248,11 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
   <ul class="rules">
     <li><b>Goal:</b> beat the dealer in today's <b>5 hands</b>. Everyone gets the same cards.</li>
     <li><b>Spell a word:</b> tap your cards to fill the slots, then tap <b>Play word</b>. Hand 1 needs <b>3 letters</b>, then 4, 5, 6 and <b>7 letters</b> in hand 5.</li>
-    <li><b>Cards:</b> 5 in hand 1, one more each hand, up to 9. The dealer gets the same number and shows you one card. There is always at least one word to find.</li>
+    <li><b>Cards:</b> 5 in hand 1, one more each hand, up to 9. The dealer gets the same number and shows you one card. There are always at least two common words to find.</li>
     <li><b>Points:</b> add up the numbers on your cards. Your <b>first letter</b> counts ×1 in hand 1, ×2 in hand 2, up to <b>×5</b> in hand 5.<div class="pts">1: A E I L N O R S T U · 2: D G · 3: B C M P<br>4: F H V W Y · 5: K · 8: J X · 10: Q Z</div></li>
     <li><b>The dealer</b> flips its cards and plays its best word. Higher score wins the hand; a tie is a push. No word for the dealer? It busts and you win.</li>
-    <li><b>Stuck?</b> No word possible means you bust. Can't find one that's there? Tap <b>Fold</b> to give up the hand.</li>
+    <li><b>Stuck?</b> Can't find a word? Tap <b>Fold</b> to give up the hand.</li>
+    <li><b>Difficulty:</b> a careful robot plays each deal ahead of time and rates it from Easy to Hard, like The Daily 15. You see it when you finish.</li>
     <li><b>Stars:</b> win hands to earn them.<table class="stars" id="starTbl"><tr><th>Hands won</th><th>3</th><th>4</th><th>5</th></tr><tr><th>Stars</th><td>⭐</td><td>⭐⭐</td><td>⭐⭐⭐</td></tr></table></li>
     <li><b>🔥 Streak:</b> finish each day's deal on its day to build your streak.</li>
     <li class="fine">The website version sends an anonymous check-in so we can count players: the day, hands played and the game version. Never your name, contacts or location.</li>
@@ -275,6 +278,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
   <div class="big" id="doneBig"></div>
   <p id="doneLine" style="font-family:var(--sans);font-weight:800"></p>
   <p id="donePts" style="font-style:italic"></p>
+  <p id="doneDiff" class="diff"></p>
   <table class="recap" id="doneRecap"></table>
   <p id="doneStreak" style="font-family:var(--sans);font-weight:800;font-size:14px;letter-spacing:.04em" hidden></p>
   <p class="fine" style="font-style:italic">Next deal in <span class="countdown" id="cd"></span></p>
@@ -300,7 +304,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
     <li>A, B, C, Deal is a free game from smAisle, just for fun. It may change or stop working at any time.</li>
     <li>No accounts and no ads. Nothing is sold.</li>
     <li>Your scores, stars and streak stay on your device.</li>
-    <li>The website version sends an anonymous check-in when you open the game and finish a hand, so we can count how many devices play each day: the game version, hands played and won, and your best day. It never includes your name, contacts or location.</li>
+    <li>The website version sends an anonymous check-in when you open the game and finish a hand, so we can count how many devices play each day: the game version, hands played and won, points and the day's difficulty, and your best day. It never includes your name, contacts or location.</li>
   </ul>
   <p class="fine">By tapping Agree and play, you accept these terms.</p>
   <button class="go" id="termsGo">Agree and play</button>
@@ -347,14 +351,14 @@ function freshDeck(r){const d=[];for(const k in COUNTS)for(let i=0;i<COUNTS[k];i
   for(let i=d.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[d[i],d[j]]=[d[j],d[i]]}return d}
 
 /* A fresh deal every hand, the same for everyone that day. Each deal is checked before it is used:
-   you always have at least one common word, and your best word beats the dealer's best by a little
+   you always have at least 2 common words (hand 5: 2 when it can, at least 1), and your best word beats the dealer's best by a little
    (so a perfect day is possible but takes the best word). About 3 days in 10 the dealer busts on one
    hand (hands 2-5), meaning it has no word at all. */
 function dealDay(date){const bustHand=hashStr('bust|'+date)%10<3?1+hashStr('which|'+date)%4:-1;
   const day={you:[],dealer:[],yourBest:[],dealerBest:[],drawCard:[],swapCard:[]};
   for(let h=0;h<HANDS;h++){const r=rng(hashStr('abcdeal3|'+date+'|'+h)),n=SIZES[h];let pick=null;
     for(let tries=0;tries<4000&&!pick;tries++){const deck=freshDeck(r),you=deck.slice(0,n),dealer=deck.slice(n,2*n);
-      const y=best(you,h);if(!y.word)continue;const d=best(dealer,h);
+      const y=best(you,h);if(!y.word)continue;if(countWords(you,LENGTHS[h])<(h<HANDS-1||tries<2000?2:1))continue;const d=best(dealer,h);
       if(h===bustHand){if(d.word||anyWord(dealer,LENGTHS[h]))continue}
       else{if(!d.word)continue;const gap=y.score-d.score;if(gap<1||gap>4+2*h)continue}
       pick={you,dealer,y,d,draw:deck[2*n],swap:deck[2*n+1]}}
@@ -362,10 +366,18 @@ function dealDay(date){const bustHand=hashStr('bust|'+date)%10<3?1+hashStr('whic
     day.you.push(pick.you);day.dealer.push(pick.dealer);day.yourBest.push(pick.y);day.dealerBest.push(pick.d);day.drawCard.push(pick.draw);day.swapCard.push(pick.swap)}
   day.bestTotal=day.yourBest.reduce((a,b)=>a+b.score,0);return day}
 
+/* Difficulty 1-5, like The Daily 15: a careful robot plays each hand with a word from the better half
+   of the common words it can make. Expected hands won: 4.9+ = 1, 4.5+ = 2, 4.1+ = 3, 3.6+ = 4, less = 5. */
+const DIFFW=['','Easy','Gentle','Medium','Tough','Hard'];
+function expectedWins(day){let E=0;for(let h=0;h<HANDS;h++){const have=count(day.you[h].join(''));
+    const ws=DEALER_LIST.filter(([w,c])=>w.length===LENGTHS[h]&&fits(c,have)).map(([w])=>score(w,h)).sort((a,b)=>b-a);
+    const top=ws.slice(0,Math.ceil(ws.length/2)),d=day.dealerBest[h];if(top.length)E+=top.filter(x=>!d.word||x>d.score).length/top.length}
+  return E}
+function difficulty(day){const e=expectedWins(day);return e>=4.9?1:e>=4.5?2:e>=4.1?3:e>=3.6?4:5}
 function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/864e5)+1}
-//module.exports={VALUES,SIZES,LENGTHS,MULT,score,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
+//module.exports={difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
 
-const VERSION='11',VDATE='Oct 30',GAME='abc';
+const VERSION='12',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -375,21 +387,23 @@ const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:v}cat
 function agreed(){return !!store.get(TERMS_KEY,'')}
 function devId(){let id=store.get('abc-dev','');if(!id){id=Array.from(crypto.getRandomValues(new Uint8Array(12)),b=>'abcdefghijklmnopqrstuvwxyz0123456789'[b%36]).join('');store.set('abc-dev',id)}return id}
 function trimMap(m){const k=Object.keys(m).sort();while(k.length>60)delete m[k.shift()];return m}
-/* kind: 'open' or 'hand'. Opens and hands are counted per day in two small maps. */
+/* kind: 'open' or 'hand'. Opens and hands are counted per day in small maps, plus hands won (w),
+   points (p) and difficulty (d) for each day you finish, like The Daily 15's owner page. */
 async function checkIn(kind){
   if(!agreed())return;
-  const day=today(),u=store.json('abc-usage',{first:day,days:0,opens:0,hands:0,wins:0,o:{},h:{}});
+  const day=today(),u=store.json('abc-usage',{first:day,days:0,opens:0,hands:0,wins:0,o:{},h:{}});u.w=u.w||{};u.p=u.p||{};u.d=u.d||{};
   if(!u.o[day]){u.days++;u.o[day]=0}
   if(kind==='open'){u.opens++;u.o[day]++}
   if(kind==='hand'){u.hands++;u.h[day]=(u.h[day]||0)+1}
-  trimMap(u.o);trimMap(u.h);
-  const hist=store.json('abc-hist',{});u.wins=Object.values(hist).reduce((a,d)=>a+(d.w||0),0);
+  const hist=store.json('abc-hist',{}),hd=hist[day];
+  if(hd&&(hd.r||'').length>=HANDS&&DAY&&DATE===day){u.w[day]=hd.w;u.p[day]=hd.p;u.d[day]=difficulty(DAY)}
+  [u.o,u.h,u.w,u.p,u.d].forEach(trimMap);u.wins=Object.values(hist).reduce((a,d)=>a+(d.w||0),0);
   store.put('abc-usage',u);
   if(!/github\.io$|smaisle\.app$/.test(location.hostname)&&!window.ABC_TEST)return;
   const I=n=>({integerValue:String(Math.round(n)||0)}),T=v=>({stringValue:String(v)}),M=m=>({mapValue:{fields:Object.fromEntries(Object.entries(m).map(([k,v])=>[k,I(v)]))}});
   const st=streaks(hist),bestDay=Object.values(hist).reduce((a,d)=>Math.max(a,d.p||0),0),done=Object.values(hist).filter(d=>(d.r||'').length>=HANDS).length;
   const body={fields:{first:T(u.first),last:T(day),days:I(u.days),v:T(VERSION),opens:I(u.opens),hands:I(u.hands),wins:I(u.wins),done:I(done),best:I(bestDay),streak:I(st.cur),
-    terms:T(store.get(TERMS_KEY,'').slice(0,10)),desk:{booleanValue:innerWidth>=820},t:I(Date.now()),o:M(u.o),h:M(u.h)}};
+    terms:T(store.get(TERMS_KEY,'').slice(0,10)),desk:{booleanValue:innerWidth>=820},t:I(Date.now()),o:M(u.o),h:M(u.h),w:M(u.w),p:M(u.p),d:M(u.d)}};
   try{await fetch(`https://firestore.googleapis.com/v1/projects/${FB_PROJ}/databases/(default)/documents/${GAME}_devices/${devId()}?key=${FB_KEY}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),keepalive:true})}catch(e){}
 }
 
@@ -447,13 +461,14 @@ function render(deal){
   fit($('dealerRow'),SIZES[S.cur],50);fitHand(cards.length);fit($('wordRow'),len,64);
   // dealer: one card up until you play
   const dr=$('dealerRow');dr.innerHTML='';
-  DAY.dealer[S.cur].forEach((c,i)=>{const el=cardEl(c,{down:!(h.done||i===0),cls:deal?'dealt':''});if(deal)el.style.animationDelay=(i*40)+'ms';dr.appendChild(el)});
+  const fly=deal==='deal'&&!h.done,mix=deal&&!fly;
+  DAY.dealer[S.cur].forEach((c,i)=>{const up=h.done||i===0,el=cardEl(c,{down:fly||!up,cls:mix?'dealt':''});if(fly&&up)el.dataset.up=1;if(mix)el.style.animationDelay=(i*40)+'ms';dr.appendChild(el)});
   $('dealerScore').textContent=h.done?(db.word?db.score+' pts':'bust'):'';
   $('dealerWord').innerHTML=h.done?(db.word?`plays <b>${db.word}</b>`:`<b>BUST</b> · no ${len}-letter word`):'';
   // your hand
   const hr=$('handRow');hr.innerHTML='';hr.classList.toggle('swapping',swapMode);
-  cards.forEach((c,i)=>{const el=cardEl(c,{cls:((h.done?(h.used||[]).includes(i):sel.includes(i))?'used':'')+(deal?' dealt':'')});
-    if(deal)el.style.animationDelay=(280+i*45)+'ms';el.setAttribute('role','button');el.setAttribute('aria-label',`${c}, ${VALUES[c]} points`);el.onclick=()=>tapCard(i);hr.appendChild(el)});
+  cards.forEach((c,i)=>{const el=cardEl(c,{down:fly,cls:((h.done?(h.used||[]).includes(i):sel.includes(i))?'used':'')+(mix?' dealt':'')});
+    if(fly)el.dataset.up=1;if(mix)el.style.animationDelay=(280+i*45)+'ms';el.setAttribute('role','button');el.setAttribute('aria-label',`${c}, ${VALUES[c]} points`);el.onclick=()=>tapCard(i);hr.appendChild(el)});
   // word slots: exactly the length this hand needs
   const wr=$('wordRow');wr.innerHTML='';const w=h.done?(h.word||''):word();
   if(h.done&&h.bust){const s=document.createElement('div');s.className='bust';s.textContent=h.fold?'FOLD':'BUST';wr.appendChild(s)}
@@ -495,7 +510,7 @@ $('foldBtn').onclick=()=>{const h=H(),f=$('foldBtn');if(h.done||busy)return;
   foldArm=false;clearTimeout(foldT);f.textContent='Fold';f.classList.remove('on');resolve(null,true)};
 $('goBtn').onclick=()=>{const h=H();if(busy)return;
   if(h.done){if(S.hands.every(x=>x.done)){showDone();return}
-    S.cur=S.hands.findIndex(x=>!x.done);refill();sel=[];$('banner').classList.remove('on');save();render(true);S.fresh=null;return}
+    S.cur=S.hands.findIndex(x=>!x.done);refill();sel=[];$('banner').classList.remove('on');save();dealHand();S.fresh=null;return}
   play()};
 function play(){const w=word();if(w.length!==LEN())return;
   if(!isWord(w)){toast('Not in word list');$('wordRow').classList.remove('shake');void $('wordRow').offsetWidth;$('wordRow').classList.add('shake');return}
@@ -521,7 +536,20 @@ function recordDay(){const hist=store.json('abc-hist',{});const done=S.hands.fil
 
 /* ---------- Screens ---------- */
 let backTo='game';
-function only(id){document.querySelectorAll('.sheet').forEach(x=>x.hidden=x.id!==id)}
+function only(id){document.querySelectorAll('.sheet').forEach(x=>x.hidden=x.id!==id);if(!id&&dealWaiting)dealHand()}
+/* Deal the hand like a dealer: one card at a time from the middle of the table, you then the dealer,
+   face down, and your cards turn over as they land. Waits if a page is covering the table. */
+let dealWaiting=false;
+function dealHand(){const covered=[...document.querySelectorAll('.sheet')].some(x=>!x.hidden);
+  dealWaiting=covered&&!H().done;if(covered||H().done||matchMedia('(prefers-reduced-motion:reduce)').matches){render();return}
+  render('deal');const t=$('table'),tr=t.getBoundingClientRect(),ox=tr.left+tr.width/2,oy=tr.top+tr.height/2;
+  const you=[...$('handRow').children],dl=[...$('dealerRow').children],order=[];
+  for(let i=0;i<Math.max(you.length,dl.length);i++){if(you[i])order.push(you[i]);if(dl[i])order.push(dl[i])}
+  const step=Math.min(90,1400/order.length),dur=340;t.style.pointerEvents='none';
+  order.forEach((el,k)=>{const r=el.getBoundingClientRect(),dx=ox-(r.left+r.width/2),dy=oy-(r.top+r.height/2);
+    el.animate([{transform:`translate(${dx}px,${dy}px) rotate(${(k*7)%15-7}deg)`},{transform:'none'}],{duration:dur,delay:k*step,easing:'cubic-bezier(.2,.8,.3,1)',fill:'backwards'});
+    if(el.dataset.up)setTimeout(()=>el.classList.remove('down'),k*step+dur-60)});
+  setTimeout(()=>{t.style.pointerEvents='';render()},order.length*step+dur+400)}
 function goBack(){if(backTo==='cover')cover();else only('')}
 function finished(){return S.hands.every(x=>x.done)}
 function wins(){return S.hands.filter(x=>x.result==='W').length}
@@ -546,6 +574,8 @@ function showStats(){const s=allStats(),hist=store.json('abc-hist',{}),dd=n=>n+'
   $('statWeek').innerHTML=W;$('statWeekSum').textContent=`${wp} of 7 played · ${ws} ⭐`;
   $('statGrid').innerHTML=[[s.stars,'⭐ Stars'],[s.played,'Played'],[s.three,'⭐⭐⭐'],[s.pct,'Hands won'],[s.bestDay,'Best day'],[s.best,'Best streak']].map(([v,l])=>`<div><b>${v}</b><span>${l}</span></div>`).join('');
   only('stats')}
+/* Difficulty, shown the same way as The Daily 15 */
+function diffHTML(d){return `Difficulty<span class="dbox">${[1,2,3,4,5].map(k=>`<i${k<=d?' class="on"':''}></i>`).join('')}</span>${DIFFW[d]}`}
 function shareText(){const r=S.hands.map(x=>x.done?{W:'🟩',L:'🟥',P:'🟨'}[x.result]:'⬜').join('');const st=starsFor(wins());
   return `A, B, C, Deal No. ${dayNumber(DATE)}${st?' '+starStr(st):''}\n${r} ${wins()}/${HANDS}\n${totalPts()} of ${DAY.bestTotal} points\nsmaisle.app`}
 function showDone(){const w=wins(),st=starsFor(w),s=allStats();
@@ -553,6 +583,7 @@ function showDone(){const w=wins(),st=starsFor(w),s=allStats();
   $('doneBig').textContent=st?starStr(st):'No stars today';$('doneBig').style.fontSize=st?'':'18px';
   $('doneLine').textContent=`${w} of ${HANDS} hands won`;
   $('donePts').textContent=`${totalPts()} of ${DAY.bestTotal} possible points`;
+  $('doneDiff').innerHTML=diffHTML(difficulty(DAY));
   $('doneRecap').innerHTML=S.hands.map((x,i)=>`<tr><td>${i+1}</td><td class="wd">${x.word||(x.fold?'FOLD':'BUST')}</td><td>${x.dealerWord==='BUST'?'dealer bust':`vs ${x.dealerWord} ${x.dealerScore}`}</td><td class="${x.result}">${x.net}</td></tr>`).join('');
   $('doneStreak').hidden=!s.cur;$('doneStreak').textContent=`🔥 ${s.cur}-day streak`;
   $('cd').textContent=nextDeal();$('shareText').hidden=true;only('done')}
@@ -593,7 +624,7 @@ $('mHelp').onclick=()=>{backTo='game';only('help')};
 $('mTerms').onclick=()=>{backTo='game';only('terms')};
 $('termsGo').onclick=()=>{const first=!agreed();if(first){store.set(TERMS_KEY,new Date().toISOString().slice(0,10));checkIn('open');cover()}else goBack()};
 
-setInterval(()=>{if(!$('done').hidden)$('cd').textContent=nextDeal();if(today()!==DATE&&!busy){loadDay();render(true);if(!$('cover').hidden)cover()}},1000);
+setInterval(()=>{if(!$('done').hidden)$('cd').textContent=nextDeal();if(today()!==DATE&&!busy){loadDay();dealHand();if(!$('cover').hidden)cover()}},1000);
 
 /* keyboard */
 document.addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey)return;if(document.querySelector('.sheet:not([hidden])'))return;
@@ -606,9 +637,10 @@ document.addEventListener('dblclick',e=>e.preventDefault());
 
 /* ---------- Start ---------- */
 $('ver').textContent=$('menuVer').textContent=`A, B, C, Deal · v${VERSION} · ${VDATE} · smAisle`;
-loadDay();render(true);
+loadDay();render();
 addEventListener('resize',()=>{if(!busy)render()});
 if(!agreed())only('terms');else{checkIn('open');cover()}
+dealHand();
 </script>
 </body>
 </html>

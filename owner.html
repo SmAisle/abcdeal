@@ -61,12 +61,17 @@ function draw(){
   const stat=(n,l)=>`<div class="stat"><b>${n}</b><span>${l}</span></div>`;
   const opened=d=>cnt(x=>x.o&&x.o[d]!=null), played=d=>cnt(x=>x.h&&+x.h[d]>0), finished=d=>cnt(x=>x.h&&+x.h[d]>=5);
   const opens=d=>DEV.reduce((a,x)=>a+(x.o&&+x.o[d]||0),0), hands=d=>DEV.reduce((a,x)=>a+(x.h&&+x.h[d]||0),0);
-  const days=[]; for(let i=0;i<14;i++){ const d=ago(i); days.push([d,opened(d),opens(d),played(d),finished(d),hands(d),cnt(x=>x.first===d)]); }
+  // Like The Daily 15: the day's difficulty, average hands won and points, best points, and perfect 5/5 days
+  const DW=["","Easy","Gentle","Medium","Tough","Hard"], fin=d=>DEV.filter(x=>x.w&&x.w[d]!=null);
+  const diff=d=>{const x=DEV.find(x=>x.d&&x.d[d]!=null); return x?DW[+x.d[d]]||"":"";};
+  const avg=(d,k)=>{const f=fin(d); return f.length?(f.reduce((a,x)=>a+(+(x[k]||{})[d]||0),0)/f.length).toFixed(1):"";};
+  const bestP=d=>{const f=fin(d); return f.length?Math.max(...f.map(x=>+(x.p||{})[d]||0)):"";}, perfect=d=>fin(d).filter(x=>+x.w[d]>=5).length;
+  const days=[]; for(let i=0;i<14;i++){ const d=ago(i); days.push([d,diff(d),opened(d),played(d),finished(d),avg(d,"w"),avg(d,"p"),bestP(d),perfect(d),hands(d),cnt(x=>x.first===d)]); }
   const tbl=(title,rows)=>`<div><h2>${title}</h2><table>${rows.map(([k,v])=>`<tr><td>${esc(k)}</td><td>${num(v)}</td></tr>`).join("")||`<tr><td class="muted">None yet</td><td></td></tr>`}</table></div>`;
   const hs=sum("hands"), ws=sum("wins");
   $("#usage").innerHTML=`<div class="stats">${stat(opened(today),"opened today")}${stat(played(today),"played today")}${stat(cnt(d=>d.last>=w),"active this week")}${stat(cnt(d=>d.last>=m),"active this month")}${stat(DEV.length,"devices ever")}${stat(cnt(d=>d.first>=w),"new this week")}${stat(num(hs),"hands played")}${stat(hs?Math.round(ws/hs*100)+"%":"–","hands won")}${stat(num(top),"best day (points)")}</div>
   <p class="muted">Counts phones and computers, not people. A device checks in when it opens the game and after each hand, from the website version only, after agreeing to the terms. The Claude-link version isn't counted.</p>
-  <h2>Last 14 days</h2><div style="overflow-x:auto"><table><tr><th>Day</th><th>Devices opened</th><th>Opens</th><th>Devices played</th><th>Finished all 5</th><th>Hands</th><th>New</th></tr>${days.map(r=>`<tr>${r.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`).join("")}</table></div>
+  <h2>Last 14 days</h2><div style="overflow-x:auto"><table><tr><th>Day</th><th>Difficulty</th><th>Opened</th><th>Played</th><th>Done</th><th>Avg won</th><th>Avg pts</th><th>Best pts</th><th>5/5</th><th>Hands</th><th>New</th></tr>${days.map(r=>`<tr>${r.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`).join("")}</table></div>
   <div class="two">
   ${tbl("Streaks, active this week",[["On a streak of 3+ days",cnt(d=>d.last>=w&&+d.streak>=3)],["On a streak of 7+ days",cnt(d=>d.last>=w&&+d.streak>=7)]])}
   ${tbl("App version, active this month",tallyBy("v").map(([k,v])=>["Version "+k,v]))}

@@ -35,14 +35,14 @@ function freshDeck(r){const d=[];for(const k in COUNTS)for(let i=0;i<COUNTS[k];i
   for(let i=d.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[d[i],d[j]]=[d[j],d[i]]}return d}
 
 /* A fresh deal every hand, the same for everyone that day. Each deal is checked before it is used:
-   you always have at least one common word, and your best word beats the dealer's best by a little
+   you always have at least 2 common words (hand 5: 2 when it can, at least 1), and your best word beats the dealer's best by a little
    (so a perfect day is possible but takes the best word). About 3 days in 10 the dealer busts on one
    hand (hands 2-5), meaning it has no word at all. */
 function dealDay(date){const bustHand=hashStr('bust|'+date)%10<3?1+hashStr('which|'+date)%4:-1;
   const day={you:[],dealer:[],yourBest:[],dealerBest:[],drawCard:[],swapCard:[]};
   for(let h=0;h<HANDS;h++){const r=rng(hashStr('abcdeal3|'+date+'|'+h)),n=SIZES[h];let pick=null;
     for(let tries=0;tries<4000&&!pick;tries++){const deck=freshDeck(r),you=deck.slice(0,n),dealer=deck.slice(n,2*n);
-      const y=best(you,h);if(!y.word)continue;const d=best(dealer,h);
+      const y=best(you,h);if(!y.word)continue;if(countWords(you,LENGTHS[h])<(h<HANDS-1||tries<2000?2:1))continue;const d=best(dealer,h);
       if(h===bustHand){if(d.word||anyWord(dealer,LENGTHS[h]))continue}
       else{if(!d.word)continue;const gap=y.score-d.score;if(gap<1||gap>4+2*h)continue}
       pick={you,dealer,y,d,draw:deck[2*n],swap:deck[2*n+1]}}
@@ -50,5 +50,13 @@ function dealDay(date){const bustHand=hashStr('bust|'+date)%10<3?1+hashStr('whic
     day.you.push(pick.you);day.dealer.push(pick.dealer);day.yourBest.push(pick.y);day.dealerBest.push(pick.d);day.drawCard.push(pick.draw);day.swapCard.push(pick.swap)}
   day.bestTotal=day.yourBest.reduce((a,b)=>a+b.score,0);return day}
 
+/* Difficulty 1-5, like The Daily 15: a careful robot plays each hand with a word from the better half
+   of the common words it can make. Expected hands won: 4.9+ = 1, 4.5+ = 2, 4.1+ = 3, 3.6+ = 4, less = 5. */
+const DIFFW=['','Easy','Gentle','Medium','Tough','Hard'];
+function expectedWins(day){let E=0;for(let h=0;h<HANDS;h++){const have=count(day.you[h].join(''));
+    const ws=DEALER_LIST.filter(([w,c])=>w.length===LENGTHS[h]&&fits(c,have)).map(([w])=>score(w,h)).sort((a,b)=>b-a);
+    const top=ws.slice(0,Math.ceil(ws.length/2)),d=day.dealerBest[h];if(top.length)E+=top.filter(x=>!d.word||x>d.score).length/top.length}
+  return E}
+function difficulty(day){const e=expectedWins(day);return e>=4.9?1:e>=4.5?2:e>=4.1?3:e>=3.6?4:5}
 function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/864e5)+1}
-if(typeof module!=='undefined')module.exports={VALUES,SIZES,LENGTHS,MULT,score,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
+if(typeof module!=='undefined')module.exports={difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
