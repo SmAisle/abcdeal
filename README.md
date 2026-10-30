@@ -111,3 +111,7 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 
 ## v31
 - Share text drops the colored squares. It now reads "4/5 won · ⏱ 3:42" under the title line.
+
+## v32
+- 💡 Hint, in the Fold pop-up (like The Daily 15's hint pop-up). It puts the next letter of a good word in its slot, keeping any right letters before it. The first hint of the day takes one star off; more hints that day are free.
+- Results say "· 💡 hint used", the share adds 💡, and history saves hint:1 so stats and the archive count the lower stars.
