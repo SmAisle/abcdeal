@@ -68,3 +68,11 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 ## v22
 - The "Now try A, B, C, Deal 'Em" button on the results card is now a promo tile: two little fanned cards (E, M), a "Today's second deal" kicker, the full name in the headline serif, "Played like Texas Hold'em", and a round › button.
 - In Deal 'Em, the matching tile points back to A, B, C, Deal with an A, B, C fan.
+
+## v23
+- More from smAisle, linking A, B, C, Deal and The Daily 15:
+  - Front page: a quiet "smAisle · See our other games ›" line under the links, opening smaisle.app.
+  - Results card: once both of today's deals are done (and on archive plays and replays), the yellow tile links to The Daily 15.
+  - Menu: a "More from smAisle" section with a Daily 15 tile.
+- Taps are counted in abc-usage.x (d15_done, d15_menu, sm_cover) and sent with the check-in. The owner page has a "Taps to other smAisle games" table.
+- In the future app, links go through window.ABC_APP.open(key) when it exists.
