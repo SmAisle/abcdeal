@@ -72,7 +72,15 @@ function split(deck,n){if(!HOLE)return [deck.slice(0,n),deck.slice(n,2*n)];const
 /* A moving bonus spreads scores out, so from MOVE_FROM the dealer may beat a little less of your hand (60%, not 50%): about the same difficulty as before */
 /* From BUST_FROM the dealer busts less often (about 1 day in 5) and only in hands 2 or 3, so the big hands are always a real fight */
 const BUST_FROM='2026-10-31';
-function dealDay(date){const share=date<MOVE_FROM?WIN_SHARE:0.6,hol=holiday(date);
+/* Deals published before the word lists changed (Nov 2026) are stored exactly as they were, with their difficulty, so the Archive never changes.
+   FROZEN_DEALS lines: [h]YYYY-MM-DD=difficulty:you,dealer,draw,swap,yourBest,dealerBest;... one group per hand ('h' = Deal 'Em, '' = a dealer bust). */
+const FROZEN={};for(const line of (typeof FROZEN_DEALS!=='undefined'?FROZEN_DEALS:'').split('|')){const i=line.indexOf('=');if(i>0)FROZEN[line.slice(0,i)]=line.slice(i+1)}
+function frozenDay(date){const f=FROZEN[(HOLE?'h':'')+date];if(!f)return null;const[diff,hands]=f.split(':');
+  const day={you:[],dealer:[],yourBest:[],dealerBest:[],drawCard:[],swapCard:[],bonus:bonusSlots(date),holiday:holiday(date),diff:+diff};
+  hands.split(';').forEach((g,h)=>{const[y,d,dr,sw,yw,dw]=g.split(',');day.you.push(y.split(''));day.dealer.push(d.split(''));day.drawCard.push(dr);day.swapCard.push(sw);
+    day.yourBest.push({word:yw,score:score(yw,h,day.bonus[h])});day.dealerBest.push({word:dw,score:score(dw,h,day.bonus[h])})});
+  day.bestTotal=day.yourBest.reduce((a,b)=>a+b.score,0);return day}
+function dealDay(date){const fz=frozenDay(date);if(fz)return fz;const share=date<MOVE_FROM?WIN_SHARE:0.6,hol=holiday(date);
   const bustHand=date<BUST_FROM?(hashStr('bust|'+date)%10<3?1+hashStr('which|'+date)%4:-1):(hashStr('bust|'+date)%10<2?1+hashStr('which|'+date)%2:-1);
   const day={you:[],dealer:[],yourBest:[],dealerBest:[],drawCard:[],swapCard:[],bonus:bonusSlots(date),holiday:hol};
   for(let h=0;h<HANDS;h++){const tws=hol&&hol.words[h],b=day.bonus[h],r=rng(hashStr((HOLE?'abcholdem|':'abcdeal3|')+date+'|'+h)),n=SIZES[h];let pick=null;
@@ -98,6 +106,6 @@ function expectedWins(day){let E=0;for(let h=0;h<HANDS;h++){const have=count(day
     const ws=DEALER_LIST.filter(([w,c])=>w.length===LENGTHS[h]&&fits(c,have)&&usesHole(c,day.you[h])).map(([w])=>score(w,h,day.bonus[h])).sort((a,b)=>b-a);
     const top=ws.slice(0,Math.ceil(ws.length/2)),d=day.dealerBest[h];if(top.length)E+=top.filter(x=>!d.word||x>d.score).length/top.length}
   return E}
-function difficulty(day){const e=expectedWins(day);return e>=4?1:e>=3.5?2:e>=3?3:e>=2.5?4:5}
+function difficulty(day){if(day.diff)return day.diff;const e=expectedWins(day);return e>=4?1:e>=3.5?2:e>=3?3:e>=2.5?4:5}
 function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/864e5)+1}
 if(typeof module!=='undefined')module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,bonusSlots,holiday,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
