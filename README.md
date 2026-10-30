@@ -54,3 +54,6 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 
 ## v19
 - Past deals for both games, like The Daily 15's past puzzles: every deal back to No. 1 with its difficulty and your result, from the front page or menu. Late plays count in stats (marked late) but not the streak. State per past day in abc-d_DATE / abch-d_DATE; difficulty cached in abc-diff / abch-diff.
+
+## v20
+- Cards shrink to fit the screen height in both games, so a two-row hand on a phone never covers the buttons.
