@@ -288,6 +288,15 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
   <button class="go alt" id="doneStats">Stats</button>
 </div></div>
 
+<div class="sheet" id="foldAsk" hidden><div class="box2" style="text-align:center">
+  <h2>🏳️ Fold</h2>
+  <p id="foldQ" style="margin:0;font-family:var(--sans);font-weight:800;font-size:17px"></p>
+  <p id="foldWarn" style="margin:0;color:var(--red);font-family:var(--sans);font-weight:700"></p>
+  <div id="foldTbl"></div>
+  <button class="go" id="foldYes">Fold this hand</button>
+  <button class="go alt" id="foldNo">No, keep playing</button>
+</div></div>
+
 <div class="sheet" id="menu" hidden><div class="box2">
   <h2>Menu</h2>
   <button class="go" id="mBack">Back to the table</button>
@@ -313,7 +322,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 <script>
 /*WORDS*/
 /*LOGIC*/
-const VERSION='12',VDATE='Oct 30',GAME='abc';
+const VERSION='13',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -440,10 +449,15 @@ $('swapBtn').onclick=()=>{const h=H();if(h.done||h.swapped||busy)return;swapMode
 $('mixBtn').onclick=()=>{const h=H();if(h.done)return;const idx=S.cards.map((_,i)=>i);
   for(let i=idx.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]]}
   S.cards=idx.map(i=>S.cards[i]);const remap=Object.fromEntries(idx.map((old,nw)=>[old,nw]));sel=sel.map(i=>remap[i]);S.fresh=null;save();render(true)};
-let foldArm=false,foldT=0;
-$('foldBtn').onclick=()=>{const h=H(),f=$('foldBtn');if(h.done||busy)return;
-  if(!foldArm){foldArm=true;f.textContent='Sure?';f.classList.add('on');clearTimeout(foldT);foldT=setTimeout(()=>{foldArm=false;f.textContent='Fold';f.classList.remove('on')},2500);return}
-  foldArm=false;clearTimeout(foldT);f.textContent='Fold';f.classList.remove('on');resolve(null,true)};
+/* Fold asks first in a pop-up, like the hint pop-up in The Daily 15 */
+$('foldBtn').onclick=()=>{const h=H();if(h.done||busy)return;
+  const w=wins(),left=S.hands.filter(x=>!x.done).length-1,n=countWords(S.cards,LEN());
+  $('foldQ').textContent=`Give up hand ${S.cur+1}? The dealer wins it.`;
+  $('foldWarn').textContent=n?`There ${n>1?`are ${n} words`:'is 1 word'} in your hand.`:'';
+  $('foldTbl').innerHTML=`<p class="fine" style="margin:4px 0 0">${w} won so far, ${left} hand${left===1?'':'s'} left after this.</p>`+$('starTbl').outerHTML.replace('id="starTbl"','');
+  only('foldAsk')};
+$('foldYes').onclick=()=>{only('');resolve(null,true)};
+$('foldNo').onclick=()=>only('');
 $('goBtn').onclick=()=>{const h=H();if(busy)return;
   if(h.done){if(S.hands.every(x=>x.done)){showDone();return}
     S.cur=S.hands.findIndex(x=>!x.done);refill();sel=[];$('banner').classList.remove('on');save();dealHand();S.fresh=null;return}
