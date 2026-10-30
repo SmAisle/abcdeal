@@ -132,3 +132,9 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 
 ## v37
 - Back to 2 hints a day, each costing one star. Each hinted letter locks to its slot (h.locks).
+
+## v38
+- The bonus spot moves (from Oct 31, 2026). Each hand from 2 to 5 puts its ×2–×5 bonus on a slot picked from the date, the same for everyone (DAY.bonus, bonusSlots in logic.js). Hand 1 is ×1. Days before Oct 31 score and deal exactly as before.
+- score(word,h,b), best(letters,h,b) and wordScores(letters,h,b) take the bonus slot. The dealer uses the same bonus spot.
+- To keep the difficulty about the same, the deal filter lets you beat up to 60% of the dealer's words on those days (was 50%). Over a 30-day sim the average robot wins are 3.24, against 3.39 before; the bonus with the old 50% filter gave 3.03.
+- The help and intro screens explain the bonus spot (the WALTZ example has ×5 on the Z).
