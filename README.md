@@ -115,3 +115,6 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 ## v32
 - 💡 Hint, in the Fold pop-up (like The Daily 15's hint pop-up). It puts the next letter of a good word in its slot, keeping any right letters before it. The first hint of the day takes one star off; more hints that day are free.
 - Results say "· 💡 hint used", the share adds 💡, and history saves hint:1 so stats and the archive count the lower stars.
+
+## v33
+- Hint lets you pick the slot: tap Get a hint, every slot glows, tap the one you want and it shows that slot's letter. The word it uses is the common word that best fits the letters you already have in place. Tapping a hand card cancels.
