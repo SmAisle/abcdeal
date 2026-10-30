@@ -45,3 +45,9 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 
 ## v17
 - Intro and How to Play say the dealer gets the same cards for everyone too.
+
+## v18
+- Deal 'Em: a second daily deal played like Texas Hold'em (shared board plus 2 cards each; your word must use one of your cards). Plus in the app later; free for everyone on the website (hasPlus() is true unless window.ABC_APP says otherwise, like The Daily 15).
+- Deal 'Em keeps its own day, results and streak (abch-day8, abch-hist). Check-ins count only the regular game.
+- Shuffle in Deal 'Em mixes the shared board and always shows a new order. Deal 'Em cards shrink to fit short screens so they never cover the buttons.
+- Deal numbers now start at No. 1 on Oct 29.
