@@ -148,3 +148,6 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 ## v41
 - Holiday Edition, like The Daily 15. On Halloween, Thanksgiving, Christmas, New Year's Eve, Valentine's Day and July 4 the dealer plays a festive word in every hand (BOO, MASK, GHOST, SPOOKY, PUMPKIN on Halloween 2026). There's a different set each year, and if a word's cards don't work out, the next one on the list is used. On the birthdays (Dec 6 TESS, Jun 12 LYLA) the dealer plays the name in hand 2.
 - The header reads "🎃 Holiday Edition", and the share's first line gets the icon. Lists are in HOLI in logic.js.
+
+## v42
+- A quick second tap (under 0.45 s) on a card you just placed no longer takes it back.
