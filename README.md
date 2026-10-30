@@ -64,3 +64,7 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 - Each hand's result box shows both words and points, winner highlighted.
 - Past deals renamed Archive; numbering starts Sept 1, 2026 (EPOCH), so the archive goes back to Sept 1.
 - How to Play matches The Daily 15: rules page plus an Extras page.
+
+## v22
+- The "Now try A, B, C, Deal 'Em" button on the results card is now a promo tile: two little fanned cards (E, M), a "Today's second deal" kicker, the full name in the headline serif, "Played like Texas Hold'em", and a round › button.
+- In Deal 'Em, the matching tile points back to A, B, C, Deal with an A, B, C fan.
