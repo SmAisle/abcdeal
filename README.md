@@ -118,3 +118,7 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 
 ## v33
 - Hint lets you pick the slot: tap Get a hint, every slot glows, tap the one you want and it shows that slot's letter. The word it uses is the common word that best fits the letters you already have in place. Tapping a hand card cancels.
+
+## v34
+- 2 hints a day, each costs one star (up to 2 stars). While hints are left (and the hand has a word), the Fold button reads "💡 Hint 2" / "💡 Hint 1" and opens a Hint pop-up: Reveal a letter, with Fold this hand and No, keep playing below. Once both are used it's Fold again.
+- Results show "💡 2 hints", the share shows one 💡 per hint, and history saves the hint count.

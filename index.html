@@ -323,7 +323,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
   <div id="hp2" hidden>
   <ul class="rules">
     <li><b>🃏 A, B, C, Deal ’Em:</b> a second deal every day, played like Texas Hold’em. You and the dealer share the board in the middle and each get 2 cards of your own. Your word must use at least one of them.</li>
-    <li><b>🏳️ Fold:</b> can't find a word? Tap Fold for a <b>💡 hint</b> first: pick any slot and see its letter. The first hint costs one star for the day. Or give up the hand and see a word you could have played.</li>
+    <li><b>🏳️ Fold:</b> can't find a word? You get <b>2 💡 hints</b> a day: the Fold button is a Hint button until they're used. Pick any slot and see its letter; each hint costs one star. After that the button is Fold. Or give up the hand and see a word you could have played.</li>
     <li><b>💯 Perfect:</b> play the best word in every hand to score every possible point.</li>
     <li><b>📊 Difficulty:</b> a careful robot plays each deal ahead of time and rates it from Easy to Hard.</li>
     <li><b>🔥 Streak:</b> finish each day's deal on its day to build your streak. Archive deals played late don't count.</li>
@@ -366,7 +366,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 </div></div>
 
 <div class="sheet" id="foldAsk" hidden><div class="box2" style="text-align:center">
-  <h2>🏳️ Fold</h2>
+  <h2 id="foldH">🏳️ Fold</h2>
   <p id="foldQ" style="margin:0;font-family:var(--sans);font-weight:800;font-size:17px"></p>
   <p id="foldWarn" style="margin:0;color:var(--red);font-family:var(--sans);font-weight:700"></p>
   <div id="foldTbl"></div>
@@ -497,7 +497,7 @@ function difficulty(day){const e=expectedWins(day);return e>=4?1:e>=3.5?2:e>=3?3
 function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/864e5)+1}
 //module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
 
-const VERSION='33',VDATE='Oct 30',GAME='abc';
+const VERSION='34',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -606,8 +606,10 @@ function totalPts(){return S.hands.filter(h=>h.done).reduce((a,h)=>a+h.net,0)}
 
 
 /* ---------- Stars ---------- */
-/* A hint takes one star off the day, like The Daily 15 */
-function starsFor(w,hint){return Math.max(0,(w>=5?3:w>=4?2:w>=3?1:0)-(hint?1:0))}
+/* Up to 2 hints a day; each takes one star off the day, like The Daily 15 */
+const MAX_HINTS=2;
+const hintsUsed=()=>S?(S.hints||(S.hinted?1:0)):0,hintsLeft=()=>Math.max(0,MAX_HINTS-hintsUsed());
+function starsFor(w,hint){return Math.max(0,(w>=5?3:w>=4?2:w>=3?1:0)-(+hint||0))}
 function starStr(n){return n?'⭐'.repeat(n):''}
 
 /* ---------- Render ---------- */
@@ -658,6 +660,7 @@ function render(deal){
   $('drawBtn').querySelector('small').textContent='−'+DRAW_COST[S.cur];$('swapBtn').querySelector('small').textContent='−'+SWAP_COST[S.cur];
   $('drawBtn').disabled=h.done||h.drew||busy;$('swapBtn').disabled=h.done||h.swapped||busy;$('swapBtn').classList.toggle('on',swapMode);
   $('mixBtn').disabled=h.done||busy;$('clearBtn').disabled=h.done||busy||!placed();$('foldBtn').disabled=h.done||busy;
+  const hl=hintsLeft()&&!h.done&&countWords(S.cards,len)>0;$('foldBtn').innerHTML=hl?`💡 Hint <small>${hintsLeft()}</small>`:'Fold';
   const g=$('goBtn');
   if(!h.done){g.textContent=w.length<len?`Play word (${w.length}/${len})`:'Play word';g.disabled=busy||w.length!==len}
   else if(S.hands.every(x=>x.done)){g.textContent='See today’s result';g.disabled=false}
@@ -710,10 +713,14 @@ $('mixBtn').onclick=()=>{const h=H();if(h.done)return;const idx=S.cards.map((_,i
 /* Fold asks first in a pop-up, like the hint pop-up in The Daily 15 */
 $('foldBtn').onclick=()=>{const h=H();if(h.done||busy)return;
   const w=wins(),left=S.hands.filter(x=>!x.done).length-1,n=countWords(S.cards,LEN());
-  $('foldQ').textContent=`Give up hand ${S.cur+1}? The dealer wins it.`;
-  $('foldWarn').textContent=n?`There ${n>1?`are ${n} words`:'is 1 word'} in your hand.`:'';
-  $('foldTbl').innerHTML=`<p class="fine" style="margin:4px 0 0">${w} won so far, ${left} hand${left===1?'':'s'} left after this.</p>`+$('starTbl').outerHTML.replace('id="starTbl"','');
-  $('hintBtn').hidden=!n;$('hintBtn').innerHTML=`💡 Get a hint<small>${S.hinted?'Pick a slot to reveal. Free, you already used today’s star.':'Pick a slot and see its letter. Costs one star today.'}</small>`;
+  /* While hints are left, this button is Hint: the pop-up offers a letter first, with Fold below it */
+  const hl=hintsLeft(),hm=hl>0&&n>0;
+  $('foldH').textContent=hm?'💡 Hint':'🏳️ Fold';
+  $('foldQ').textContent=hm?`Stuck on hand ${S.cur+1}? Reveal a letter.`:`Give up hand ${S.cur+1}? The dealer wins it.`;
+  $('foldWarn').textContent=hm?`Each hint costs one star. ${hl} of ${MAX_HINTS} left today.`:n?`There ${n>1?`are ${n} words`:'is 1 word'} in your hand.`:'';
+  $('foldTbl').innerHTML=(hintsLeft()>0&&n>0?'':`<p class="fine" style="margin:4px 0 0">${w} won so far, ${left} hand${left===1?'':'s'} left after this.</p>`)+$('starTbl').outerHTML.replace('id="starTbl"','');
+  $('hintBtn').hidden=!hm;$('hintBtn').innerHTML=`💡 Reveal a letter<small>Pick any slot and see its letter. −1 ⭐</small>`;
+  $('foldYes').className=hm?'go alt':'go';
   only('foldAsk')};
 /* Hint: you pick a slot and it shows that slot's letter. The word is the common word that best fits the letters
    you already have in place, so a hint never undoes your work when it doesn't have to. */
@@ -730,7 +737,7 @@ function revealAt(j){hintMode=false;const h=H(),w=hintWord();if(!w){render();toa
   let c=free.length?free[free.length-1]:-1;
   if(c<0){const k=sel.findIndex((i,k)=>i!=null&&k!==j&&S.cards[i]===L&&w[k]!==L);if(k>=0){c=sel[k];sel[k]=null}}
   if(c<0){render();return}
-  sel[j]=c;trimSel();S.hinted=true;h.hints=(h.hints||0)+1;save();sfx('place');render();toast(`Slot ${j+1} is ${L}`,1800)}
+  sel[j]=c;trimSel();S.hints=hintsUsed()+1;h.hints=(h.hints||0)+1;save();sfx('place');render();toast(`Slot ${j+1} is ${L}`,1800)}
 $('foldYes').onclick=()=>{only('');resolve(null,true)};
 $('foldNo').onclick=()=>only('');
 $('goBtn').onclick=()=>{const h=H();if(busy)return;
@@ -761,7 +768,7 @@ function showBanner(h){const b=$('banner'),d=DAY.dealerBest[S.cur];
   /* stays up until Next hand */}
 function recordDay(){const hist=store.json(KEY('hist'),{});const done=S.hands.filter(x=>x.done);
   if(hist[DATE]&&!hist[DATE].late&&PAST)return;
-  hist[DATE]={w:done.filter(x=>x.result==='W').length,p:done.reduce((a,x)=>a+x.net,0),r:done.map(x=>x.result).join(''),b:DAY.bestTotal,t:S.secs||0,...(S.hinted?{hint:1}:{}),...(PAST?{late:1}:{})};store.put(KEY('hist'),hist)}
+  hist[DATE]={w:done.filter(x=>x.result==='W').length,p:done.reduce((a,x)=>a+x.net,0),r:done.map(x=>x.result).join(''),b:DAY.bestTotal,t:S.secs||0,...(hintsUsed()?{hint:hintsUsed()}:{}),...(PAST?{late:1}:{})};store.put(KEY('hist'),hist)}
 
 /* ---------- Screens ---------- */
 let backTo='game';
@@ -810,12 +817,12 @@ function showStats(){const s=allStats(),hist=store.json(KEY('hist'),{}),dd=n=>n+
   only('stats')}
 /* Difficulty, shown the same way as The Daily 15 */
 function diffHTML(d){return `Difficulty<span class="dbox">${[1,2,3,4,5].map(k=>`<i${k<=d?' class="on"':''}></i>`).join('')}</span>${DIFFW[d]}`}
-function shareText(){const st=starsFor(wins(),S.hinted);
-  return `${GNAME()} No. ${dayNumber(DATE)}${st?' '+starStr(st):''}\n${wins()}/${HANDS} won${S.hinted?' · 💡':''}${S.secs?' · ⏱ '+mmss(S.secs):''}\n${totalPts()} of ${DAY.bestTotal} points${totalPts()>=DAY.bestTotal?' 💯':''}\nsmaisle.app`}
-function showDone(){const w=wins(),st=starsFor(w,S.hinted),s=allStats();
+function shareText(){const st=starsFor(wins(),hintsUsed());
+  return `${GNAME()} No. ${dayNumber(DATE)}${st?' '+starStr(st):''}\n${wins()}/${HANDS} won${hintsUsed()?' · '+'💡'.repeat(hintsUsed()):''}${S.secs?' · ⏱ '+mmss(S.secs):''}\n${totalPts()} of ${DAY.bestTotal} points${totalPts()>=DAY.bestTotal?' 💯':''}\nsmaisle.app`}
+function showDone(){const w=wins(),st=starsFor(w,hintsUsed()),s=allStats();
   $('doneTitle').textContent=w===5?'Perfect deal!':w>=4?'Hot table!':w>=3?'You beat the house':w===2?'Close one':'The house wins';
   $('doneBig').textContent=st?starStr(st):'No stars today';$('doneBig').style.fontSize=st?'':'18px';
-  $('doneLine').textContent=`${w} of ${HANDS} hands won`+(S.secs?` in ${mmss(S.secs)}`:'')+(S.hinted?' · 💡 hint used':'');
+  $('doneLine').textContent=`${w} of ${HANDS} hands won`+(S.secs?` in ${mmss(S.secs)}`:'')+(hintsUsed()?` · 💡 ${hintsUsed()} hint${hintsUsed()>1?'s':''}`:'');
   const perfect=totalPts()>=DAY.bestTotal;$('donePts').innerHTML=perfect?`💯 Every possible point: ${totalPts()} of ${DAY.bestTotal}`:`${totalPts()} of ${DAY.bestTotal} possible points`;
   $('doneDiff').innerHTML=diffHTML(difficulty(DAY));
   $('doneRecap').innerHTML=S.hands.map((x,i)=>`<tr><td>${i+1}</td><td class="wd">${x.word||(x.fold?'FOLD':'BUST')}</td><td>${x.dealerWord==='BUST'?'dealer bust':`vs ${x.dealerWord} ${x.dealerScore}`}</td><td class="${x.result}">${x.net}</td></tr>`).join('');
