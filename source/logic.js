@@ -7,7 +7,7 @@ const SIZES=[5,6,7,8,9]; /* cards dealt (you and the dealer): one more each hand
 const HANDS=LENGTHS.length;
 /* Draw and Swap cost more as hands are worth more: hand 1 is 2 and 1, hand 5 is 6 and 5. */
 const DRAW_COST=[2,3,4,5,6],SWAP_COST=[1,2,3,4,5];
-const EPOCH='2026-10-29';
+const EPOCH='2026-09-01';
 /* Hold'em (Plus): shared cards in the middle (3 in hand 1, up to 7 in hand 5) plus 2 private cards each.
    In Hold'em, card arrays are [board..., your 2 cards] and a word must use at least one of your 2 cards.
    HOLE is 0 in the regular game, so every rule below works the same as before. */

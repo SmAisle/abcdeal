@@ -57,3 +57,10 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 
 ## v20
 - Cards shrink to fit the screen height in both games, so a two-row hand on a phone never covers the buttons.
+
+## v21
+- Results card fits short phones: See the table and Stats side by side, and a yellow nudge to play the other game today.
+- Always the full name: the top bar says A, B, C, Deal or A, B, C, Deal 'Em, with No. and date under it.
+- Each hand's result box shows both words and points, winner highlighted.
+- Past deals renamed Archive; numbering starts Sept 1, 2026 (EPOCH), so the archive goes back to Sept 1.
+- How to Play matches The Daily 15: rules page plus an Extras page.
