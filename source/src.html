@@ -65,7 +65,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 #handRow .card,#boardRow .card,#wordRow .card{touch-action:none}
 .card.drag{z-index:30;transition:none!important;pointer-events:none}.card.drag .face{box-shadow:4px 6px 0 rgba(0,0,0,.3)}
 #wordRow.over{outline:2px dashed var(--ink2);outline-offset:5px;border-radius:4px}
-#wordRow .card.tgt .face{background:var(--hi)}
+#wordRow .card.tgt .face,#wordRow .slot.tgt{background:var(--hi)}
 
 /* Cards: big letter, corner letter and points, like a deck of cards */
 .card{width:var(--w);height:calc(var(--w)*1.4);position:relative;perspective:600px;flex:none;border:0;padding:0;background:none}
@@ -303,7 +303,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
   <div id="hp1">
   <ul class="rules">
     <li><b>Goal:</b> beat the dealer in today's <b>5 hands</b>. Everyone gets the same cards, and so does the dealer.</li>
-    <li><b>Spell a word:</b> tap your cards to fill the slots, then tap <b>Play word</b>. Drag a card onto another to swap them, between two to slide it in, or tap it to take it back. Hand 1 needs <b>3 letters</b>, up to <b>7 letters</b> in hand 5.</li>
+    <li><b>Spell a word:</b> tap your cards to fill the slots, then tap <b>Play word</b>. Drag a card to any slot to start from the end or the middle, onto another card to swap them, or tap it to take it back. Hand 1 needs <b>3 letters</b>, up to <b>7 letters</b> in hand 5.</li>
     <li><b>Cards:</b> 5 in hand 1, one more each hand, up to 9. The dealer shows you one card. There are always words to find, and your best word always beats the dealer's.</li>
     <li><b>Points:</b> add up the numbers on your cards. Your <b>first letter</b> counts ×1 in hand 1, up to <b>×5</b> in hand 5.<div class="pts">1: A E I L N O R S T U · 2: D G · 3: B C M P<br>4: F H V W Y · 5: K · 8: J X · 10: Q Z</div></li>
     <li><b>The dealer</b> flips its cards and plays its best word. Higher score wins; a tie is a push. No word? The dealer busts.</li>
@@ -411,7 +411,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 <script>
 /*WORDS*/
 /*LOGIC*/
-const VERSION='27',VDATE='Oct 30',GAME='abc';
+const VERSION='28',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -450,17 +450,22 @@ function actx(){if(!soundOn())return null;try{ac=ac||new (window.AudioContext||w
 function tone(f,dur=.08,type='sine',vol=.1,delay=0){const a=actx();if(!a)return;try{const o=a.createOscillator(),g=a.createGain(),t=a.currentTime+delay;o.type=type;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g).connect(a.destination);o.start(t);o.stop(t+dur+.02)}catch(e){}}
 function snap(dur=.04,freq=2600,vol=.16,delay=0){const a=actx();if(!a)return;try{const n=Math.ceil(a.sampleRate*dur),b=a.createBuffer(1,n,a.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);
   const src=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain(),t=a.currentTime+delay;src.buffer=b;f.type='bandpass';f.frequency.value=freq;f.Q.value=.8;g.gain.value=vol;src.connect(f).connect(g).connect(a.destination);src.start(t)}catch(e){}}
+/* Bells (soft glass) for words and results, picked on the sound board; the dealer's win keeps the plain falling pair */
+function osc(f,dur,type,vol,delay,attack=.004){const a=actx();if(!a)return;try{const o=a.createOscillator(),g=a.createGain(),t=a.currentTime+delay;o.type=type;o.frequency.setValueAtTime(f,t);
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+attack);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(a.destination);o.start(t);o.stop(t+dur+.03)}catch(e){}}
+const bell=(f,d=0,v=.08,len=.9)=>{osc(f,len,'sine',v,d);osc(f*2.76,len*.5,'sine',v*.3,d,.003);osc(f*5.4,len*.25,'sine',v*.12,d,.002)};
+const bells=(fs,gap)=>fs.forEach((f,i)=>bell(f,i*gap));
 const SFX={
   deal:()=>snap(.05,2200,.2),flip:()=>snap(.035,3800,.14),
-  place:()=>{snap(.03,3000,.1);tone(660,.05,'triangle',.05)},take:()=>{snap(.03,2400,.08);tone(440,.05,'triangle',.045)},
+  place:()=>{snap(.03,3000,.08);bell(1319,0,.05,.35)},take:()=>{snap(.03,2400,.07);bell(988,0,.04,.3)},
   shuffle:()=>{for(let i=0;i<7;i++)snap(.03,2400+i*150,.12,i*.045)},
-  nope:()=>{tone(196,.09,'square',.035);tone(185,.12,'square',.035,.09)},
-  win:()=>[523,659,784].forEach((f,i)=>tone(f,.18,'triangle',.09,i*.09)),
-  bust:()=>[523,659,784,1047].forEach((f,i)=>tone(f,.18,'triangle',.09,i*.08)),
+  nope:()=>{bell(330,0,.06,.4);bell(311,.14,.06,.5)},
+  win:()=>bells([784,988,1175],.1),
+  bust:()=>{bells([784,988,1175,1568],.08);bell(2093,.4,.04,.8)},
   lose:()=>[392,311].forEach((f,i)=>tone(f,.24,'triangle',.08,i*.16)),
-  push:()=>[523,523].forEach((f,i)=>tone(f,.12,'triangle',.07,i*.13)),
-  fold:()=>tone(165,.3,'sine',.09),
-  done:()=>[523,659,784,1047,784,1047].forEach((f,i)=>tone(f,i>3?.3:.16,'triangle',.08,i*.1))};
+  push:()=>bell(880,0,.07,.8),
+  fold:()=>bell(262,0,.07,1.1),
+  done:()=>bells([784,988,1175,1568,1175,1568],.12)};
 function sfx(k){if(soundOn()&&SFX[k])SFX[k]()}
 
 /* ---------- Helpers ---------- */
@@ -503,7 +508,13 @@ function refill(){S.cards=DAY.you[S.cur].slice()}
 function H(){return S.hands[S.cur]}
 function LEN(){return LENGTHS[S.cur]}
 function shown(){const h=H();return h.done?h.snap:S.cards}
-function word(){return sel.map(i=>S.cards[i]).join('')}
+/* sel holds the card in each word slot (null for an empty slot), so you can fill the slots in any order */
+function word(){return sel.filter(i=>i!=null).map(i=>S.cards[i]).join('')}
+const placed=()=>sel.filter(i=>i!=null).length;
+function freeSlot(){for(let j=0;j<LEN();j++)if(sel[j]==null)return j;return -1}
+function trimSel(){while(sel.length&&sel[sel.length-1]==null)sel.pop()}
+/* Points so far: your letters, with the multiplier only once a card sits in the first slot */
+function previewScore(){let s=0;sel.forEach(i=>{if(i!=null)s+=VALUES[S.cards[i]]||0});return sel[0]!=null?s+(MULT[S.cur]-1)*(VALUES[S.cards[sel[0]]]||0):s}
 function cost(h){const i=S.hands.indexOf(h);return (h.drew?DRAW_COST[i]:0)+(h.swapped?SWAP_COST[i]:0)}
 function totalPts(){return S.hands.filter(h=>h.done).reduce((a,h)=>a+h.net,0)}
 
@@ -545,19 +556,19 @@ function render(deal){
   cards.forEach((c,i)=>{const el=cardEl(c,{down:fly,cls:((h.done?(h.used||[]).includes(i):sel.includes(i))?'used':'')+(mix?' dealt':'')});
     if(fly)el.dataset.up=1;if(mix)el.style.animationDelay=(280+i*45)+'ms';el.setAttribute('role','button');el.setAttribute('aria-label',`${c}, ${VALUES[c]} points`);el.onclick=()=>{if(!dragJust())tapCard(i)};dragify(el,'hand',i);(HOLDEM()&&i<B?br:hr).appendChild(el)});
   // word slots: exactly the length this hand needs
-  const wr=$('wordRow');wr.innerHTML='';const w=h.done?(h.word||''):word();
+  const wr=$('wordRow');wr.innerHTML='';const w=h.done?(h.word||''):word(),slotL=i=>h.done?w[i]:(sel[i]!=null?S.cards[sel[i]]:null);
   if(h.done&&h.bust){const s=document.createElement('div');s.className='bust';s.textContent=h.fold?'FOLD':'BUST';wr.appendChild(s)}
-  else for(let i=0;i<len;i++){let el;if(i<w.length){el=cardEl(w[i]);if(!h.done){el.onclick=()=>{if(dragJust())return;sel.splice(i,1);sfx('take');render()};dragify(el,'word',i)}}else{el=document.createElement('div');el.className='slot'}
+  else for(let i=0;i<len;i++){let el;const L=slotL(i);if(L){el=cardEl(L);if(!h.done){el.onclick=()=>{if(dragJust())return;sel[i]=null;trimSel();sfx('take');render()};dragify(el,'word',i)}}else{el=document.createElement('div');el.className='slot';el.onclick=()=>{}}
     if(i===0&&MULT[S.cur]>1){el.classList.add('mx');el.dataset.m='×'+MULT[S.cur]}wr.appendChild(el)}
   // one quiet line: points so far and how many words are possible
   const n=countWords(S.cards,len),poss=n?`${n} word${n>1?'s':''} possible`:'only rare words here';
   if(h.done)$('preview').innerHTML=h.bust?(h.fold?'You folded':'You busted'):`<b>${h.score}</b> pts${cost(h)?` − ${cost(h)} = <b>${h.net}</b>`:''}`;
   else if(swapMode)$('preview').textContent='Tap a card to swap it out';
-  else{const s=score(w,S.cur),c=cost(h);$('preview').innerHTML=`<b>${s-c}</b> pts · ${poss}`}
+  else{const s=previewScore(),c=cost(h);$('preview').innerHTML=`<b>${s-c}</b> pts · ${poss}`}
   // buttons
   $('drawBtn').querySelector('small').textContent='−'+DRAW_COST[S.cur];$('swapBtn').querySelector('small').textContent='−'+SWAP_COST[S.cur];
   $('drawBtn').disabled=h.done||h.drew||busy;$('swapBtn').disabled=h.done||h.swapped||busy;$('swapBtn').classList.toggle('on',swapMode);
-  $('mixBtn').disabled=h.done||busy;$('clearBtn').disabled=h.done||busy||!sel.length;$('foldBtn').disabled=h.done||busy;
+  $('mixBtn').disabled=h.done||busy;$('clearBtn').disabled=h.done||busy||!placed();$('foldBtn').disabled=h.done||busy;
   const g=$('goBtn');
   if(!h.done){g.textContent=w.length<len?`Play word (${w.length}/${len})`:'Play word';g.disabled=busy||w.length!==len}
   else if(S.hands.every(x=>x.done)){g.textContent='See today’s result';g.disabled=false}
@@ -567,49 +578,46 @@ function render(deal){
   if(!h.done&&!busy)checkStuck();
 }
 /* ---------- Dragging cards ----------
-   Word card: drag left or right to move it, or off the word to take it back.
-   Hand card: drag onto the word to put it at that spot (onto a card to replace it when the word is full).
-   A press that doesn't move is still a tap. */
+   Every word slot is a spot you can drop on. Drop a card on an empty slot to put it there (TH at the end, then build),
+   on a filled slot to swap the two, or off the word to take it back. A press that doesn't move is still a tap. */
 let dragT=0;const dragJust=()=>Date.now()-dragT<350;
-function dropAt(x,skip){const cs=[...$('wordRow').querySelectorAll('.card')];let t=0;cs.forEach((c,j)=>{if(j===skip)return;const r=c.getBoundingClientRect();if(r.left+r.width/2<x)t++});return t}
-/* The word card under the finger (its middle 70%), for swapping; -1 when you're between cards */
-function onCard(x,skip){const cs=[...$('wordRow').querySelectorAll('.card')];for(let j=0;j<cs.length;j++){if(j===skip)continue;const r=cs[j].getBoundingClientRect();if(Math.abs(x-(r.left+r.width/2))<r.width*.35)return j}return -1}
+/* The slot nearest the finger, using where the slots sat when the drag began (the dragged card itself moves) */
+function slotAt(x,mids){let best=-1,bd=1e9;mids.forEach((m,j)=>{const d=Math.abs(m-x);if(d<bd){bd=d;best=j}});return best}
 function overWord(x,y){const r=$('wordRow').getBoundingClientRect(),pad=r.height*.6;return y>r.top-pad&&y<r.bottom+pad&&x>r.left-30&&x<r.right+30}
 function dragify(el,kind,i){
   el.addEventListener('pointerdown',e=>{if(H().done||busy||swapMode||e.button>0)return;const sx=e.clientX,sy=e.clientY;let on=false;
     try{el.setPointerCapture(e.pointerId)}catch(_){}
-    const wr=$('wordRow'),mv=ev=>{const dx=ev.clientX-sx,dy=ev.clientY-sy;if(!on&&Math.hypot(dx,dy)>8){on=true;el.classList.add('drag')}
+    const wr=$('wordRow'),mids=[...wr.children].map(c=>{const r=c.getBoundingClientRect();return r.left+r.width/2}),mv=ev=>{const dx=ev.clientX-sx,dy=ev.clientY-sy;if(!on&&Math.hypot(dx,dy)>8){on=true;el.classList.add('drag')}
       if(!on)return;ev.preventDefault();el.style.transform=`translate(${dx}px,${dy}px) scale(1.06)`;
-      const ov=overWord(ev.clientX,ev.clientY);wr.classList.toggle('over',ov);
-      const tg=ov&&(kind==='word'||sel.includes(i)||sel.length>=LEN())?onCard(ev.clientX,kind==='word'?i:sel.indexOf(i)):-1;
-      [...wr.querySelectorAll('.card')].forEach((c,j)=>c.classList.toggle('tgt',j===tg))},
+      const ov=overWord(ev.clientX,ev.clientY),tg=ov?slotAt(ev.clientX,mids):-1;wr.classList.toggle('over',ov);
+      [...wr.children].forEach((c,j)=>c.classList.toggle('tgt',j===tg&&c!==el))},
     end=ev=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',end);el.removeEventListener('pointercancel',end);wr.classList.remove('over');
-      if(!on)return;dragT=Date.now();const x=ev.clientX,y=ev.clientY,ov=ev.type==='pointerup'&&overWord(x,y);
-      /* Dropped on another card in the word: the two swap places. Between cards: it slides in there. */
-      if(kind==='word'){const j=ov?onCard(x,i):-1;if(j>=0)[sel[i],sel[j]]=[sel[j],sel[i]];else{const v=sel.splice(i,1)[0];if(ov)sel.splice(Math.min(dropAt(x,i),sel.length),0,v)}}
-      else if(ov){const k=sel.indexOf(i),j=k>=0?onCard(x,k):-1;if(j>=0)[sel[k],sel[j]]=[sel[j],sel[k]];else if(k>=0){sel.splice(k,1);sel.splice(Math.min(dropAt(x,k),sel.length),0,i)}
-        else if(sel.length<LEN())sel.splice(Math.min(dropAt(x,-1),sel.length),0,i);
-        else{const cs=[...wr.querySelectorAll('.card')];let best=0,bd=1e9;cs.forEach((c,j)=>{const r=c.getBoundingClientRect(),d=Math.abs(r.left+r.width/2-x);if(d<bd){bd=d;best=j}});sel[best]=i}}
-      sfx(ov?'place':kind==='word'?'take':'flip');render()};
+      if(!on)return;dragT=Date.now();const x=ev.clientX,y=ev.clientY,ov=ev.type==='pointerup'&&overWord(x,y),j=ov?slotAt(x,mids):-1;
+      const from=kind==='word'?i:sel.indexOf(i);   // the slot this card is in now, or -1 from your hand
+      if(j<0){if(from>=0)sel[from]=null}
+      else if(from>=0){[sel[from],sel[j]]=[sel[j]??null,sel[from]]}
+      else sel[j]=i;                               // from your hand: fills the slot, or replaces the card there
+      for(let k=0;k<LEN();k++)if(sel[k]===undefined)sel[k]=null;trimSel();
+      sfx(j>=0?'place':from>=0?'take':'flip');render()};
     el.addEventListener('pointermove',mv);el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end)})}
 /* ---------- Actions ---------- */
 function tapCard(i){const h=H();if(h.done||busy)return;
   if(swapMode){if(sel.includes(i))return;S.cards[i]=DAY.swapCard[S.cur];h.swapped=true;sfx('flip');swapMode=false;save();render();
     const el=$('handRow').children[i];el.classList.add('down');requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.remove('down')));toast(`Swapped for ${S.cards[i]} (−${SWAP_COST[S.cur]})`);return}
-  const k=sel.indexOf(i);if(k>=0){sel.splice(k,1);sfx('take');render();return}
-  if(sel.length>=LEN()){sfx('nope');toast(`This hand is a ${LEN()}-letter word`);return}
-  sel.push(i);sfx('place');render()}
-function typeLetter(ch){const h=H();if(h.done||busy||sel.length>=LEN())return;const i=S.cards.findIndex((c,j)=>c===ch&&!sel.includes(j));if(i>=0){sel.push(i);sfx('place');render()}}
+  const k=sel.indexOf(i);if(k>=0){sel[k]=null;trimSel();sfx('take');render();return}
+  const j=freeSlot();if(j<0){sfx('nope');toast(`This hand is a ${LEN()}-letter word`);return}
+  sel[j]=i;sfx('place');render()}
+function typeLetter(ch){const h=H(),j=freeSlot();if(h.done||busy||j<0)return;const i=S.cards.findIndex((c,k)=>c===ch&&!sel.includes(k));if(i>=0){sel[j]=i;sfx('place');render()}}
 $('drawBtn').onclick=()=>{const h=H();if(h.done||h.drew||busy)return;swapMode=false;sfx('deal');S.cards.push(DAY.drawCard[S.cur]);h.drew=true;save();render();
   $('handRow').lastChild.classList.add('dealt');toast(`Drew ${S.cards[S.cards.length-1]} (−${DRAW_COST[S.cur]})`)};
-$('clearBtn').onclick=()=>{if(sel.length)sfx('take');sel=[];swapMode=false;render()};
+$('clearBtn').onclick=()=>{if(placed())sfx('take');sel=[];swapMode=false;render()};
 $('swapBtn').onclick=()=>{const h=H();if(h.done||h.swapped||busy)return;swapMode=!swapMode;render()};
 /* Shuffle: your cards, or in Hold'em the shared board (your 2 cards stay put) */
 $('mixBtn').onclick=()=>{const h=H();if(h.done)return;const idx=S.cards.map((_,i)=>i);
   const n=idx.length-HOLE,same=()=>idx.every((o,k)=>S.cards[o]===S.cards[k]);
   /* always show a new order, unless every card is the same letter */
   for(let t=0;t<20;t++){for(let i=n-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]]}if(!same())break}
-  sfx('shuffle');S.cards=idx.map(i=>S.cards[i]);const remap=Object.fromEntries(idx.map((old,nw)=>[old,nw]));sel=sel.map(i=>remap[i]);S.fresh=null;save();render(true);if(HOLDEM())[...$('handRow').children].forEach(el=>el.classList.remove('dealt'))};
+  sfx('shuffle');S.cards=idx.map(i=>S.cards[i]);const remap=Object.fromEntries(idx.map((old,nw)=>[old,nw]));sel=sel.map(i=>i==null?null:remap[i]);S.fresh=null;save();render(true);if(HOLDEM())[...$('handRow').children].forEach(el=>el.classList.remove('dealt'))};
 /* Fold asks first in a pop-up, like the hint pop-up in The Daily 15 */
 $('foldBtn').onclick=()=>{const h=H();if(h.done||busy)return;
   const w=wins(),left=S.hands.filter(x=>!x.done).length-1,n=countWords(S.cards,LEN());
@@ -805,7 +813,7 @@ setInterval(()=>{if(!$('done').hidden)$('cd').textContent=nextDeal();if(!PAST&&t
 /* keyboard */
 document.addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey)return;if(document.querySelector('.sheet:not([hidden])'))return;
   if(e.key==='Enter'){$('goBtn').click();e.preventDefault()}
-  else if(e.key==='Backspace'){if(sel.length&&!H().done){sel.pop();sfx('take');render()}e.preventDefault()}
+  else if(e.key==='Backspace'){if(placed()&&!H().done){trimSel();sel.pop();trimSel();sfx('take');render()}e.preventDefault()}
   else if(/^[a-z]$/i.test(e.key))typeLetter(e.key.toUpperCase())});
 /* no zoom */
 document.addEventListener('gesturestart',e=>e.preventDefault());
