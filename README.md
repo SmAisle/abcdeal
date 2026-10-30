@@ -92,3 +92,6 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 - Play time: counted quietly while you're at the table on an unfinished hand (paused on other pages, between hands, and when the app is in the background). Never shown during play.
 - The results card says "4 of 5 hands won in 3:42", and the share text adds "⏱ 3:42".
 - Saved in history as t; sent in the check-in as a t map per day. The owner page's Last 14 days table has an Avg time column.
+
+## v27
+- Drag a card in your word onto another card and the two swap places (the card you're over lights up yellow). Drop it between two cards and it slides in there. Same for a hand card that's already in your word.
