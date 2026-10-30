@@ -27,3 +27,6 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 - Every hand has at least 2 common words for you (hand 5: 2 when it can, at least 1).
 - Difficulty 1-5 (Easy, Gentle, Medium, Tough, Hard) like The Daily 15: a careful robot plays each deal ahead of time. Shown on the results card.
 - Check-in adds w, p and d maps (hands won, points, difficulty per finished day). The owner page's Last 14 days table shows Difficulty, Avg won, Avg pts, Best pts and 5/5 like The Daily 15.
+
+## v13
+- Fold opens a pop-up first (like the hint pop-up in The Daily 15): how many words are in your hand, hands won so far, and the star table.
