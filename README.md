@@ -34,3 +34,7 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 ## v14
 - After you fold, the result shows a word you could have played and its points.
 - ABC-Deal-invite.pdf: one-page friends and family invite with a QR code to smaisle.github.io/abcdeal.
+
+## v15
+- Play again (for fun) on the results card, like The Daily 15: replays the same deal, never saved, and does not count toward stats or streak.
+- 💯 on the results card and in the share text when you score every possible point.
