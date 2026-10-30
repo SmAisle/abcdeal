@@ -160,3 +160,6 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 
 ## v45
 - The share's points line is clearer: "80 points (best possible: 81)", or "81 points, the most possible 💯".
+
+## v46
+- From Oct 31, 2026 (BUST_FROM) the dealer busts on about 1 day in 5, only in hand 2 or 3. Before that it was 3 days in 10, in hands 2 to 5. Today's and past deals are unchanged.

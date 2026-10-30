@@ -493,12 +493,14 @@ function freshDeck(r){const d=[];for(const k in COUNTS)for(let i=0;i<COUNTS[k];i
 
 /* A fresh deal every hand, the same for everyone that day. Each deal is checked before it is used:
    you have at least 4 common words in hands 1-4 and 2 in hand 5, your best word always beats the dealer's,
-   but the dealer's word beats at least half of your words (so you have choices, and the dealer wins often). About 3 days in 10 the dealer busts on one
-   hand (hands 2-5), meaning it has no word at all. */
+   but the dealer's word beats at least half of your words (so you have choices, and the dealer wins often). About 3 days in 10 the dealer busts on one hand (hands 2-5); from BUST_FROM, about 1 day in 5 (hands 2-3), meaning it has no word at all. */
 /* Your cards and the dealer's from a shuffled deck: n each, or in Hold'em a shared board of n-2 plus 2 each */
 function split(deck,n){if(!HOLE)return [deck.slice(0,n),deck.slice(n,2*n)];const b=n-HOLE,board=deck.slice(0,b);return [board.concat(deck.slice(b,b+HOLE)),board.concat(deck.slice(b+HOLE,b+2*HOLE))]}
 /* A moving bonus spreads scores out, so from MOVE_FROM the dealer may beat a little less of your hand (60%, not 50%): about the same difficulty as before */
-function dealDay(date){const share=date<MOVE_FROM?WIN_SHARE:0.6,hol=holiday(date);const bustHand=hashStr('bust|'+date)%10<3?1+hashStr('which|'+date)%4:-1;
+/* From BUST_FROM the dealer busts less often (about 1 day in 5) and only in hands 2 or 3, so the big hands are always a real fight */
+const BUST_FROM='2026-10-31';
+function dealDay(date){const share=date<MOVE_FROM?WIN_SHARE:0.6,hol=holiday(date);
+  const bustHand=date<BUST_FROM?(hashStr('bust|'+date)%10<3?1+hashStr('which|'+date)%4:-1):(hashStr('bust|'+date)%10<2?1+hashStr('which|'+date)%2:-1);
   const day={you:[],dealer:[],yourBest:[],dealerBest:[],drawCard:[],swapCard:[],bonus:bonusSlots(date),holiday:hol};
   for(let h=0;h<HANDS;h++){const tws=hol&&hol.words[h],b=day.bonus[h],r=rng(hashStr((HOLE?'abcholdem|':'abcdeal3|')+date+'|'+h)),n=SIZES[h];let pick=null;
     for(let tries=0;tries<4000&&!pick;tries++){const tw=tws&&tws[Math.floor(tries/800)%tws.length];const deck=freshDeck(r);let [you,dealer]=split(deck,n);
@@ -527,7 +529,7 @@ function difficulty(day){const e=expectedWins(day);return e>=4?1:e>=3.5?2:e>=3?3
 function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/864e5)+1}
 //module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,bonusSlots,holiday,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
 
-const VERSION='45',VDATE='Oct 30',GAME='abc';
+const VERSION='46',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
