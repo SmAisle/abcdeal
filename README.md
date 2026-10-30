@@ -154,3 +154,6 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 
 ## v43
 - ☰ toggles the menu: it stays on top of the open menu, and a second tap goes back to what was open before. Tapping the dimmed area outside the menu also closes it, like The Daily 15 v1.78.
+
+## v44
+- The bonus spot stands out more (option C): a red "×N BONUS" tag, a red-outlined spot, and a red outline on the card placed there.
