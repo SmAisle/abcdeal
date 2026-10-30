@@ -430,7 +430,7 @@ const LENGTHS=[3,4,5,6,7];
 const MULT=[1,2,3,4,5]; /* the bonus spot's letter counts this many times, by hand */
 /* The bonus spot moves around: from MOVE_FROM on, each hand puts it on a slot picked from the date (the same for everyone).
    Before that it was always the first letter, so past days score the way they did. */
-const MOVE_FROM='2026-10-31';
+const MOVE_FROM='2026-10-30';
 function bonusSlots(date){return LENGTHS.map((len,h)=>date<MOVE_FROM||h===0?0:hashStr('bonus|'+date+'|'+h)%len)}
 const SIZES=[5,6,7,8,9]; /* cards dealt (you and the dealer): one more each hand */
 const HANDS=LENGTHS.length;
@@ -502,7 +502,7 @@ function difficulty(day){const e=expectedWins(day);return e>=4?1:e>=3.5?2:e>=3?3
 function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/864e5)+1}
 //module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,bonusSlots,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
 
-const VERSION='39',VDATE='Oct 30',GAME='abc';
+const VERSION='40',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -582,7 +582,9 @@ let DATE=today(),DAY=null,S=null,sel=[],swapMode=false,busy=false,hintMode=false
 let PAST=null;
 function loadDay(past){PAST=past||null;DATE=PAST||today();DAY=dealDay(DATE);REPLAY=false;
   S=store.json(PAST?KEY('d_'+DATE):KEY('day8'),null);
-  if(!S||S.date!==DATE){S={date:DATE,cur:0,cards:[],hands:[]};refill()}
+  /* A game saved before the moving bonus came in (dv missing) on a moving-bonus day was dealt differently: start it fresh */
+  const stale=S&&S.date===DATE&&DATE>=MOVE_FROM&&S.dv!==2;if(stale){const k=KEY('diff'),m=store.json(k,{});delete m[DATE];store.put(k,m)}
+  if(!S||S.date!==DATE||stale){S={date:DATE,cur:0,cards:[],hands:[],dv:2};refill()}
   for(let h=0;h<HANDS;h++)if(!S.hands[h])S.hands[h]={drew:false,swapped:false,done:false};
   /* a banner from the other game or day must not stay up */
   sel=[];swapMode=false;hintMode=false;const bn=document.getElementById('banner');if(bn)bn.classList.remove('on');save()}
@@ -594,7 +596,7 @@ const mmss=t=>{t=Math.round(t||0);return t>=3600?`${Math.floor(t/3600)}:${String
 setInterval(()=>{if(!S||!S.hands.length||document.visibilityState!=='visible'||finished()||H().done||busy)return;
   if([...document.querySelectorAll('.sheet')].some(x=>!x.hidden))return;S.secs=(S.secs||0)+1;if(S.secs%5===0)save()},1000);
 function save(){if(!REPLAY)store.put(PAST?KEY('d_'+DATE):KEY('day8'),S)}
-function startReplay(){REPLAY=true;S={date:DATE,cur:0,cards:[],hands:[]};refill();for(let h=0;h<HANDS;h++)S.hands[h]={drew:false,swapped:false,done:false};
+function startReplay(){REPLAY=true;S={date:DATE,cur:0,cards:[],hands:[],dv:2};refill();for(let h=0;h<HANDS;h++)S.hands[h]={drew:false,swapped:false,done:false};
   sel=[];$('banner').classList.remove('on');dealWaiting=true;only('')}
 function refill(){S.cards=DAY.you[S.cur].slice()}
 function H(){return S.hands[S.cur]}

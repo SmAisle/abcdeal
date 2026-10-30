@@ -141,3 +141,6 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 
 ## v39
 - Fix: the result banner from one game (e.g. a hand 5 fold) stayed on screen after switching to the other game. loadDay now clears it.
+
+## v40
+- The moving bonus starts today (MOVE_FROM 2026-10-30). Any game for today saved by v39 or earlier is started fresh (S.dv), since some of today's hands are dealt differently now.
