@@ -129,3 +129,6 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 ## v36
 - Hint pop-up trimmed to one line ("Reveal one letter for 1 ⭐") and three buttons, with bigger text and a darker backdrop.
 - The hinted letter locks to its slot for the rest of the hand (yellow, with a 💡); Clear, taps and drags leave it in place.
+
+## v37
+- Back to 2 hints a day, each costing one star. Each hinted letter locks to its slot (h.locks).
