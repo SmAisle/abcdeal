@@ -95,3 +95,9 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 
 ## v27
 - Drag a card in your word onto another card and the two swap places (the card you're over lights up yellow). Drop it between two cards and it slides in there. Same for a hand card that's already in your word.
+
+## v28
+- Fill your word in any order. Every slot is a spot you can drop a card on: drag a card to an empty slot (say TH into the last two) and build from there. Drop on a filled slot to swap, or off the word to take it back. Tapping a card fills the first empty slot; tapping a card in the word takes it out and leaves the gap.
+- Points so far count the first-letter multiplier only once the first slot is filled.
+- Fixes swapping with the first card: the drop spot now comes from where the slots sat when the drag began.
+- Sounds: bells (soft glass) for place, take back, not a word, win, dealer bust, push, fold and day done, picked from the sound board. Dealer wins keeps the falling pair. Card sounds unchanged.
