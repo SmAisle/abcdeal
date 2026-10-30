@@ -388,6 +388,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
   <button class="go alt" id="mPast">Archive</button>
   <button class="go alt" id="mStats">Stats</button>
   <button class="go alt" id="mHelp">How to play</button>
+  <button class="go alt" id="mSound"></button>
   <button class="go alt" id="mTerms">Terms and privacy</button>
   <div class="sect">More from smAisle</div>
   <button class="go try more" id="mD15"></button>
@@ -484,7 +485,7 @@ function difficulty(day){const e=expectedWins(day);return e>=4?1:e>=3.5?2:e>=3?3
 function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/864e5)+1}
 //module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
 
-const VERSION='24',VDATE='Oct 30',GAME='abc';
+const VERSION='25',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -513,6 +514,28 @@ async function checkIn(kind){
     terms:T(store.get(TERMS_KEY,'').slice(0,10)),desk:{booleanValue:innerWidth>=820},t:I(Date.now()),o:M(u.o),h:M(u.h),w:M(u.w),p:M(u.p),d:M(u.d),x:M(u.x||{})}};
   try{await fetch(`https://firestore.googleapis.com/v1/projects/${FB_PROJ}/databases/(default)/documents/${GAME}_devices/${devId()}?key=${FB_KEY}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),keepalive:true})}catch(e){}
 }
+
+/* ---------- Sound, like The Daily 15: little synth tones, plus a soft noise "snap" for cards. On/off in the menu. ---------- */
+let ac=null;const soundOn=()=>store.get('abc-sound','on')!=='off';
+// iPhones only let sound start inside a tap, so wake the audio on every tap until it's running.
+function unlockAudio(){if(!soundOn()||(ac&&ac.state==='running'))return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume();const b=ac.createBufferSource();b.buffer=ac.createBuffer(1,1,22050);b.connect(ac.destination);b.start(0)}catch(e){}}
+['pointerdown','touchend','click','keydown'].forEach(ev=>document.addEventListener(ev,unlockAudio,true));
+function actx(){if(!soundOn())return null;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state!=='running')ac.resume();return ac}catch(e){return null}}
+function tone(f,dur=.08,type='sine',vol=.1,delay=0){const a=actx();if(!a)return;try{const o=a.createOscillator(),g=a.createGain(),t=a.currentTime+delay;o.type=type;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g).connect(a.destination);o.start(t);o.stop(t+dur+.02)}catch(e){}}
+function snap(dur=.04,freq=2600,vol=.16,delay=0){const a=actx();if(!a)return;try{const n=Math.ceil(a.sampleRate*dur),b=a.createBuffer(1,n,a.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);
+  const src=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain(),t=a.currentTime+delay;src.buffer=b;f.type='bandpass';f.frequency.value=freq;f.Q.value=.8;g.gain.value=vol;src.connect(f).connect(g).connect(a.destination);src.start(t)}catch(e){}}
+const SFX={
+  deal:()=>snap(.05,2200,.2),flip:()=>snap(.035,3800,.14),
+  place:()=>{snap(.03,3000,.1);tone(660,.05,'triangle',.05)},take:()=>{snap(.03,2400,.08);tone(440,.05,'triangle',.045)},
+  shuffle:()=>{for(let i=0;i<7;i++)snap(.03,2400+i*150,.12,i*.045)},
+  nope:()=>{tone(196,.09,'square',.035);tone(185,.12,'square',.035,.09)},
+  win:()=>[523,659,784].forEach((f,i)=>tone(f,.18,'triangle',.09,i*.09)),
+  bust:()=>[523,659,784,1047].forEach((f,i)=>tone(f,.18,'triangle',.09,i*.08)),
+  lose:()=>[392,311].forEach((f,i)=>tone(f,.24,'triangle',.08,i*.16)),
+  push:()=>[523,523].forEach((f,i)=>tone(f,.12,'triangle',.07,i*.13)),
+  fold:()=>tone(165,.3,'sine',.09),
+  done:()=>[523,659,784,1047,784,1047].forEach((f,i)=>tone(f,i>3?.3:.16,'triangle',.08,i*.1))};
+function sfx(k){if(soundOn()&&SFX[k])SFX[k]()}
 
 /* ---------- Helpers ---------- */
 const $=id=>document.getElementById(id);
@@ -593,7 +616,7 @@ function render(deal){
   // word slots: exactly the length this hand needs
   const wr=$('wordRow');wr.innerHTML='';const w=h.done?(h.word||''):word();
   if(h.done&&h.bust){const s=document.createElement('div');s.className='bust';s.textContent=h.fold?'FOLD':'BUST';wr.appendChild(s)}
-  else for(let i=0;i<len;i++){let el;if(i<w.length){el=cardEl(w[i]);if(!h.done){el.onclick=()=>{if(dragJust())return;sel.splice(i,1);render()};dragify(el,'word',i)}}else{el=document.createElement('div');el.className='slot'}
+  else for(let i=0;i<len;i++){let el;if(i<w.length){el=cardEl(w[i]);if(!h.done){el.onclick=()=>{if(dragJust())return;sel.splice(i,1);sfx('take');render()};dragify(el,'word',i)}}else{el=document.createElement('div');el.className='slot'}
     if(i===0&&MULT[S.cur]>1){el.classList.add('mx');el.dataset.m='×'+MULT[S.cur]}wr.appendChild(el)}
   // one quiet line: points so far and how many words are possible
   const n=countWords(S.cards,len),poss=n?`${n} word${n>1?'s':''} possible`:'only rare words here';
@@ -631,26 +654,26 @@ function dragify(el,kind,i){
       else if(ov){const k=sel.indexOf(i);if(k>=0){sel.splice(k,1);sel.splice(Math.min(dropAt(x,k),sel.length),0,i)}
         else if(sel.length<LEN())sel.splice(Math.min(dropAt(x,-1),sel.length),0,i);
         else{const cs=[...wr.querySelectorAll('.card')];let best=0,bd=1e9;cs.forEach((c,j)=>{const r=c.getBoundingClientRect(),d=Math.abs(r.left+r.width/2-x);if(d<bd){bd=d;best=j}});sel[best]=i}}
-      render()};
+      sfx(ov?'place':kind==='word'?'take':'flip');render()};
     el.addEventListener('pointermove',mv);el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end)})}
 /* ---------- Actions ---------- */
 function tapCard(i){const h=H();if(h.done||busy)return;
-  if(swapMode){if(sel.includes(i))return;S.cards[i]=DAY.swapCard[S.cur];h.swapped=true;swapMode=false;save();render();
+  if(swapMode){if(sel.includes(i))return;S.cards[i]=DAY.swapCard[S.cur];h.swapped=true;sfx('flip');swapMode=false;save();render();
     const el=$('handRow').children[i];el.classList.add('down');requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.remove('down')));toast(`Swapped for ${S.cards[i]} (−${SWAP_COST[S.cur]})`);return}
-  const k=sel.indexOf(i);if(k>=0){sel.splice(k,1);render();return}
-  if(sel.length>=LEN()){toast(`This hand is a ${LEN()}-letter word`);return}
-  sel.push(i);render()}
-function typeLetter(ch){const h=H();if(h.done||busy||sel.length>=LEN())return;const i=S.cards.findIndex((c,j)=>c===ch&&!sel.includes(j));if(i>=0){sel.push(i);render()}}
-$('drawBtn').onclick=()=>{const h=H();if(h.done||h.drew||busy)return;swapMode=false;S.cards.push(DAY.drawCard[S.cur]);h.drew=true;save();render();
+  const k=sel.indexOf(i);if(k>=0){sel.splice(k,1);sfx('take');render();return}
+  if(sel.length>=LEN()){sfx('nope');toast(`This hand is a ${LEN()}-letter word`);return}
+  sel.push(i);sfx('place');render()}
+function typeLetter(ch){const h=H();if(h.done||busy||sel.length>=LEN())return;const i=S.cards.findIndex((c,j)=>c===ch&&!sel.includes(j));if(i>=0){sel.push(i);sfx('place');render()}}
+$('drawBtn').onclick=()=>{const h=H();if(h.done||h.drew||busy)return;swapMode=false;sfx('deal');S.cards.push(DAY.drawCard[S.cur]);h.drew=true;save();render();
   $('handRow').lastChild.classList.add('dealt');toast(`Drew ${S.cards[S.cards.length-1]} (−${DRAW_COST[S.cur]})`)};
-$('clearBtn').onclick=()=>{sel=[];swapMode=false;render()};
+$('clearBtn').onclick=()=>{if(sel.length)sfx('take');sel=[];swapMode=false;render()};
 $('swapBtn').onclick=()=>{const h=H();if(h.done||h.swapped||busy)return;swapMode=!swapMode;render()};
 /* Shuffle: your cards, or in Hold'em the shared board (your 2 cards stay put) */
 $('mixBtn').onclick=()=>{const h=H();if(h.done)return;const idx=S.cards.map((_,i)=>i);
   const n=idx.length-HOLE,same=()=>idx.every((o,k)=>S.cards[o]===S.cards[k]);
   /* always show a new order, unless every card is the same letter */
   for(let t=0;t<20;t++){for(let i=n-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]]}if(!same())break}
-  S.cards=idx.map(i=>S.cards[i]);const remap=Object.fromEntries(idx.map((old,nw)=>[old,nw]));sel=sel.map(i=>remap[i]);S.fresh=null;save();render(true);if(HOLDEM())[...$('handRow').children].forEach(el=>el.classList.remove('dealt'))};
+  sfx('shuffle');S.cards=idx.map(i=>S.cards[i]);const remap=Object.fromEntries(idx.map((old,nw)=>[old,nw]));sel=sel.map(i=>remap[i]);S.fresh=null;save();render(true);if(HOLDEM())[...$('handRow').children].forEach(el=>el.classList.remove('dealt'))};
 /* Fold asks first in a pop-up, like the hint pop-up in The Daily 15 */
 $('foldBtn').onclick=()=>{const h=H();if(h.done||busy)return;
   const w=wins(),left=S.hands.filter(x=>!x.done).length-1,n=countWords(S.cards,LEN());
@@ -661,12 +684,12 @@ $('foldBtn').onclick=()=>{const h=H();if(h.done||busy)return;
 $('foldYes').onclick=()=>{only('');resolve(null,true)};
 $('foldNo').onclick=()=>only('');
 $('goBtn').onclick=()=>{const h=H();if(busy)return;
-  if(h.done){if(S.hands.every(x=>x.done)){showDone();return}
+  if(h.done){if(S.hands.every(x=>x.done)){sfx('done');showDone();return}
     S.cur=S.hands.findIndex(x=>!x.done);refill();sel=[];$('banner').classList.remove('on');save();dealHand();S.fresh=null;return}
   play()};
 function play(){const w=word();if(w.length!==LEN())return;
-  if(!isWord(w)){toast('Not in word list');$('wordRow').classList.remove('shake');void $('wordRow').offsetWidth;$('wordRow').classList.add('shake');return}
-  if(HOLDEM()&&!sel.some(i=>i>=S.cards.length-HOLE)){toast('Use at least one of your 2 cards');$('wordRow').classList.remove('shake');void $('wordRow').offsetWidth;$('wordRow').classList.add('shake');return}
+  if(!isWord(w)){sfx('nope');toast('Not in word list');$('wordRow').classList.remove('shake');void $('wordRow').offsetWidth;$('wordRow').classList.add('shake');return}
+  if(HOLDEM()&&!sel.some(i=>i>=S.cards.length-HOLE)){sfx('nope');toast('Use at least one of your 2 cards');$('wordRow').classList.remove('shake');void $('wordRow').offsetWidth;$('wordRow').classList.add('shake');return}
   resolve(w)}
 /* w is your word, or null for a bust (no word possible) or a fold (gave up). Either loses the hand and throws away your cards. */
 function resolve(w,fold){const h=H();h.fold=!!fold;busy=true;swapMode=false;const d=DAY.dealerBest[S.cur];
@@ -674,8 +697,8 @@ function resolve(w,fold){const h=H();h.fold=!!fold;busy=true;swapMode=false;cons
   h.score=w?score(w,S.cur):0;h.net=w?Math.max(0,h.score-cost(h)):0;h.dealerWord=d.word||'BUST';h.dealerScore=d.score;
   h.result=!w?'L':!d.word?'W':h.net>d.score?'W':h.net<d.score?'L':'P';
   S.cards=S.cards.filter((_,i)=>!h.used.includes(i));
-  const cards=[...$('dealerRow').children];cards.forEach((el,i)=>setTimeout(()=>el.classList.remove('down'),120+i*110));
-  setTimeout(()=>{h.done=true;sel=[];busy=false;save();if(!REPLAY)recordDay();render();showBanner(h);if(!REPLAY)checkIn('hand')},120+cards.length*110+350)}
+  const cards=[...$('dealerRow').children];if(fold)sfx('fold');cards.forEach((el,i)=>setTimeout(()=>{if(el.classList.contains('down'))sfx('flip');el.classList.remove('down')},120+i*110));
+  setTimeout(()=>{h.done=true;sel=[];busy=false;save();if(!REPLAY)recordDay();render();showBanner(h);if(!fold)sfx(h.result==='W'?(d.word?'win':'bust'):h.result==='P'?'push':'lose');if(!REPLAY)checkIn('hand')},120+cards.length*110+350)}
 
 function showBanner(h){const b=$('banner'),d=DAY.dealerBest[S.cur];
   const title=h.bust?(h.fold?'Fold':'Bust!'):!d.word?'Dealer busts!':{W:'You win!',L:'Dealer wins',P:'Push'}[h.result];
@@ -707,6 +730,7 @@ function dealHand(){const covered=[...document.querySelectorAll('.sheet')].some(
   t.style.pointerEvents='none';
   order.forEach((el,k)=>{const r=el.getBoundingClientRect(),dx=ox-(r.left+r.width/2),dy=oy-(r.top+r.height/2);
     el.animate([{transform:`translate(${dx}px,${dy}px) rotate(${(k*7)%15-7}deg)`},{transform:'none'}],{duration:dur,delay:at[k],easing:'cubic-bezier(.2,.8,.3,1)',fill:'backwards'});
+    setTimeout(()=>sfx('deal'),at[k]+dur*.6);
     if(el.dataset.up)setTimeout(()=>el.classList.remove('down'),at[k]+dur-60)});
   setTimeout(()=>{t.style.pointerEvents='';render()},tt+dur+400)}
 function goBack(){if(backTo==='cover')cover();else only('')}
@@ -834,6 +858,8 @@ $('menuBtn').onclick=()=>{backTo='game';only('menu')};
 $('mBack').onclick=()=>only('');
 $('mCover').onclick=cover;
 $('mStats').onclick=()=>{backTo='game';showStats()};
+const sndLabel=()=>{$('mSound').textContent=(soundOn()?'🔊 Sound: On':'🔇 Sound: Off')};sndLabel();
+$('mSound').onclick=()=>{store.set('abc-sound',soundOn()?'off':'on');sndLabel();sfx('place')};
 $('mHelp').onclick=()=>{backTo='game';helpPage(1);only('help')};
 $('mTerms').onclick=()=>{backTo='game';only('terms')};
 $('termsGo').onclick=()=>{const first=!agreed();if(first){store.set(TERMS_KEY,new Date().toISOString().slice(0,10));checkIn('open');cover()}else goBack()};
@@ -843,7 +869,7 @@ setInterval(()=>{if(!$('done').hidden)$('cd').textContent=nextDeal();if(!PAST&&t
 /* keyboard */
 document.addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey)return;if(document.querySelector('.sheet:not([hidden])'))return;
   if(e.key==='Enter'){$('goBtn').click();e.preventDefault()}
-  else if(e.key==='Backspace'){if(sel.length&&!H().done){sel.pop();render()}e.preventDefault()}
+  else if(e.key==='Backspace'){if(sel.length&&!H().done){sel.pop();sfx('take');render()}e.preventDefault()}
   else if(/^[a-z]$/i.test(e.key))typeLetter(e.key.toUpperCase())});
 /* no zoom */
 document.addEventListener('gesturestart',e=>e.preventDefault());

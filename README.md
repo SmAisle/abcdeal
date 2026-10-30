@@ -83,3 +83,7 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
   - Drag a card from your hand (or the board) onto your word to put it at that spot. When the word is full, dropping it on a card replaces that card.
   - Drag a card off your word to take it back. A plain tap still takes it back too.
 - How to Play mentions dragging.
+
+## v25
+- Sound, like The Daily 15: soft card snaps when cards are dealt, flipped, placed or taken back; a riffle for Shuffle; a buzz for a word that isn't allowed; chimes for a win, a dealer bust and a push, a falling pair of notes for a loss, and a short fanfare when you finish the day.
+- Sound: On/Off in the menu (saved as abc-sound). On by default.
