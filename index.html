@@ -530,7 +530,7 @@ function difficulty(day){const e=expectedWins(day);return e>=4?1:e>=3.5?2:e>=3?3
 function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/864e5)+1}
 //module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,bonusSlots,holiday,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
 
-const VERSION='47',VDATE='Oct 30',GAME='abc';
+const VERSION='48',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -589,7 +589,22 @@ function sfx(k){if(soundOn()&&SFX[k])SFX[k]()}
 
 /* ---------- Helpers ---------- */
 const $=id=>document.getElementById(id);
-function today(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+/* Clock check: if the phone's clock is off by 10+ minutes, use the website's clock (its Date header) instead.
+   Same-origin only (GitHub Pages); offline, in the Claude copy or on failure we use the phone's clock as before. */
+let CLOCK_SKEW=0;
+const now=()=>new Date(Date.now()+CLOCK_SKEW);
+async function checkClock(){
+  if(!/^https?:/.test(location.protocol))return false;
+  try{const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),3000),t0=Date.now();
+    const r=await fetch(location.href.split('#')[0],{method:'HEAD',cache:'no-store',signal:ctl.signal});clearTimeout(tm);
+    const h=r.headers.get('date');if(!h)return false;const skew=Date.parse(h)+(Date.now()-t0)/2-Date.now();
+    if(!isFinite(skew)||Math.abs(skew)<10*60e3)return false;
+    /* switching the day under a game already in progress would lose it, so then it waits for the next open */
+    const old=CLOCK_SKEW;CLOCK_SKEW=skew;const t=today();
+    if(!PAST&&t!==DATE&&S&&(S.hands.some(x=>x.done)||placed())){CLOCK_SKEW=old;return false}
+    if(t!==DATE&&!PAST)setTimeout(()=>toast(`Your phone’s date is off, so this is today’s real deal (No. ${dayNumber(today())})`,4200),400);
+    return true}catch(e){return false}}
+function today(){const d=now();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function niceDate(s){return new Date(s+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})}
 function toast(msg,ms=1400){const t=$('toast');t.textContent=msg;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),ms)}
 function cardEl(letter,{down=false,cls=''}={}){const b=document.createElement('div');b.className='card'+(down?' down':'')+(cls?' '+cls:'');
@@ -840,7 +855,7 @@ function dealHand(){const covered=[...document.querySelectorAll('.sheet')].some(
 function goBack(){if(backTo==='cover')cover();else only('')}
 function finished(){return S.hands.every(x=>x.done)}
 function wins(){return S.hands.filter(x=>x.result==='W').length}
-function nextDeal(){const n=new Date();const m=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1);const s=Math.max(0,Math.floor((m-n)/1000));
+function nextDeal(){const n=now();const m=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1);const s=Math.max(0,Math.floor((m-n)/1000));
   return [Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(x=>String(x).padStart(2,'0')).join(':')}
 function allStats(){const hist=store.json(KEY('hist'),{}),days=Object.entries(hist).filter(([k,d])=>(d.r||'').length>=HANDS);
   let stars=0,three=0,hands=0,won=0,bestDay=0;for(const [,d] of days){const st=starsFor(d.w,d.hint);stars+=st;if(st===3)three++;hands+=d.r.length;won+=d.w;bestDay=Math.max(bestDay,d.p||0)}
@@ -984,7 +999,7 @@ document.addEventListener('dblclick',e=>e.preventDefault());
 
 /* ---------- Start ---------- */
 $('ver').textContent=$('menuVer').textContent=`A, B, C, Deal · v${VERSION} · ${VDATE} · smAisle`;
-loadDay();render();
+loadDay();render();checkClock();
 addEventListener('resize',()=>{if(!busy)render()});
 if(!agreed())only('terms');else{checkIn('open');cover()}
 dealHand();
