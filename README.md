@@ -42,3 +42,6 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 ## v16
 - Hands 1-4 have at least 4 common words (hand 5: at least 2). The dealer's word beats at least half of your words, but your best word always wins. A robot now wins about 3.3 hands a day instead of 4.6.
 - Difficulty thresholds recalibrated: expected wins 4+ Easy, 3.5+ Gentle, 3+ Medium, 2.5+ Tough, less Hard.
+
+## v17
+- Intro and How to Play say the dealer gets the same cards for everyone too.
