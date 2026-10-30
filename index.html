@@ -491,7 +491,7 @@ function difficulty(day){const e=expectedWins(day);return e>=4?1:e>=3.5?2:e>=3?3
 function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/864e5)+1}
 //module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
 
-const VERSION='29',VDATE='Oct 30',GAME='abc';
+const VERSION='30',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -537,7 +537,7 @@ const bell=(f,d=0,v=.08,len=.9)=>{osc(f,len,'sine',v,d);osc(f*2.76,len*.5,'sine'
 const bells=(fs,gap)=>fs.forEach((f,i)=>bell(f,i*gap));
 const SFX={
   deal:()=>snap(.05,2200,.2),flip:()=>snap(.035,3800,.14),
-  place:()=>{snap(.03,3000,.08);bell(1319,0,.05,.35)},take:()=>{snap(.03,2400,.07);bell(988,0,.04,.3)},
+  place:()=>snap(.04,1800,.22),take:()=>{snap(.03,2400,.07);bell(988,0,.04,.3)},
   shuffle:()=>{for(let i=0;i<7;i++)snap(.03,2400+i*150,.12,i*.045)},
   nope:()=>{bell(330,0,.06,.4);bell(311,.14,.06,.5)},
   win:()=>bells([784,988,1175],.1),
@@ -785,7 +785,7 @@ function showStats(){const s=allStats(),hist=store.json(KEY('hist'),{}),dd=n=>n+
 /* Difficulty, shown the same way as The Daily 15 */
 function diffHTML(d){return `Difficulty<span class="dbox">${[1,2,3,4,5].map(k=>`<i${k<=d?' class="on"':''}></i>`).join('')}</span>${DIFFW[d]}`}
 function shareText(){const r=S.hands.map(x=>x.done?{W:'🟩',L:'🟥',P:'🟨'}[x.result]:'⬜').join('');const st=starsFor(wins());
-  return `${GNAME()} No. ${dayNumber(DATE)}${st?' '+starStr(st):''}\n${r} ${wins()}/${HANDS}${S.secs?' ⏱ '+mmss(S.secs):''}\n${totalPts()} of ${DAY.bestTotal} points${totalPts()>=DAY.bestTotal?' 💯':''}\nsmaisle.app`}
+  return `${GNAME()} No. ${dayNumber(DATE)}${st?' '+starStr(st):''}\n${r}\n${wins()}/${HANDS} hands won${S.secs?' · ⏱ '+mmss(S.secs):''}\n${totalPts()} of ${DAY.bestTotal} points${totalPts()>=DAY.bestTotal?' 💯':''}\nsmaisle.app`}
 function showDone(){const w=wins(),st=starsFor(w),s=allStats();
   $('doneTitle').textContent=w===5?'Perfect deal!':w>=4?'Hot table!':w>=3?'You beat the house':w===2?'Close one':'The house wins';
   $('doneBig').textContent=st?starStr(st):'No stars today';$('doneBig').style.fontSize=st?'':'18px';
