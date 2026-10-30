@@ -5,7 +5,7 @@ const LENGTHS=[3,4,5,6,7];
 const MULT=[1,2,3,4,5]; /* the bonus spot's letter counts this many times, by hand */
 /* The bonus spot moves around: from MOVE_FROM on, each hand puts it on a slot picked from the date (the same for everyone).
    Before that it was always the first letter, so past days score the way they did. */
-const MOVE_FROM='2026-10-31';
+const MOVE_FROM='2026-10-30';
 function bonusSlots(date){return LENGTHS.map((len,h)=>date<MOVE_FROM||h===0?0:hashStr('bonus|'+date+'|'+h)%len)}
 const SIZES=[5,6,7,8,9]; /* cards dealt (you and the dealer): one more each hand */
 const HANDS=LENGTHS.length;
