@@ -422,7 +422,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 <script>
 /*WORDS*/
 /*LOGIC*/
-const VERSION='41',VDATE='Oct 30',GAME='abc';
+const VERSION='42',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -581,7 +581,7 @@ function render(deal){
   // word slots: exactly the length this hand needs
   const wr=$('wordRow');wr.innerHTML='';const w=h.done?(h.word||''):word(),slotL=i=>h.done?w[i]:(sel[i]!=null?S.cards[sel[i]]:null);
   if(h.done&&h.bust){const s=document.createElement('div');s.className='bust';s.textContent=h.fold?'FOLD':'BUST';wr.appendChild(s)}
-  else for(let i=0;i<len;i++){let el;const L=slotL(i);if(L){el=cardEl(L);if(locked(i)){el.classList.add('lock');el.onclick=()=>{if(hintMode){hintMode=false;render()}toast('Your hint letter stays put')}}else if(!h.done){el.onclick=()=>{if(dragJust())return;if(hintMode)return revealAt(i);sel[i]=null;trimSel();sfx('take');render()};dragify(el,'word',i)}}else{el=document.createElement('div');el.className='slot';el.onclick=()=>{if(hintMode)revealAt(i)}}
+  else for(let i=0;i<len;i++){let el;const L=slotL(i);if(L){el=cardEl(L);if(locked(i)){el.classList.add('lock');el.onclick=()=>{if(hintMode){hintMode=false;render()}toast('Your hint letter stays put')}}else if(!h.done){el.onclick=()=>{if(dragJust())return;if(hintMode)return revealAt(i);if(placedAt.i===sel[i]&&Date.now()-placedAt.t<450)return;sel[i]=null;trimSel();sfx('take');render()};dragify(el,'word',i)}}else{el=document.createElement('div');el.className='slot';el.onclick=()=>{if(hintMode)revealAt(i)}}
     if(hintMode&&!h.done)el.classList.add('pick');
     if(i===BON()&&MULT[S.cur]>1){el.classList.add('mx');el.dataset.m='×'+MULT[S.cur]}wr.appendChild(el)}
   // one quiet line: points so far and how many words are possible
@@ -631,9 +631,11 @@ function dragify(el,kind,i){
 function tapCard(i){const h=H();if(h.done||busy)return;if(hintMode){hintMode=false;render();return}
   if(swapMode){if(sel.includes(i))return;S.cards[i]=DAY.swapCard[S.cur];h.swapped=true;sfx('flip');swapMode=false;save();render();
     const el=$('handRow').children[i];el.classList.add('down');requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.remove('down')));toast(`Swapped for ${S.cards[i]} (−${SWAP_COST[S.cur]})`);return}
-  const k=sel.indexOf(i);if(locked(k)){toast('Your hint letter stays put');return}if(k>=0){sel[k]=null;trimSel();sfx('take');render();return}
+  /* a quick second tap on the card you just placed is a double tap, not a take-back */
+  const k=sel.indexOf(i);if(locked(k)){toast('Your hint letter stays put');return}if(k>=0&&placedAt.i===i&&Date.now()-placedAt.t<450)return;if(k>=0){sel[k]=null;trimSel();sfx('take');render();return}
   const j=freeSlot();if(j<0){sfx('nope');toast(`This hand is a ${LEN()}-letter word`);return}
-  sel[j]=i;sfx('place');render()}
+  sel[j]=i;placedAt={i,t:Date.now()};sfx('place');render()}
+let placedAt={i:-1,t:0};
 function typeLetter(ch){const h=H(),j=freeSlot();if(h.done||busy||j<0)return;const i=S.cards.findIndex((c,k)=>c===ch&&!sel.includes(k));if(i>=0){sel[j]=i;sfx('place');render()}}
 $('drawBtn').onclick=()=>{const h=H();if(h.done||h.drew||busy)return;swapMode=false;sfx('deal');S.cards.push(DAY.drawCard[S.cur]);h.drew=true;save();render();
   $('handRow').lastChild.classList.add('dealt');toast(`Drew ${S.cards[S.cards.length-1]} (−${DRAW_COST[S.cur]})`)};
