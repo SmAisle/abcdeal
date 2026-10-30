@@ -157,3 +157,6 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 
 ## v44
 - The bonus spot stands out more (option C): a red "×N BONUS" tag, a red-outlined spot, and a red outline on the card placed there.
+
+## v45
+- The share's points line is clearer: "80 points (best possible: 81)", or "81 points, the most possible 💯".
