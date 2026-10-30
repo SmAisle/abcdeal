@@ -163,3 +163,6 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 
 ## v46
 - From Oct 31, 2026 (BUST_FROM) the dealer busts on about 1 day in 5, only in hand 2 or 3. Before that it was 3 days in 10, in hands 2 to 5. Today's and past deals are unchanged.
+
+## v47
+- New dealer-bust banner (option C): 💥, a red "Dealer busts!" title, the dealer's line reads "no word 0", and a note that the dealer couldn't spell N letters with its cards, so any word wins.
