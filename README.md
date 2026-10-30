@@ -51,3 +51,6 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 - Deal 'Em keeps its own day, results and streak (abch-day8, abch-hist). Check-ins count only the regular game.
 - Shuffle in Deal 'Em mixes the shared board and always shows a new order. Deal 'Em cards shrink to fit short screens so they never cover the buttons.
 - Deal numbers now start at No. 1 on Oct 29.
+
+## v19
+- Past deals for both games, like The Daily 15's past puzzles: every deal back to No. 1 with its difficulty and your result, from the front page or menu. Late plays count in stats (marked late) but not the streak. State per past day in abc-d_DATE / abch-d_DATE; difficulty cached in abc-diff / abch-diff.
