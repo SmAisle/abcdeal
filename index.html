@@ -5,152 +5,194 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
 <title>A, B, C, Deal</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="A daily word game. Spell a better word than the dealer.">
+<meta name="description" content="A daily word game played like blackjack with letter cards. Spell a better word than the dealer.">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ABC Deal">
 <meta name="theme-color" content="#f4efe1">
+<link rel="icon" href="icon-180.png">
+<link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&family=Libre+Baskerville:ital@0;1&family=Libre+Franklin:wght@500;600;700;800&display=swap">
 <style>
-/* Layout: one screen in The Daily 15's style. Masthead with double rules, the table between two ink rules
-   (dealer above, your word in the middle, your hand below), square ink buttons at the bottom. */
+/* Layout: one screen in The Daily 15's style. A top bar (deal number, points, menu), the hand tracker,
+   the table between two ink rules (dealer above, your word in the middle, your hand below), then the buttons.
+   Cover, intro, rules, stats and results are Daily 15 style cards. */
 :root{
-  --paper:#f4efe1; --ink:#1a1814; --muted:#5d584d; --faint:#c8c0ab; --card:#fffdf6; --red:#9c2a1f;
+  --paper:#f4efe1; --paper2:#ebe4d0; --ink:#1a1814; --ink2:#4a453b; --fade:#8c8574; --card:#fffdf6; --red:#b3261e; --hi:#ffe27a;
   --head:"Playfair Display",Georgia,"Times New Roman",serif;
   --body:"Libre Baskerville",Georgia,serif;
   --sans:"Libre Franklin","Helvetica Neue",Arial,sans-serif;
   color-scheme:light;
 }
-*{box-sizing:border-box}
+*,*::before,*::after{box-sizing:border-box}
 [hidden]{display:none!important}
-html,body{height:100%}
-html,body,button,.card{touch-action:manipulation}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;overflow:hidden;
-  background-image:linear-gradient(rgba(26,24,20,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(26,24,20,.035) 1px,transparent 1px);background-size:6px 6px}
+html,body{height:100%;margin:0;touch-action:manipulation}
+button,.card{touch-action:manipulation}
+body{background:var(--paper);background-image:radial-gradient(rgba(0,0,0,.035) 1px,transparent 1px);background-size:4px 4px;color:var(--ink);font-family:var(--body);overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 button{font-family:inherit;color:inherit;cursor:pointer}
 button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-#app{height:100%;display:flex;flex-direction:column;max-width:520px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#app{height:100%;display:flex;flex-direction:column;gap:6px;max-width:520px;margin:0 auto;padding:6px max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 12px) max(16px,env(safe-area-inset-left,0px))}
 
-/* Masthead */
-header{margin-top:12px;border-top:3px double var(--ink);border-bottom:3px double var(--ink);padding:8px 0 6px;text-align:center}
-h1{font-family:var(--head);font-weight:900;font-size:clamp(30px,10vw,40px);line-height:1;margin:0;letter-spacing:-.01em}
-.meta{display:flex;justify-content:space-between;font:800 .62rem var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+/* Top bar, like The Daily 15's game screen */
+.top{display:flex;align-items:center;gap:8px;border-bottom:3px double var(--ink);padding:2px 0 6px}
+#pno{flex:1;display:flex;flex-direction:column;line-height:1;min-width:0}
+#pno b{font-family:var(--head);font-weight:900;font-size:20px;white-space:nowrap}
+#pno small{font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);margin-top:3px}
+.box{display:flex;align-items:baseline;justify-content:center;gap:8px;border:2px solid var(--ink);padding:2px 12px;background:var(--card);min-width:84px}
+.box small{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.box b{font-family:var(--head);font-weight:900;font-size:20px;font-variant-numeric:tabular-nums}
+#menuBtn{flex:none;width:34px;height:30px;padding:0;line-height:1;border-radius:4px;background:transparent;border:1.5px solid var(--ink);font-size:18px}
 
 /* Hand tracker */
-#tracker{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0 8px}
-.pips{display:flex;gap:6px}
-.pip{width:26px;height:26px;border:1.5px solid var(--faint);display:grid;place-items:center;font:800 .72rem var(--sans);color:#9a917c;background:var(--card);font-variant-numeric:tabular-nums}
+#tracker{display:flex;justify-content:center;gap:8px}
+.pip{width:30px;height:30px;border:1.5px solid #cfc7b2;display:grid;place-items:center;font:800 13px var(--sans);color:var(--fade);background:var(--card);font-variant-numeric:tabular-nums}
 .pip.now{border:2px solid var(--ink);color:var(--ink)}
 .pip.W{background:var(--ink);border-color:var(--ink);color:var(--paper)}
 .pip.L{border-color:var(--red);color:var(--red)}
-.pip.P{border-color:var(--ink);color:var(--ink);background:repeating-linear-gradient(45deg,var(--card) 0 3px,#e8e0cb 3px 6px)}
-.total{font:800 .62rem var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:right}
-.total b{display:block;font:900 1.4rem var(--head);color:var(--ink);letter-spacing:0;font-variant-numeric:tabular-nums}
+.pip.P{border-color:var(--ink);color:var(--ink);background:var(--paper2)}
 
-/* Table */
-#table{flex:1;min-height:0;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);display:flex;flex-direction:column;justify-content:space-between;padding:12px 0;gap:10px;position:relative}
+/* Table: plain paper between two rules */
+#table{flex:1;min-height:0;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);background:var(--paper);display:flex;flex-direction:column;justify-content:space-between;padding:12px 0;gap:10px;position:relative}
 .seat{display:flex;flex-direction:column;align-items:center;gap:8px}
-.label{font:700 .66rem var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:flex;gap:8px;align-items:center}
+.label{font:700 11px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);display:flex;gap:8px;align-items:center}
 .label b{color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:.04em}
 .row{display:flex;gap:6px;justify-content:center;flex-wrap:nowrap;width:100%}
-#dealerRow{--w:44px}
+#dealerRow{--w:40px}
 #handRow{--w:52px}
 #wordRow{--w:46px;min-height:calc(var(--w)*1.4)}
 
-/* Cards */
+/* Cards: big letter, corner letter and points, like a deck of cards */
 .card{width:var(--w);height:calc(var(--w)*1.4);position:relative;perspective:600px;flex:none;border:0;padding:0;background:none}
 .card .in{position:absolute;inset:0;transition:transform .45s cubic-bezier(.3,.7,.3,1.1);transform-style:preserve-3d}
 .card.down .in{transform:rotateY(180deg)}
-.face,.backside{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
-.face{background:var(--card);border:1.5px solid var(--ink);color:var(--ink)}
+.face,.backside{position:absolute;inset:0;border-radius:3px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.face{background:var(--card);border:2px solid var(--ink);color:var(--ink)}
 .face .big{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--head);font-weight:900;font-size:calc(var(--w)*.64);line-height:1;padding-top:calc(var(--w)*.05)}
 .face .tl,.face .br{position:absolute;font-weight:800;font-size:calc(var(--w)*.2);line-height:1}
 .face .tl{top:calc(var(--w)*.08);left:calc(var(--w)*.09);font-family:var(--head)}
 .face .br{bottom:calc(var(--w)*.08);right:calc(var(--w)*.09);font-family:var(--sans);font-variant-numeric:tabular-nums}
-.backside{transform:rotateY(180deg);background:var(--ink);background-image:repeating-linear-gradient(45deg,rgba(244,239,225,.18) 0 1px,transparent 1px 5px)}
+.backside{transform:rotateY(180deg);background:var(--card);border:1.5px solid var(--fade);background-image:repeating-linear-gradient(45deg,rgba(26,24,20,.09) 0 1px,transparent 1px 6px)}
+.backside::after{content:"";position:absolute;inset:3px;border:1px solid rgba(26,24,20,.18)}
 #handRow .card{transition:transform .15s,opacity .15s}
 #handRow .card.used{opacity:.22;transform:translateY(4px)}
 #handRow .card:not(.used):active{transform:translateY(-3px)}
-#handRow.swapping .card:not(.used) .face{box-shadow:0 0 0 3px var(--ink);animation:wob .5s ease-in-out infinite alternate}
-@keyframes wob{to{transform:translateY(-3px)}}
+#handRow.swapping .card:not(.used) .face{box-shadow:0 0 0 3px var(--hi)}
 .card.dealt{animation:deal .35s cubic-bezier(.2,.8,.3,1.1) both}
 @keyframes deal{from{transform:translateY(-30px);opacity:0}}
 .bust{font-family:var(--head);font-weight:900;font-size:2rem;letter-spacing:.12em;color:var(--red);height:calc(var(--w)*1.4);display:grid;place-items:center}
 .mx{position:relative}
-.mx::after{content:attr(data-m);position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);font:800 .66rem/1 var(--sans);letter-spacing:.06em;padding:3px 6px;z-index:2;white-space:nowrap}
-.slot{width:var(--w);height:calc(var(--w)*1.4);border:1.5px dashed rgba(26,24,20,.35);flex:none}
-.slot.mx{border-style:solid;border-color:var(--ink);background:rgba(26,24,20,.05)}
+.mx::after{content:attr(data-m);position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--card);font:800 11px/1 var(--sans);letter-spacing:.06em;padding:3px 6px;z-index:2;white-space:nowrap}
+.slot{width:var(--w);height:calc(var(--w)*1.4);border:1.5px dashed rgba(26,24,20,.35);border-radius:3px;flex:none}
+.slot.mx{border-style:solid;border-color:var(--ink);background:rgba(26,24,20,.04)}
+.middle{display:flex;flex-direction:column;align-items:center;gap:10px}
+#preview{font:italic 14px var(--body);color:var(--ink2);min-height:1.3em;text-align:center}
+#preview b{font-style:normal;font-family:var(--sans);font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+#dealerWord{min-height:1.2em;font:italic 13px var(--body);color:var(--ink2);text-align:center}
+#dealerWord b{font-style:normal;color:var(--ink);font-family:var(--head);font-size:17px;letter-spacing:.08em}
 
-.middle{display:flex;flex-direction:column;align-items:center;gap:8px}
-#preview{font:italic .84rem var(--body);color:var(--muted);min-height:1.3em;text-align:center}
-#preview b{font-style:normal;font-family:var(--sans);color:var(--ink);font-variant-numeric:tabular-nums}
-#dealerWord{min-height:1.2em;font:italic .82rem var(--body);color:var(--muted);text-align:center}
-#dealerWord b{font-style:normal;color:var(--ink);font-family:var(--head);font-size:1.05rem;letter-spacing:.08em}
-
-/* Result banner */
-#banner{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.95);opacity:0;pointer-events:none;background:var(--card);color:var(--ink);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:12px 18px;text-align:center;transition:.2s;min-width:220px;max-width:92%}
+/* Result stamp over the table */
+#banner{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.95);opacity:0;pointer-events:none;background:var(--paper);color:var(--ink);border:3px double var(--ink);box-shadow:6px 6px 0 rgba(0,0,0,.25);padding:12px 18px;text-align:center;transition:.2s;min-width:220px;max-width:92%}
 #banner.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
-#banner h3{font-family:var(--head);font-size:1.7rem;margin:0 0 4px;font-weight:900}
-#banner .vs{font:800 .9rem var(--sans);letter-spacing:.04em;font-variant-numeric:tabular-nums}
-#banner .tip{font:italic .8rem var(--body);color:var(--muted);margin-top:6px}
+#banner h3{font-family:var(--head);font-size:28px;margin:0 0 4px;font-weight:900}
+#banner .vs{font:800 14px var(--sans);letter-spacing:.04em;font-variant-numeric:tabular-nums}
+#banner .tip{font:italic 13px var(--body);color:var(--ink2);margin-top:6px}
 #banner.L h3{color:var(--red)}
 
-/* Controls */
-#controls{padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px}
-.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px}
-.tool{border:1.5px solid var(--ink);background:var(--card);padding:10px 4px;font:800 .72rem var(--sans);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
-.tool small{font-weight:700;margin-left:3px}
-.tool:disabled{opacity:.3;cursor:default}
-.tool.on{background:var(--ink);color:var(--paper)}
-.go{border:0;padding:15px;font:800 .95rem var(--sans);letter-spacing:.12em;text-transform:uppercase;background:var(--ink);color:var(--paper)}
-.go:disabled{opacity:.3;cursor:default}
-.links{display:flex;justify-content:center;gap:6px;font:800 .64rem var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.links button{border:0;background:none;padding:4px 2px;font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
-#toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 140px);transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 14px;font:700 .85rem var(--sans);opacity:0;transition:opacity .2s;pointer-events:none;z-index:30}
+/* Buttons, like The Daily 15's bar */
+#bar{display:flex;gap:8px}
+#bar button{flex:1;padding:7px 4px;border-radius:3px;border:2px solid var(--ink);background:var(--card);font:800 12px var(--sans);text-transform:uppercase;letter-spacing:.06em;box-shadow:2px 2px 0 var(--ink);white-space:nowrap}
+#bar button:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--ink)}
+#bar button small{font-weight:700;margin-left:3px}
+#bar button:disabled{opacity:.35;cursor:default}
+#bar button.on{background:var(--hi)}
+.go{padding:12px;border:2px solid var(--ink);border-radius:3px;background:var(--ink);color:var(--paper);font-family:var(--sans);font-weight:800;font-size:16px;text-transform:uppercase;letter-spacing:.08em}
+.go.alt{background:var(--card);color:var(--ink)}
+.go:disabled{opacity:.35;cursor:default}
+#toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 120px);transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 14px;font:700 14px var(--sans);opacity:0;transition:opacity .2s;pointer-events:none;z-index:60}
 #toast.on{opacity:1}
 .shake{animation:shake .35s}
 @keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
 
-/* Sheets */
-.sheet{position:fixed;inset:0;background:rgba(26,24,20,.5);display:flex;align-items:flex-end;justify-content:center;z-index:20;padding-top:env(safe-area-inset-top,0px)}
-.panel{background:var(--paper);color:var(--ink);width:100%;max-width:520px;max-height:92%;overflow:auto;border-top:3px double var(--ink);padding-block:20px calc(20px + env(safe-area-inset-bottom,0px));padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));position:relative;-webkit-user-select:text;user-select:text}
-@media (min-width:600px){.sheet{align-items:center}.panel{border:2px solid var(--ink)}}
-.panel h2{font-family:var(--head);font-weight:900;font-size:1.8rem;margin:0 0 4px;text-wrap:balance}
-.panel h4{font:800 .68rem var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px}
-.panel p,.panel li{font-family:var(--body);line-height:1.6;font-size:.88rem}
-.panel ul{padding-left:20px;margin:6px 0}
-.ic{width:34px;height:34px;border:1.5px solid var(--ink);background:var(--card);display:grid;place-items:center;font-weight:800}
-.close{position:absolute;top:12px;right:12px}
-.ex{display:flex;gap:5px;margin:8px 0;--w:34px}
-.vtag{font:600 .72rem var(--sans);color:var(--muted);margin-top:16px}
-.small{font-size:.8rem;color:var(--muted)}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
-.stats b{display:block;font:900 1.7rem var(--head);font-variant-numeric:tabular-nums}
-.stats span{font:600 .68rem var(--sans);color:var(--muted);line-height:1.2;display:block}
-.recap{width:100%;border-collapse:collapse;font:600 .85rem var(--sans);font-variant-numeric:tabular-nums}
-.recap td{padding:6px 4px;border-bottom:1px solid var(--faint)}
+/* Sheets and cards, as in The Daily 15 */
+.sheet{position:fixed;inset:0;z-index:30;background:rgba(26,24,20,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.sheet>.box2{background:var(--paper);border:3px double var(--ink);padding:18px;width:100%;max-width:400px;max-height:90%;overflow:auto;display:flex;flex-direction:column;gap:10px;box-shadow:6px 6px 0 rgba(0,0,0,.25);-webkit-user-select:text;user-select:text}
+.box2 h2{font-family:var(--head);font-weight:900;font-size:28px;margin:0;text-align:center;border-bottom:1px solid var(--ink);padding-bottom:6px}
+.box2 p{margin:0}
+.rules{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:12px;font-size:14px;line-height:1.5}
+.fine{font-size:12px;color:var(--ink2)}
+.ver{text-align:center;font-size:11px;opacity:.5;font-family:var(--sans)}
+.stars{width:100%;border-collapse:collapse;margin-top:6px;text-align:center;background:#fff}
+.stars th,.stars td{border:2px solid var(--ink);padding:6px 4px}
+.stars th{font-family:var(--sans);font-size:13px;font-weight:800}
+.stars tr:first-child th{background:var(--ink);color:var(--card);font-size:15px}
+.stars td{font-size:20px;line-height:1;letter-spacing:-2px;white-space:nowrap}
+.pts{font-family:var(--sans);font-size:12px;font-weight:700;line-height:1.6}
+
+/* Cover */
+#cover{background:var(--paper);background-image:radial-gradient(rgba(0,0,0,.035) 1px,transparent 1px);background-size:4px 4px;z-index:40}
+#cover .in{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;max-width:340px;text-align:center}
+#cover .mh{border-top:3px double var(--ink);border-bottom:3px double var(--ink);padding:8px 0;width:100%}
+#cover h1{font-family:var(--head);font-weight:900;font-size:clamp(40px,12vw,52px);line-height:1;margin:0;letter-spacing:-.01em}
+#cover .ln{display:flex;justify-content:space-between;font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-top:6px;color:var(--ink2)}
+#cover .tag{font-style:italic;font-size:15px;margin:0}
+#cvStreak{font-family:var(--sans);font-weight:800;font-size:14px;letter-spacing:.04em}
+#cvStats{display:flex;width:100%;background:none;border:none;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);padding:6px 0;color:var(--ink)}
+#cvStats div{flex:1;display:flex;flex-direction:column;gap:1px}
+#cvStats div+div{border-left:1px solid var(--fade)}
+#cvStats b{font-family:var(--head);font-weight:900;font-size:22px;line-height:1.1}
+#cvStats span{font-family:var(--sans);font-weight:800;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+#cover .go{width:100%}
+.links{display:flex;gap:8px;align-items:center;justify-content:center;font-family:var(--sans);font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.links button{background:none;border:none;padding:6px 2px;font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--ink);text-decoration:underline}
+
+/* First-time intro */
+#qCard{min-height:min(470px,86vh);justify-content:space-between;text-align:center}
+#qSkip{background:none;border:none;padding:4px 0;font-family:var(--sans);font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;text-decoration:underline;color:var(--ink2)}
+#qPic{min-height:96px;display:grid;place-items:center}
+#qTitle{border:none;margin:0;padding:0}
+#qText{margin:0;font-family:var(--sans);font-weight:700;font-size:19px;line-height:1.45}
+#qText .stars{font-size:initial;margin-top:12px}
+#qDots{display:flex;justify-content:center;gap:8px}
+#qDots span{width:10px;height:10px;border-radius:50%;background:#cfc7b2}
+#qDots span.on{background:var(--ink)}
+.qrow{display:flex;gap:5px;justify-content:center;--w:38px}
+
+/* Stats */
+.sstreak{display:flex;flex-direction:column;gap:4px;font-family:var(--head);font-weight:900;font-size:20px;text-align:left}
+.sstreak div{display:flex;align-items:baseline}.sstreak em{font-style:normal;display:inline-block;width:1.4em}.sstreak b{margin-left:auto}
+.shead{margin:4px 0 0;text-align:left;font-family:var(--head);font-weight:900;font-size:16px;border-bottom:2px solid var(--ink);padding-bottom:3px}
+.sweek{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;border:2px solid var(--ink);border-radius:3px;padding:4px}
+.sweek div{border:1.5px solid var(--ink);border-radius:3px;background:var(--card);padding:4px 0;min-height:46px;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:11px;line-height:1.1}
+.sweek span{font-family:var(--sans);font-weight:800;font-size:10px;letter-spacing:.04em}
+.sweek .off{opacity:.45;border-color:var(--fade)}
+.sweek .x{font-family:var(--sans);font-weight:700;color:var(--ink2)}
+.sweeksum{font-family:var(--sans);font-weight:700;font-size:13px}
+.statgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.statgrid div{border:2px solid var(--ink);border-radius:3px;background:var(--card);padding:7px 2px 6px;display:flex;flex-direction:column;gap:2px}
+.statgrid b{font-family:var(--sans);font-weight:900;font-size:22px;line-height:1.1}
+.statgrid span{font-family:var(--sans);font-weight:800;font-size:9.5px;text-transform:uppercase;letter-spacing:.05em}
+
+/* Results */
+.big{font-size:34px;letter-spacing:2px;line-height:1.1}
+.recap{width:100%;border-collapse:collapse;font:600 13px var(--sans);font-variant-numeric:tabular-nums;text-align:left}
+.recap td{padding:5px 3px;border-bottom:1px solid #cfc7b2}
 .recap td:last-child{text-align:right;font-weight:800}
 .recap .L{color:var(--red)}
 .recap .wd{font-family:var(--head);font-weight:900;letter-spacing:.05em}
-.big-res{font-family:var(--head);font-size:2.3rem;font-weight:900;margin:4px 0}
-.emoji{font-size:1.5rem;letter-spacing:.1em}
-.countdown{font-variant-numeric:tabular-nums;font-weight:800;font-size:1.2rem}
-#shareText{width:100%;height:110px;font:inherit;font-size:.9rem;border:1.5px solid var(--ink);padding:8px;background:var(--card);color:var(--ink)}
-.menu-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
-.menu-list button{text-align:left;border:1.5px solid var(--ink);background:var(--card);padding:12px 14px;font:800 .78rem var(--sans);letter-spacing:.08em;text-transform:uppercase}
-@media (max-height:640px){header{margin-top:6px}h1{font-size:28px}#table{padding:8px 0}.go{padding:12px}}
+#shareText{width:100%;height:110px;font:14px var(--sans);border:2px solid var(--ink);padding:8px;background:var(--card);color:var(--ink)}
+.countdown{font-variant-numeric:tabular-nums}
+@media (max-height:700px){#qText{font-size:16.5px}#qPic{min-height:80px}#table{padding:8px 0}.go{padding:10px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <div id="app">
-  <header>
-    <h1>A, B, C, Deal</h1>
-    <div class="meta" id="dayLabel"><span></span><span></span></div>
-  </header>
-  <div id="tracker">
-    <div class="pips" id="pips"></div>
-    <div class="total">Points<b id="totalPts">0</b></div>
+  <div class="top">
+    <div id="pno"><b id="noLabel">Deal No. 1</b><small id="dateLabel"></small></div>
+    <div class="box"><small>Points</small><b id="totalPts">0</b></div>
+    <button id="menuBtn" aria-label="Menu">☰</button>
   </div>
+  <div id="tracker"></div>
   <main id="table">
     <section class="seat">
       <div class="label">Dealer <b id="dealerScore"></b></div>
@@ -158,79 +200,109 @@ h1{font-family:var(--head);font-weight:900;font-size:clamp(30px,10vw,40px);line-
       <div id="dealerWord"></div>
     </section>
     <section class="middle">
-      <div class="label" id="wordLabel">Your word</div>
+      <div class="label" id="wordLabel"></div>
       <div class="row" id="wordRow"></div>
       <div id="preview"></div>
     </section>
     <section class="seat">
       <div class="row" id="handRow"></div>
-      <div class="label" id="handTitle">Your hand</div>
     </section>
     <div id="banner"></div>
   </main>
-  <div id="controls">
-    <div class="tools">
-      <button class="tool" id="drawBtn" hidden>Draw<small>−2</small></button>
-      <button class="tool" id="swapBtn" hidden>Swap<small>−1</small></button>
-      <button class="tool" id="mixBtn">Shuffle</button>
-      <button class="tool" id="clearBtn">Clear</button>
-      <button class="tool" id="foldBtn">Fold</button>
-    </div>
-    <button class="go" id="goBtn">Play word</button>
-    <div class="links"><button id="statsBtn">Stats</button>·<button id="helpBtn">How to play</button>·<button id="menuBtn">Menu</button></div>
+  <div id="bar">
+    <button id="drawBtn" hidden>Draw<small>−2</small></button>
+    <button id="swapBtn" hidden>Swap<small>−1</small></button>
+    <button id="mixBtn">⇄ Shuffle</button>
+    <button id="clearBtn">Clear</button>
+    <button id="foldBtn">Fold</button>
   </div>
+  <button class="go" id="goBtn">Play word</button>
 </div>
 <div id="toast"></div>
 
-<div class="sheet" id="terms" hidden><div class="panel">
+<div class="sheet" id="cover"><div class="in">
+  <div class="mh"><h1>A, B, C, Deal</h1><div class="ln"><span id="cvDate"></span><span id="cvNo"></span></div></div>
+  <p class="tag">Five hands. One dealer. Spell the better word.</p>
+  <div id="cvStreak" hidden></div>
+  <button id="cvStats" hidden aria-label="Your stats"></button>
+  <button class="go" id="coverGo">Play today's deal</button>
+  <div class="links"><button id="coverStats">Stats</button><span>·</span><button id="coverHow">How to play</button></div>
+  <div class="ver" id="cvVer"></div>
+</div></div>
+
+<div class="sheet" id="quick" hidden><div class="box2" id="qCard">
+  <div style="text-align:right"><button id="qSkip">Skip intro</button></div>
+  <div id="qPic"></div>
+  <h2 id="qTitle"></h2>
+  <p id="qText"></p>
+  <div id="qDots"></div>
+  <button class="go" id="quickGo">Next</button>
+  <button class="go alt" id="qAll" hidden>See all rules</button>
+</div></div>
+
+<div class="sheet" id="help" hidden><div class="box2">
+  <h2>How to Play</h2>
+  <ul class="rules">
+    <li><b>Goal:</b> beat the dealer in today's <b>5 hands</b>. Everyone gets the same cards.</li>
+    <li><b>Spell a word:</b> tap your cards to fill the slots, then tap <b>Play word</b>. Hand 1 needs <b>3 letters</b>, then 4, 5, 6 and <b>7 letters</b> in hand 5.</li>
+    <li><b>Cards:</b> 5 in hand 1, one more each hand, up to 9. The dealer gets the same number and shows you one card. There is always at least one word to find.</li>
+    <li><b>Points:</b> add up the numbers on your cards. Your <b>first letter</b> counts ×1 in hand 1, ×2 in hand 2, up to <b>×5</b> in hand 5.<div class="pts">1: A E I L N O R S T U · 2: D G · 3: B C M P<br>4: F H V W Y · 5: K · 8: J X · 10: Q Z</div></li>
+    <li><b>The dealer</b> flips its cards and plays its best word. Higher score wins the hand; a tie is a push. No word for the dealer? It busts and you win.</li>
+    <li><b>Stuck?</b> No word possible means you bust. Can't find one that's there? Tap <b>Fold</b> to give up the hand.</li>
+    <li><b>Stars:</b> win hands to earn them.<table class="stars" id="starTbl"><tr><th>Hands won</th><th>3</th><th>4</th><th>5</th></tr><tr><th>Stars</th><td>⭐</td><td>⭐⭐</td><td>⭐⭐⭐</td></tr></table></li>
+    <li><b>🔥 Streak:</b> finish each day's deal on its day to build your streak.</li>
+    <li class="fine">The website version sends an anonymous check-in so we can count players: the day, hands played and the game version. Never your name, contacts or location.</li>
+  </ul>
+  <button class="go" id="helpGo">Let's play</button>
+  <div class="ver" id="ver"></div>
+</div></div>
+
+<div class="sheet" id="stats" hidden><div class="box2" style="text-align:center">
+  <h2>Your Stats</h2>
+  <div id="statStreak" class="sstreak"></div>
+  <h3 class="shead">This week</h3>
+  <div id="statWeek" class="sweek"></div>
+  <div id="statWeekSum" class="sweeksum"></div>
+  <h3 class="shead">All time</h3>
+  <div id="statGrid" class="statgrid"></div>
+  <p class="fine" style="font-style:italic">Counts each day's deal, played on its day.</p>
+  <button class="go alt" id="statsBack">Back</button>
+</div></div>
+
+<div class="sheet" id="done" hidden><div class="box2" style="text-align:center">
+  <h2 id="doneTitle"></h2>
+  <div class="big" id="doneBig"></div>
+  <p id="doneLine" style="font-family:var(--sans);font-weight:800"></p>
+  <p id="donePts" style="font-style:italic"></p>
+  <table class="recap" id="doneRecap"></table>
+  <p id="doneStreak" style="font-family:var(--sans);font-weight:800;font-size:14px;letter-spacing:.04em" hidden></p>
+  <p class="fine" style="font-style:italic">Next deal in <span class="countdown" id="cd"></span></p>
+  <button class="go" id="shareBtn">Share result</button>
+  <textarea id="shareText" readonly hidden></textarea>
+  <button class="go alt" id="lookBtn">Look at the table</button>
+  <button class="go alt" id="doneStats">Stats</button>
+</div></div>
+
+<div class="sheet" id="menu" hidden><div class="box2">
+  <h2>Menu</h2>
+  <button class="go" id="mBack">Back to the table</button>
+  <button class="go alt" id="mCover">Front page</button>
+  <button class="go alt" id="mStats">Stats</button>
+  <button class="go alt" id="mHelp">How to play</button>
+  <button class="go alt" id="mTerms">Terms and privacy</button>
+  <div class="ver" id="menuVer"></div>
+</div></div>
+
+<div class="sheet" id="terms" hidden><div class="box2">
   <h2>A, B, C, Deal</h2>
-  <h4>Terms</h4>
-  <ul>
-    <li>A, B, C, Deal is a free game, just for fun. It may change or stop working at any time.</li>
+  <ul class="rules">
+    <li>A, B, C, Deal is a free game from smAisle, just for fun. It may change or stop working at any time.</li>
     <li>No accounts and no ads. Nothing is sold.</li>
-    <li>Your scores and streak stay on your device.</li>
+    <li>Your scores, stars and streak stay on your device.</li>
     <li>The website version sends an anonymous check-in when you open the game and finish a hand, so we can count how many devices play each day: the game version, hands played and won, and your best day. It never includes your name, contacts or location.</li>
   </ul>
-  <p class="small">By tapping Agree and play, you accept these terms.</p>
-  <button class="go" id="termsGo" style="width:100%">Agree and play</button>
-</div></div>
-
-<div class="sheet" id="help" hidden><div class="panel">
-  <button class="ic close" data-close="help" aria-label="Close">✕</button>
-  <h2>How to play</h2>
-  <p>Beat the dealer with a better word. Everyone gets the same five hands each day.</p>
-  <ul>
-    <li>Each hand needs a longer word: <b>3 letters</b> in hand 1, then 4, 5, 6 and <b>7 letters</b> in hand 5. The dealer plays by the same rule.</li>
-    <li>Every hand is a fresh deal: 5 cards in hand 1, one more each hand, up to 9 in hand 5. The dealer gets the same number. Everyone gets the same cards each day, and there is always at least one word to find.</li>
-    <li>Each card is worth its points, like Scrabble. Tap cards to spell your word, then tap <b>Play word</b>.</li>
-    <li>Under your word, the game counts how many common words your cards can make. After each hand it tells you what the best word was worth.</li>
-    <li>The first letter of your word counts extra: ×1 in hand 1, ×2 in hand 2, up to <b>×5</b> in hand 5. Start with a big letter! The dealer's first letter counts the same way.</li>
-    <li>No word possible? You <b>bust</b>: you lose the hand and throw away your cards. Can't find a word that's there? Tap <b>Fold</b> to give up the hand the same way.</li>
-    <li>The dealer shows one card. When you play, it flips the rest and plays its best word. Higher score wins; a tie is a push. If the dealer has no word, the dealer busts and you win.</li>
-  </ul>
-  <h4>Example, hand 5</h4>
-  <div class="ex" id="exRow"></div>
-  <p class="small" style="margin:0">In hand 5, S·H·A·V·E = 1+4+1+4+1 = 11, and the S counts ×5, so <b>15</b>. Rearranged as H·A·V·E·S, the H counts ×5: 11 + 16 = <b>27</b>.</p>
-  <h4>Card points</h4>
-  <p class="small" style="margin:0">1: A E I L N O R S T U · 2: D G · 3: B C M P · 4: F H V W Y · 5: K · 8: J X · 10: Q Z</p>
-  <button class="go" id="helpGo" style="width:100%;margin-top:18px">Deal me in</button>
-  <div class="vtag" id="vtag1"></div>
-</div></div>
-
-<div class="sheet" id="stats" hidden><div class="panel">
-  <button class="ic close" data-close="stats" aria-label="Close">✕</button>
-  <div id="statsBody"></div>
-</div></div>
-
-<div class="sheet" id="menu" hidden><div class="panel">
-  <button class="ic close" data-close="menu" aria-label="Close">✕</button>
-  <h2>Menu</h2>
-  <div class="menu-list">
-    <button id="mHelp">How to play</button>
-    <button id="mStats">Stats</button>
-    <button id="mTerms">Terms and privacy</button>
-  </div>
-  <div class="vtag" id="vtag2"></div>
+  <p class="fine">By tapping Agree and play, you accept these terms.</p>
+  <button class="go" id="termsGo">Agree and play</button>
 </div></div>
 
 <script>
@@ -292,7 +364,7 @@ function dealDay(date){const bustHand=hashStr('bust|'+date)%10<3?1+hashStr('whic
 function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/864e5)+1}
 //module.exports={VALUES,SIZES,LENGTHS,MULT,score,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
 
-const VERSION='9',VDATE='Oct 30',GAME='abc';
+const VERSION='10',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -349,52 +421,56 @@ function word(){return sel.map(i=>S.cards[i]).join('')}
 function cost(h){const i=S.hands.indexOf(h);return (h.drew?DRAW_COST[i]:0)+(h.swapped?SWAP_COST[i]:0)}
 function totalPts(){return S.hands.filter(h=>h.done).reduce((a,h)=>a+h.net,0)}
 
+
+/* ---------- Stars ---------- */
+function starsFor(w){return w>=5?3:w>=4?2:w>=3?1:0}
+function starStr(n){return n?'⭐'.repeat(n):''}
+
 /* ---------- Render ---------- */
 /* Size cards so n of them fit across the table */
-function fit(row,n,max){const W=$('table').clientWidth-24,g=n>7?4:6;row.style.gap=g+'px';row.style.setProperty('--w',Math.max(26,Math.min(max,Math.floor((W-g*(n-1))/n)))+'px')}
+function fit(row,n,max){const W=$('table').clientWidth-8,g=n>7?4:6;row.style.gap=g+'px';row.style.setProperty('--w',Math.max(26,Math.min(max,Math.floor((W-g*(n-1))/n)))+'px')}
 let stuckT=0;
 function checkStuck(){const h=H();clearTimeout(stuckT);if(h.done||busy)return false;if(anyWord(S.cards,LEN()))return false;
   if(DRAW_SWAP&&(!h.drew||!h.swapped)){const opt=!h.drew&&!h.swapped?'Draw or swap':!h.drew?'Draw':'Swap';$('preview').innerHTML=`<b>No ${LEN()}-letter word here.</b> ${opt}, or bust.`;return true}
-  $('preview').innerHTML=`<b>No ${LEN()}-letter word${DRAW_SWAP?' still':''} in your hand.</b> You bust.`;busy=true;['drawBtn','swapBtn','mixBtn','foldBtn','goBtn'].forEach(id=>$(id).disabled=true);
+  $('preview').innerHTML=`<b>No ${LEN()}-letter word${DRAW_SWAP?' still':''} in your hand.</b> You bust.`;busy=true;['drawBtn','swapBtn','mixBtn','clearBtn','foldBtn','goBtn'].forEach(id=>$(id).disabled=true);
   stuckT=setTimeout(()=>{busy=false;resolve(null)},1400);return true}
 function render(deal){
   const h=H(),len=LEN(),db=DAY.dealerBest[S.cur],cards=shown();
-  $('dayLabel').innerHTML=`<span>${new Date(DATE+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'})}</span><span>Deal No. ${dayNumber(DATE)}</span>`;
-  $('pips').innerHTML=S.hands.map((x,i)=>`<div class="pip ${x.done?x.result:''} ${i===S.cur&&!x.done?'now':''}" title="Hand ${i+1}: ${LENGTHS[i]} letters">${x.done?x.result:LENGTHS[i]}</div>`).join('');
+  $('noLabel').textContent=`Deal No. ${dayNumber(DATE)}`;
+  $('dateLabel').textContent=new Date(DATE+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  $('tracker').innerHTML=S.hands.map((x,i)=>`<div class="pip ${x.done?x.result:''} ${i===S.cur&&!x.done?'now':''}" title="Hand ${i+1}: ${LENGTHS[i]} letters">${x.done?x.result:LENGTHS[i]}</div>`).join('');
   $('totalPts').textContent=totalPts();
-  $('wordLabel').textContent=h.done?'Your word':`Your ${len}-letter word`+(MULT[S.cur]>1?` · first letter ×${MULT[S.cur]}`:'');
-  $('handTitle').textContent=`Hand ${S.cur+1} of ${HANDS} · ${len}-letter word · ${SIZES[S.cur]} cards`;
-  fit($('dealerRow'),SIZES[S.cur],44);fit($('handRow'),Math.max(cards.length,7),56);fit($('wordRow'),len,46);
-  // dealer
+  $('wordLabel').textContent=`Hand ${S.cur+1} · ${len} letters`;
+  fit($('dealerRow'),SIZES[S.cur],40);fit($('handRow'),Math.max(cards.length,7),56);fit($('wordRow'),len,46);
+  // dealer: one card up until you play
   const dr=$('dealerRow');dr.innerHTML='';
   DAY.dealer[S.cur].forEach((c,i)=>{const el=cardEl(c,{down:!(h.done||i===0),cls:deal?'dealt':''});if(deal)el.style.animationDelay=(i*40)+'ms';dr.appendChild(el)});
   $('dealerScore').textContent=h.done?(db.word?db.score+' pts':'bust'):'';
-  $('dealerWord').innerHTML=h.done?(db.word?`plays <b>${db.word}</b>`:`<b>BUST</b> · no ${len}-letter word`):'shows one card';
-  // hand
-  const hr=$('handRow');hr.innerHTML='';hr.classList.toggle('eight',cards.length>7);hr.classList.toggle('swapping',swapMode);
-  cards.forEach((c,i)=>{const isNew=deal&&S.fresh&&S.fresh.includes(i);
-    const el=cardEl(c,{cls:((h.done?(h.used||[]).includes(i):sel.includes(i))?'used':'')+(isNew||(deal&&!S.fresh)?' dealt':'')});
-    if(isNew||(deal&&!S.fresh))el.style.animationDelay=(280+i*45)+'ms';el.setAttribute('role','button');el.setAttribute('aria-label',`${c}, ${VALUES[c]} points`);el.onclick=()=>tapCard(i);hr.appendChild(el)});
+  $('dealerWord').innerHTML=h.done?(db.word?`plays <b>${db.word}</b>`:`<b>BUST</b> · no ${len}-letter word`):'';
+  // your hand
+  const hr=$('handRow');hr.innerHTML='';hr.classList.toggle('swapping',swapMode);
+  cards.forEach((c,i)=>{const el=cardEl(c,{cls:((h.done?(h.used||[]).includes(i):sel.includes(i))?'used':'')+(deal?' dealt':'')});
+    if(deal)el.style.animationDelay=(280+i*45)+'ms';el.setAttribute('role','button');el.setAttribute('aria-label',`${c}, ${VALUES[c]} points`);el.onclick=()=>tapCard(i);hr.appendChild(el)});
   // word slots: exactly the length this hand needs
   const wr=$('wordRow');wr.innerHTML='';const w=h.done?(h.word||''):word();
   if(h.done&&h.bust){const s=document.createElement('div');s.className='bust';s.textContent=h.fold?'FOLD':'BUST';wr.appendChild(s)}
   else for(let i=0;i<len;i++){let el;if(i<w.length){el=cardEl(w[i]);if(!h.done){el.onclick=()=>{sel.splice(i,1);render()}}}else{el=document.createElement('div');el.className='slot'}
     if(i===0&&MULT[S.cur]>1){el.classList.add('mx');el.dataset.m='×'+MULT[S.cur]}wr.appendChild(el)}
+  // one quiet line: points so far and how many words are possible
+  const n=countWords(S.cards,len),poss=n?`${n} word${n>1?'s':''} possible`:'only rare words here';
   if(h.done)$('preview').innerHTML=h.bust?(h.fold?'You folded':'You busted'):`<b>${h.score}</b> pts${cost(h)?` − ${cost(h)} = <b>${h.net}</b>`:''}`;
   else if(swapMode)$('preview').textContent='Tap a card to swap it out';
-  else if(!w.length){const n=countWords(S.cards,len);$('preview').innerHTML=`Spell a ${len}-letter word · `+(n?`<b>${n}</b> common word${n>1?'s':''} in your hand`:'only rare words here')}
-  else{const s=score(w,S.cur),c=cost(h);$('preview').innerHTML=`<b>${s}</b> pts`+(MULT[S.cur]>1?` (${w[0]} ×${MULT[S.cur]})`:'')+(c?` − ${c} = <b>${s-c}</b>`:'')}
-  // controls
+  else{const s=score(w,S.cur),c=cost(h);$('preview').innerHTML=`<b>${s-c}</b> pts · ${poss}`}
+  // buttons
   $('drawBtn').querySelector('small').textContent='−'+DRAW_COST[S.cur];$('swapBtn').querySelector('small').textContent='−'+SWAP_COST[S.cur];
   $('drawBtn').disabled=h.done||h.drew||busy;$('swapBtn').disabled=h.done||h.swapped||busy;$('swapBtn').classList.toggle('on',swapMode);
   $('mixBtn').disabled=h.done||busy;$('clearBtn').disabled=h.done||busy||!sel.length;$('foldBtn').disabled=h.done||busy;
   const g=$('goBtn');
   if(!h.done){g.textContent=w.length<len?`Play word (${w.length}/${len})`:'Play word';g.disabled=busy||w.length!==len}
-  else if(S.hands.every(x=>x.done)){g.textContent='See today’s results';g.disabled=false}
+  else if(S.hands.every(x=>x.done)){g.textContent='See today’s result';g.disabled=false}
   else{g.textContent='Next hand';g.disabled=false}
   if(!h.done&&!busy)checkStuck();
 }
-
 /* ---------- Actions ---------- */
 function tapCard(i){const h=H();if(h.done||busy)return;
   if(swapMode){if(sel.includes(i))return;S.cards[i]=DAY.swapCard[S.cur];h.swapped=true;swapMode=false;save();render();
@@ -415,7 +491,7 @@ $('foldBtn').onclick=()=>{const h=H(),f=$('foldBtn');if(h.done||busy)return;
   if(!foldArm){foldArm=true;f.textContent='Sure?';f.classList.add('on');clearTimeout(foldT);foldT=setTimeout(()=>{foldArm=false;f.textContent='Fold';f.classList.remove('on')},2500);return}
   foldArm=false;clearTimeout(foldT);f.textContent='Fold';f.classList.remove('on');resolve(null,true)};
 $('goBtn').onclick=()=>{const h=H();if(busy)return;
-  if(h.done){if(S.hands.every(x=>x.done)){$('banner').classList.remove('on');showResults();return}
+  if(h.done){if(S.hands.every(x=>x.done)){showDone();return}
     S.cur=S.hands.findIndex(x=>!x.done);refill();sel=[];$('banner').classList.remove('on');save();render(true);S.fresh=null;return}
   play()};
 function play(){const w=word();if(w.length!==LEN())return;
@@ -429,6 +505,7 @@ function resolve(w,fold){const h=H();h.fold=!!fold;busy=true;swapMode=false;cons
   S.cards=S.cards.filter((_,i)=>!h.used.includes(i));
   const cards=[...$('dealerRow').children];cards.forEach((el,i)=>setTimeout(()=>el.classList.remove('down'),120+i*110));
   setTimeout(()=>{h.done=true;sel=[];busy=false;save();recordDay();render();showBanner(h);checkIn('hand')},120+cards.length*110+350)}
+
 function showBanner(h){const b=$('banner'),d=DAY.dealerBest[S.cur];
   const title=h.bust?(h.fold?'Fold':'Bust!'):!d.word?'Dealer busts!':{W:'You win!',L:'Dealer wins',P:'Push'}[h.result];
   const yb=best(h.snap,S.cur);
@@ -437,38 +514,83 @@ function showBanner(h){const b=$('banner'),d=DAY.dealerBest[S.cur];
   b.className='on '+h.result;b.innerHTML=`<h3>${title}</h3><div class="vs">${vs}</div>${tip?`<div class="tip">${tip}</div>`:''}`;
   /* stays up until Next hand */}
 function recordDay(){const hist=store.json('abc-hist',{});const done=S.hands.filter(x=>x.done);
-  hist[DATE]={w:done.filter(x=>x.result==='W').length,p:done.reduce((a,x)=>a+x.net,0),r:done.map(x=>x.result).join('')};store.put('abc-hist',hist)}
-/* ---------- Sheets ---------- */
-function sheet(id,show){$(id).hidden=!show}
-document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>sheet(b.dataset.close,false));
-document.querySelectorAll('.sheet').forEach(s=>s.addEventListener('click',e=>{if(e.target===s&&s.id!=='terms')s.hidden=true}));
-function shareText(){const r=S.hands.map(x=>x.done?{W:'🟩',L:'🟥',P:'🟨'}[x.result]:'⬜').join('');const w=S.hands.filter(x=>x.result==='W').length;
-  return `A, B, C, Deal No. ${dayNumber(DATE)}\n${r} ${w}/${HANDS}\n${totalPts()} of ${DAY.bestTotal} possible points\nsmaisle.app`}
-function statsHTML(){const hist=store.json('abc-hist',{}),days=Object.values(hist).filter(d=>(d.r||'').length>=HANDS);
-  const hands=days.reduce((a,d)=>a+d.r.length,0),wins=days.reduce((a,d)=>a+d.w,0),st=streaks(hist);
-  return `<h4>Your stats</h4><div class="stats"><div><b>${days.length}</b><span>Days played</span></div><div><b>${hands?Math.round(wins/hands*100):0}</b><span>Hands won %</span></div><div><b>${st.cur}</b><span>Current streak</span></div><div><b>${st.max}</b><span>Max streak</span></div></div>`}
+  hist[DATE]={w:done.filter(x=>x.result==='W').length,p:done.reduce((a,x)=>a+x.net,0),r:done.map(x=>x.result).join(''),b:DAY.bestTotal};store.put('abc-hist',hist)}
+
+/* ---------- Screens ---------- */
+let backTo='game';
+function only(id){document.querySelectorAll('.sheet').forEach(x=>x.hidden=x.id!==id)}
+function goBack(){if(backTo==='cover')cover();else only('')}
+function finished(){return S.hands.every(x=>x.done)}
+function wins(){return S.hands.filter(x=>x.result==='W').length}
 function nextDeal(){const n=new Date();const m=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1);const s=Math.max(0,Math.floor((m-n)/1000));
   return [Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(x=>String(x).padStart(2,'0')).join(':')}
-function showResults(){const w=S.hands.filter(x=>x.result==='W').length,all=S.hands.every(x=>x.done);
-  const head=all?`<h2>${w>=4?'Hot table!':w>=3?'You beat the house':w===2?'Close one':'The house wins today'}</h2>
-    <div class="big-res">${w} of ${HANDS} hands</div><div class="emoji">${shareText().split('\n')[1].split(' ')[0]}</div><p style="margin:6px 0 0"><b>${totalPts()}</b> points today · best possible <b>${DAY.bestTotal}</b></p>`
-    :`<h2>Today so far</h2><p>${S.hands.filter(x=>x.done).length} of ${HANDS} hands played.</p>`;
-  const rows=S.hands.map((x,i)=>x.done?`<tr><td>Hand ${i+1}</td><td class="wd">${x.word||(x.fold?'FOLD':'BUST')}</td><td class="small">${x.dealerWord==='BUST'?'dealer bust':`vs ${x.dealerWord} ${x.dealerScore}`}</td><td class="${x.result}">${x.net}</td></tr>`:'').join('');
-  $('statsBody').innerHTML=head+(rows?`<h4>Hands</h4><table class="recap">${rows}</table>`:'')+
-    (all?`<div style="display:flex;gap:8px;margin-top:16px"><button class="go" id="shareBtn" style="flex:1">Share</button></div><textarea id="shareText" readonly hidden></textarea>
-    <p class="small" style="margin-top:14px">Next deal in <span class="countdown" id="cd">${nextDeal()}</span></p>`:'')+statsHTML()+`<div class="vtag">v${VERSION} · ${VDATE}</div>`;
-  sheet('stats',true);
-  const sb=$('shareBtn');if(sb)sb.onclick=async()=>{const t=shareText();
-    if(window.top===window&&navigator.share){try{await navigator.share({text:t});return}catch(e){if(e.name==='AbortError')return}}
-    try{await navigator.clipboard.writeText(t);toast('Copied. Paste it in a text.')}catch(e){const ta=$('shareText');ta.hidden=false;ta.value=t;ta.focus();ta.select();toast('Select and copy the text below')}};
-}
-setInterval(()=>{const c=$('cd');if(c&&!$('stats').hidden)c.textContent=nextDeal();if(today()!==DATE&&!busy){loadDay();render(true)}},1000);
-$('helpBtn').onclick=$('mHelp').onclick=()=>{sheet('menu',false);sheet('help',true)};
-$('statsBtn').onclick=$('mStats').onclick=()=>{sheet('menu',false);showResults()};
-$('menuBtn').onclick=()=>sheet('menu',true);
-$('mTerms').onclick=()=>{sheet('menu',false);sheet('terms',true)};
-$('helpGo').onclick=()=>{sheet('help',false);store.set('abc-seen','1')};
-$('termsGo').onclick=()=>{const first=!agreed();if(first)store.set(TERMS_KEY,new Date().toISOString().slice(0,10));sheet('terms',false);if(first){checkIn('open');if(!store.get('abc-seen',''))sheet('help',true)}};
+function allStats(){const hist=store.json('abc-hist',{}),days=Object.entries(hist).filter(([k,d])=>(d.r||'').length>=HANDS);
+  let stars=0,three=0,hands=0,won=0,bestDay=0;for(const [,d] of days){const st=starsFor(d.w);stars+=st;if(st===3)three++;hands+=d.r.length;won+=d.w;bestDay=Math.max(bestDay,d.p||0)}
+  const sk=streaks(hist);return {played:days.length,stars,three,pct:hands?Math.round(won/hands*100)+'%':'–',bestDay,cur:sk.cur,best:sk.max}}
+function cover(){const s=allStats();
+  $('cvDate').textContent=new Date(DATE+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+  $('cvNo').textContent='Deal No. '+dayNumber(DATE);$('cvVer').textContent=`v${VERSION} · ${VDATE}`;
+  $('coverGo').textContent=finished()?"See today's result":S.hands.some(x=>x.done)?'Keep playing':"Play today's deal";
+  const doneToday=finished();$('cvStreak').hidden=!s.cur;$('cvStreak').textContent='🔥 '+s.cur+'-day streak'+(doneToday?'':' · play today to keep it');
+  $('cvStats').hidden=!s.played;if(s.played)$('cvStats').innerHTML=[[s.stars,'⭐ Stars'],[s.played,'Played'],[s.three,'⭐⭐⭐'],[s.best,'Best streak']].map(([v,l])=>`<div><b>${v}</b><span>${l}</span></div>`).join('');
+  only('cover')}
+function showStats(){const s=allStats(),hist=store.json('abc-hist',{}),dd=n=>n+' day'+(n===1?'':'s');
+  $('statStreak').innerHTML=`<div><em>🔥</em>Current streak:<b>${dd(s.cur)}</b></div><div><em></em>Best streak:<b>${dd(s.best)}</b></div>`;
+  let wp=0,ws=0,W='';for(let i=6;i>=0;i--){const d=new Date(Date.parse(DATE+'T12:00:00')-i*864e5);const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const r=hist[k],wd=d.toLocaleDateString('en-US',{weekday:'short'}).toUpperCase();
+    if(r&&(r.r||'').length>=HANDS){const n=starsFor(r.w);wp++;ws+=n;W+=`<div><span>${wd}</span>${n===3?'⭐<br>⭐⭐':n?starStr(n):'<span class="x">✓</span>'}</div>`}
+    else W+=`<div${i?' class="off"':''}><span>${wd}</span><span class="x">${i?'✕':'–'}</span></div>`}
+  $('statWeek').innerHTML=W;$('statWeekSum').textContent=`${wp} of 7 played · ${ws} ⭐`;
+  $('statGrid').innerHTML=[[s.stars,'⭐ Stars'],[s.played,'Played'],[s.three,'⭐⭐⭐'],[s.pct,'Hands won'],[s.bestDay,'Best day'],[s.best,'Best streak']].map(([v,l])=>`<div><b>${v}</b><span>${l}</span></div>`).join('');
+  only('stats')}
+function shareText(){const r=S.hands.map(x=>x.done?{W:'🟩',L:'🟥',P:'🟨'}[x.result]:'⬜').join('');const st=starsFor(wins());
+  return `A, B, C, Deal No. ${dayNumber(DATE)}${st?' '+starStr(st):''}\n${r} ${wins()}/${HANDS}\n${totalPts()} of ${DAY.bestTotal} points\nsmaisle.app`}
+function showDone(){const w=wins(),st=starsFor(w),s=allStats();
+  $('doneTitle').textContent=w===5?'Perfect deal!':w>=4?'Hot table!':w>=3?'You beat the house':w===2?'Close one':'The house wins';
+  $('doneBig').textContent=st?starStr(st):'No stars today';$('doneBig').style.fontSize=st?'':'18px';
+  $('doneLine').textContent=`${w} of ${HANDS} hands won`;
+  $('donePts').textContent=`${totalPts()} of ${DAY.bestTotal} possible points`;
+  $('doneRecap').innerHTML=S.hands.map((x,i)=>`<tr><td>${i+1}</td><td class="wd">${x.word||(x.fold?'FOLD':'BUST')}</td><td>${x.dealerWord==='BUST'?'dealer bust':`vs ${x.dealerWord} ${x.dealerScore}`}</td><td class="${x.result}">${x.net}</td></tr>`).join('');
+  $('doneStreak').hidden=!s.cur;$('doneStreak').textContent=`🔥 ${s.cur}-day streak`;
+  $('cd').textContent=nextDeal();$('shareText').hidden=true;only('done')}
+$('shareBtn').onclick=async()=>{const t=shareText();
+  if(window.top===window&&navigator.share){try{await navigator.share({text:t});return}catch(e){if(e.name==='AbortError')return}}
+  try{await navigator.clipboard.writeText(t);toast('Copied. Paste it in a text.')}catch(e){const ta=$('shareText');ta.hidden=false;ta.value=t;ta.focus();ta.select();toast('Select and copy the text above')}};
+$('lookBtn').onclick=()=>only('');
+$('doneStats').onclick=()=>{backTo='done';showStats()};
+$('statsBack').onclick=()=>{if(backTo==='done')only('done');else goBack()};
+
+/* First-time intro: 4 short screens, like The Daily 15 */
+const mini=(w,m)=>`<div class="qrow">${[...w].map((l,i)=>{const v=VALUES[l];return `<div class="card${i===0&&m?' mx':''}" ${i===0&&m?`data-m="×${m}"`:''}><div class="in"><div class="face"><span class="tl">${l}</span><span class="big">${l}</span><span class="br">${v}</span></div></div></div>`}).join('')}</div>`;
+const QS=[
+  [mini('ABC'),'Beat the dealer','Everyone gets the same <b>5 hands</b> today. Spell a word worth more points than the dealer’s.'],
+  ['<div style="font-family:var(--head);font-weight:900;font-size:40px;letter-spacing:.06em">3 · 4 · 5 · 6 · 7</div>','Longer every hand','Hand 1 needs a <b>3-letter</b> word, up to <b>7 letters</b> in hand 5. You get 5 cards, then one more each hand.'],
+  [mini('HAVES',5),'Big first letters','Add up the points on your cards. Your <b>first letter</b> counts ×1 in hand 1, up to <b>×5</b> in hand 5.'],
+  ['','Earn stars','Win hands to earn stars. Finish every day for a streak.'+$('starTbl').outerHTML]];
+let qStep=0,qHelp=false;
+function qShow(){const q=QS[qStep];$('qPic').innerHTML=q[0];$('qPic').hidden=!q[0];$('qTitle').textContent=q[1];$('qText').innerHTML=q[2];
+  $('qDots').innerHTML=QS.map((_,k)=>`<span${k===qStep?' class="on"':''}></span>`).join('');const last=qStep===QS.length-1;
+  $('quickGo').textContent=!last?'Next':qHelp?'Got it':"Let's play";$('qSkip').textContent=qHelp?'Close':'Skip intro';$('qAll').hidden=!(qHelp&&last)}
+function qOpen(help){qHelp=!!help;qStep=0;qShow();only('quick')}
+function qDone(){store.set('abc-seen','1');if(qHelp)goBack();else only('')}
+$('quickGo').onclick=()=>{if(qStep<QS.length-1){qStep++;qShow()}else qDone()};
+$('qSkip').onclick=qDone;
+$('qAll').onclick=()=>only('help');
+$('helpGo').onclick=()=>{store.set('abc-seen','1');goBack()};
+
+/* Cover and menu */
+$('coverGo').onclick=()=>{backTo='game';if(finished())return showDone();if(!store.get('abc-seen',''))qOpen();else only('')};
+$('coverHow').onclick=()=>{backTo='cover';qOpen(true)};
+$('cvStats').onclick=$('coverStats').onclick=()=>{backTo='cover';showStats()};
+$('menuBtn').onclick=()=>{backTo='game';only('menu')};
+$('mBack').onclick=()=>only('');
+$('mCover').onclick=cover;
+$('mStats').onclick=()=>{backTo='game';showStats()};
+$('mHelp').onclick=()=>{backTo='game';only('help')};
+$('mTerms').onclick=()=>{backTo='game';only('terms')};
+$('termsGo').onclick=()=>{const first=!agreed();if(first){store.set(TERMS_KEY,new Date().toISOString().slice(0,10));checkIn('open');cover()}else goBack()};
+
+setInterval(()=>{if(!$('done').hidden)$('cd').textContent=nextDeal();if(today()!==DATE&&!busy){loadDay();render(true);if(!$('cover').hidden)cover()}},1000);
 
 /* keyboard */
 document.addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey)return;if(document.querySelector('.sheet:not([hidden])'))return;
@@ -480,11 +602,10 @@ document.addEventListener('gesturestart',e=>e.preventDefault());
 document.addEventListener('dblclick',e=>e.preventDefault());
 
 /* ---------- Start ---------- */
-$('vtag1').textContent=$('vtag2').textContent=`A, B, C, Deal · v${VERSION} · ${VDATE} · smAisle`;
-['S','H','A','V','E'].forEach(c=>$('exRow').appendChild(cardEl(c)));
+$('ver').textContent=$('menuVer').textContent=`A, B, C, Deal · v${VERSION} · ${VDATE} · smAisle`;
 loadDay();render(true);
 addEventListener('resize',()=>{if(!busy)render()});
-if(!agreed())sheet('terms',true);else{checkIn('open');if(!store.get('abc-seen',''))sheet('help',true)}
+if(!agreed())only('terms');else{checkIn('open');cover()}
 </script>
 </body>
 </html>
