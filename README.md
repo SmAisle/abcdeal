@@ -138,3 +138,6 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 - score(word,h,b), best(letters,h,b) and wordScores(letters,h,b) take the bonus slot. The dealer uses the same bonus spot.
 - To keep the difficulty about the same, the deal filter lets you beat up to 60% of the dealer's words on those days (was 50%). Over a 30-day sim the average robot wins are 3.24, against 3.39 before; the bonus with the old 50% filter gave 3.03.
 - The help and intro screens explain the bonus spot (the WALTZ example has ×5 on the Z).
+
+## v39
+- Fix: the result banner from one game (e.g. a hand 5 fold) stayed on screen after switching to the other game. loadDay now clears it.
