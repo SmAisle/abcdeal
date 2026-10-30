@@ -422,7 +422,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 <script>
 /*WORDS*/
 /*LOGIC*/
-const VERSION='38',VDATE='Oct 30',GAME='abc';
+const VERSION='39',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -504,7 +504,8 @@ function loadDay(past){PAST=past||null;DATE=PAST||today();DAY=dealDay(DATE);REPL
   S=store.json(PAST?KEY('d_'+DATE):KEY('day8'),null);
   if(!S||S.date!==DATE){S={date:DATE,cur:0,cards:[],hands:[]};refill()}
   for(let h=0;h<HANDS;h++)if(!S.hands[h])S.hands[h]={drew:false,swapped:false,done:false};
-  sel=[];swapMode=false;save()}
+  /* a banner from the other game or day must not stay up */
+  sel=[];swapMode=false;hintMode=false;const bn=document.getElementById('banner');if(bn)bn.classList.remove('on');save()}
 /* Replay, like The Daily 15: after finishing, play today's deal again for fun. It is never saved and doesn't count. */
 let REPLAY=false;
 /* Play time: counts quietly while you're at the table on an unfinished hand (not on other pages, between hands,
