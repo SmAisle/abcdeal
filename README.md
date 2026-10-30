@@ -166,3 +166,6 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 
 ## v47
 - New dealer-bust banner (option C): 💥, a red "Dealer busts!" title, the dealer's line reads "no word 0", and a note that the dealer couldn't spell N letters with its cards, so any word wins.
+
+## v48
+- Clock check on open (the spec is in /mnt/project-files/clock-check/README.md). A HEAD request to the page itself reads the server's Date header. If the phone's clock is off by 10+ minutes, CLOCK_SKEW corrects today(), the next-deal countdown and the daily rollover, and a toast says "Your phone's date is off, so this is today's real deal (No. N)". It never blocks play, and offline, file:// or the Claude copy fall back to the phone clock. If a game is already in progress on the wrong day, the correction waits until the next open.
