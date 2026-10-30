@@ -149,6 +149,12 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 #cvStats b{font-family:var(--head);font-weight:900;font-size:22px;line-height:1.1}
 #cvStats span{font-family:var(--sans);font-weight:800;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
 #cover .go{width:100%}
+.ptabs{display:grid;grid-template-columns:1fr 1fr;border:1.5px solid var(--ink)}
+.ptabs button{font:800 12px var(--sans);letter-spacing:.1em;text-transform:uppercase;padding:9px 0;background:var(--card);color:var(--ink);border:0;cursor:pointer}
+.ptabs button.on{background:var(--ink);color:var(--card)}
+#pastList{display:flex;flex-direction:column;gap:7px;max-height:50vh;overflow-y:auto}
+#pastList .go{display:flex;justify-content:space-between;align-items:center;text-transform:none;letter-spacing:0;text-align:left;padding:10px 12px;margin:0}
+#pastList .go>span{display:flex;flex-direction:column;gap:4px}#pastList em{font-style:normal}
 #coverHold small{font-size:11px;letter-spacing:.08em;margin-left:6px;opacity:.75}
 .links{display:flex;gap:8px;align-items:center;justify-content:center;font-family:var(--sans);font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
 .links button{background:none;border:none;padding:6px 2px;font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--ink);text-decoration:underline}
@@ -240,7 +246,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
   <button id="cvStats" hidden aria-label="Your stats"></button>
   <button class="go" id="coverGo">Play today's deal</button>
   <button class="go alt" id="coverHold">Deal ’Em <small id="holdTag">🔒 Plus</small></button>
-  <div class="links"><button id="coverStats">Stats</button><span>·</span><button id="coverHow">How to play</button></div>
+  <div class="links"><button id="coverPast">Past deals</button><span>·</span><button id="coverStats">Stats</button><span>·</span><button id="coverHow">How to play</button></div>
   <div class="ver" id="cvVer"></div>
 </div></div>
 
@@ -267,7 +273,8 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
     <li><b>Stars:</b> win hands to earn them.<table class="stars" id="starTbl"><tr><th>Hands won</th><th>3</th><th>4</th><th>5</th></tr><tr><th>Stars</th><td>⭐</td><td>⭐⭐</td><td>⭐⭐⭐</td></tr></table></li>
     <li><b>💯 Perfect:</b> play the best word in every hand to score every possible point.</li>
     <li><b>Deal ’Em (Plus):</b> a second deal every day, played like Texas Hold’em. You and the dealer share the board in the middle and each get 2 cards of your own. Your word has to use at least one of your 2 cards.</li>
-    <li><b>🔥 Streak:</b> finish each day's deal on its day to build your streak.</li>
+    <li><b>🔥 Streak:</b> finish each day's deal on its day to build your streak. Past deals played late don't count.</li>
+    <li><b>Past deals:</b> play any earlier deal from the front page or the menu.</li>
     <li class="fine">The website version sends an anonymous check-in so we can count players: the day, hands played and the game version. Never your name, contacts or location.</li>
   </ul>
   <button class="go" id="helpGo">Let's play</button>
@@ -322,10 +329,19 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
   <button class="go alt" id="plusBack">Not now</button>
 </div></div>
 
+<div class="sheet" id="past" hidden><div class="box2">
+  <h2>Past deals</h2>
+  <div class="ptabs"><button id="pastDeal">Deal</button><button id="pastEm">Deal ’Em</button></div>
+  <p class="fine" style="margin:0;font-style:italic;text-align:center" id="pastNote"></p>
+  <div id="pastList"></div>
+  <button class="go alt" id="pastBack">Back</button>
+</div></div>
+
 <div class="sheet" id="menu" hidden><div class="box2">
   <h2>Menu</h2>
   <button class="go" id="mBack">Back to the table</button>
   <button class="go alt" id="mCover">Front page</button>
+  <button class="go alt" id="mPast">Past deals</button>
   <button class="go alt" id="mStats">Stats</button>
   <button class="go alt" id="mHelp">How to play</button>
   <button class="go alt" id="mTerms">Terms and privacy</button>
@@ -347,7 +363,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 <script>
 /*WORDS*/
 /*LOGIC*/
-const VERSION='18',VDATE='Oct 30',GAME='abc';
+const VERSION='19',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -384,7 +400,8 @@ function niceDate(s){return new Date(s+'T12:00:00').toLocaleDateString(undefined
 function toast(msg,ms=1400){const t=$('toast');t.textContent=msg;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),ms)}
 function cardEl(letter,{down=false,cls=''}={}){const b=document.createElement('div');b.className='card'+(down?' down':'')+(cls?' '+cls:'');
   const v=VALUES[letter]||0;b.innerHTML=`<div class="in"><div class="face${v>=4?' red':''}"><span class="tl">${letter}</span><span class="big">${letter}</span><span class="br">${v}</span></div><div class="backside"></div></div>`;return b}
-function streaks(hist){const days=Object.keys(hist).filter(k=>(hist[k].r||'').length>=HANDS).sort();let cur=0,max=0,run=0,prev=null;
+/* Streak: days in a row finished on the day they came out. Past deals played late don't count, like The Daily 15. */
+function streaks(hist){const days=Object.keys(hist).filter(k=>(hist[k].r||'').length>=HANDS&&!hist[k].late).sort();let cur=0,max=0,run=0,prev=null;
   for(const d of days){run=prev&&(Date.parse(d)-Date.parse(prev))===864e5?run+1:1;max=Math.max(max,run);prev=d}
   const t=today(),y=new Date(Date.parse(t+'T12:00:00')-864e5);const ys=y.getFullYear()+'-'+String(y.getMonth()+1).padStart(2,'0')+'-'+String(y.getDate()).padStart(2,'0');
   if(prev===t||prev===ys)cur=run;return {cur,max}}
@@ -395,14 +412,16 @@ function streaks(hist){const days=Object.keys(hist).filter(k=>(hist[k].r||'').le
 let MODE='deal';const HOLDEM=()=>MODE==='holdem',KEY=k=>(HOLDEM()?'abch-':'abc-')+k,GNAME=()=>HOLDEM()?'A, B, C, Deal ’Em':'A, B, C, Deal';
 function setMode(m){MODE=m;HOLE=m==='holdem'?2:0;loadDay()}
 let DATE=today(),DAY=null,S=null,sel=[],swapMode=false,busy=false;
-function loadDay(){DATE=today();DAY=dealDay(DATE);REPLAY=false;
-  S=store.json(KEY('day8'),null);
+/* PAST is a past deal's date while you play it from the archive, otherwise null (today's deal) */
+let PAST=null;
+function loadDay(past){PAST=past||null;DATE=PAST||today();DAY=dealDay(DATE);REPLAY=false;
+  S=store.json(PAST?KEY('d_'+DATE):KEY('day8'),null);
   if(!S||S.date!==DATE){S={date:DATE,cur:0,cards:[],hands:[]};refill()}
   for(let h=0;h<HANDS;h++)if(!S.hands[h])S.hands[h]={drew:false,swapped:false,done:false};
   sel=[];swapMode=false;save()}
 /* Replay, like The Daily 15: after finishing, play today's deal again for fun. It is never saved and doesn't count. */
 let REPLAY=false;
-function save(){if(!REPLAY)store.put(KEY('day8'),S)}
+function save(){if(!REPLAY)store.put(PAST?KEY('d_'+DATE):KEY('day8'),S)}
 function startReplay(){REPLAY=true;S={date:DATE,cur:0,cards:[],hands:[]};refill();for(let h=0;h<HANDS;h++)S.hands[h]={drew:false,swapped:false,done:false};
   sel=[];$('banner').classList.remove('on');dealWaiting=true;only('')}
 function refill(){S.cards=DAY.you[S.cur].slice()}
@@ -430,7 +449,7 @@ function checkStuck(){const h=H();clearTimeout(stuckT);if(h.done||busy)return fa
   stuckT=setTimeout(()=>{busy=false;resolve(null)},1400);return true}
 function render(deal){
   const h=H(),len=LEN(),db=DAY.dealerBest[S.cur],cards=shown();
-  $('noLabel').textContent=`${HOLDEM()?'Deal ’Em':'Deal'} No. ${dayNumber(DATE)}${REPLAY?' · Replay':''}`;
+  $('noLabel').textContent=`${HOLDEM()?'Deal ’Em':'Deal'} No. ${dayNumber(DATE)}${REPLAY?' · Replay':PAST?' · Late':''}`;
   $('dateLabel').textContent=new Date(DATE+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
   $('tracker').innerHTML=S.hands.map((x,i)=>`<div class="pip ${x.done?x.result:''} ${i===S.cur&&!x.done?'now':''}" title="Hand ${i+1}: ${LENGTHS[i]} letters">${x.done?x.result:LENGTHS[i]}</div>`).join('');
   $('totalPts').textContent=totalPts();
@@ -521,7 +540,8 @@ function showBanner(h){const b=$('banner'),d=DAY.dealerBest[S.cur];
   b.className='on '+h.result;b.innerHTML=`<h3>${title}</h3><div class="vs">${vs}</div>${tip?`<div class="tip">${tip}</div>`:''}`;
   /* stays up until Next hand */}
 function recordDay(){const hist=store.json(KEY('hist'),{});const done=S.hands.filter(x=>x.done);
-  hist[DATE]={w:done.filter(x=>x.result==='W').length,p:done.reduce((a,x)=>a+x.net,0),r:done.map(x=>x.result).join(''),b:DAY.bestTotal};store.put(KEY('hist'),hist)}
+  if(hist[DATE]&&!hist[DATE].late&&PAST)return;
+  hist[DATE]={w:done.filter(x=>x.result==='W').length,p:done.reduce((a,x)=>a+x.net,0),r:done.map(x=>x.result).join(''),b:DAY.bestTotal,...(PAST?{late:1}:{})};store.put(KEY('hist'),hist)}
 
 /* ---------- Screens ---------- */
 let backTo='game';
@@ -550,7 +570,7 @@ function nextDeal(){const n=new Date();const m=new Date(n.getFullYear(),n.getMon
 function allStats(){const hist=store.json(KEY('hist'),{}),days=Object.entries(hist).filter(([k,d])=>(d.r||'').length>=HANDS);
   let stars=0,three=0,hands=0,won=0,bestDay=0;for(const [,d] of days){const st=starsFor(d.w);stars+=st;if(st===3)three++;hands+=d.r.length;won+=d.w;bestDay=Math.max(bestDay,d.p||0)}
   const sk=streaks(hist);return {played:days.length,stars,three,pct:hands?Math.round(won/hands*100)+'%':'–',bestDay,cur:sk.cur,best:sk.max}}
-function cover(){if(HOLDEM())setMode('deal');const s=allStats();
+function cover(){if(HOLDEM()||PAST){if(HOLDEM())setMode('deal');else loadDay();render()}const s=allStats();
   $('cvDate').textContent=new Date(DATE+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
   $('cvNo').textContent='Deal No. '+dayNumber(DATE);$('cvVer').textContent=`v${VERSION} · ${VDATE}`;
   $('holdTag').textContent=hasPlus()?(holdStatus()||'New'):'🔒 Plus';
@@ -586,6 +606,30 @@ $('shareBtn').onclick=async()=>{const t=shareText();
   try{await navigator.clipboard.writeText(t);toast('Copied. Paste it in a text.')}catch(e){const ta=$('shareText');ta.hidden=false;ta.value=t;ta.focus();ta.select();toast('Select and copy the text above')}};
 $('lookBtn').onclick=()=>only('');
 $('replayBtn').onclick=startReplay;
+/* Past deals, like The Daily 15's past puzzles: every deal back to No. 1, for both games. They count, marked as played late. */
+const dateAt=i=>{const d=new Date(Date.parse(today()+'T12:00:00')-i*864e5);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+let pastMode='deal',pastBack='cover',pastJob=0;
+function diffOf(date){const k=(HOLDEM()?'abch-':'abc-')+'diff',m=store.json(k,{});if(m[date])return m[date];const d=difficulty(dealDay(date));m[date]=d;store.put(k,m);return d}
+function showPast(m){pastMode=m||pastMode;if(pastMode==='holdem'&&!hasPlus())return showPlus();
+  const keep=MODE,keepPast=PAST;HOLE=pastMode==='holdem'?2:0;MODE=pastMode;
+  $('pastDeal').classList.toggle('on',!HOLDEM());$('pastEm').classList.toggle('on',HOLDEM());
+  $('pastNote').textContent="Play any past deal back to No. 1. It counts, marked as played late, but doesn't add to your streak.";
+  const L=$('pastList'),hist=store.json(KEY('hist'),{}),rows=[];L.innerHTML='';
+  for(let i=1;dayNumber(dateAt(i))>=1;i++){const d=dateAt(i),r=hist[d],pg=store.json(KEY('d_'+d),null),b=document.createElement('button');b.className='go alt';
+    const res=r&&(r.r||'').length>=HANDS?`${starStr(starsFor(r.w))||'✓'} ${r.w}/${HANDS}${r.late?' late':''}`:pg&&pg.hands&&pg.hands.some(x=>x.done)?'In progress':'Play';
+    b.innerHTML=`<span><b>No. ${dayNumber(d)} · ${niceDate(d)}</b><em class="diff" data-d="${d}">Difficulty …</em></span><b>${res}</b>`;
+    b.onclick=()=>playPast(pastMode,d);L.appendChild(b);rows.push(d)}
+  if(!rows.length)L.innerHTML='<p style="margin:0;text-align:center;font-style:italic">No past deals yet. Come back tomorrow.</p>';
+  MODE=keep;HOLE=keep==='holdem'?2:0;only('past');
+  /* difficulty takes a moment per deal, so fill it in one row at a time and remember it */
+  const job=++pastJob,mode=pastMode;let n=0;const next=()=>{if(job!==pastJob||n>=rows.length||$('past').hidden)return;const d=rows[n++];
+    const k=MODE,kh=HOLE;MODE=mode;HOLE=mode==='holdem'?2:0;const v=diffOf(d);MODE=k;HOLE=kh;
+    const el=L.querySelector(`[data-d="${d}"]`);if(el)el.innerHTML=diffHTML(v);setTimeout(next,0)};setTimeout(next,30)}
+function playPast(m,d){backTo='game';MODE=m;HOLE=m==='holdem'?2:0;loadDay(d);if(finished())return showDone();dealWaiting=true;only('')}
+$('pastDeal').onclick=()=>showPast('deal');$('pastEm').onclick=()=>showPast('holdem');
+$('coverPast').onclick=()=>{pastBack='cover';showPast(MODE)};
+$('mPast').onclick=()=>{pastBack='game';showPast(MODE)};
+$('pastBack').onclick=()=>pastBack==='cover'?cover():only('');
 /* Plus, like Daily 15 Plus: a one-time purchase in the App Store app (window.ABC_APP). The website stays free, so Deal 'Em is open to everyone there. */
 function hasPlus(){return !window.ABC_APP||!!window.ABC_APP.plus}
 function holdStatus(){let k=null;try{k=JSON.parse(localStorage.getItem('abch-day8')||'null')}catch(e){}if(!k||k.date!==today())return '';const n=(k.hands||[]).filter(x=>x.done).length;return n>=HANDS?'Done ✓':n?'Keep playing':''}
@@ -627,7 +671,7 @@ $('mHelp').onclick=()=>{backTo='game';only('help')};
 $('mTerms').onclick=()=>{backTo='game';only('terms')};
 $('termsGo').onclick=()=>{const first=!agreed();if(first){store.set(TERMS_KEY,new Date().toISOString().slice(0,10));checkIn('open');cover()}else goBack()};
 
-setInterval(()=>{if(!$('done').hidden)$('cd').textContent=nextDeal();if(today()!==DATE&&!busy){loadDay();dealHand();if(!$('cover').hidden)cover()}},1000);
+setInterval(()=>{if(!$('done').hidden)$('cd').textContent=nextDeal();if(!PAST&&today()!==DATE&&!busy){loadDay();dealHand();if(!$('cover').hidden)cover()}},1000);
 
 /* keyboard */
 document.addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey)return;if(document.querySelector('.sheet:not([hidden])'))return;
