@@ -172,3 +172,6 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 
 ## v49
 - The dealer's common-word list is now open-licensed (ENABLE + 12dicts, public domain; built by the word-lists thread, see /mnt/project-files/word-lists). Deals already published are kept exactly as they were in FROZEN_DEALS (frozenDay() in logic.js), difficulty included. On those days the live "words possible" count can move by 1 or 2.
+
+## v50
+- Tapping a locked hint letter asks "🔓 Unlock?". Unlocking frees the card to move or take back, and the hint's star stays spent.
