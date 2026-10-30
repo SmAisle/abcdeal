@@ -133,7 +133,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 @keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
 
 /* Sheets and cards, as in The Daily 15 */
-.sheet{position:fixed;inset:0;z-index:30;background:rgba(26,24,20,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.sheet{position:fixed;inset:0;z-index:30;background:rgba(26,24,20,.72);display:flex;align-items:center;justify-content:center;padding:16px}
 .sheet>.box2{background:var(--paper);border:3px double var(--ink);padding:18px;width:100%;max-width:400px;max-height:90%;overflow:auto;display:flex;flex-direction:column;gap:10px;box-shadow:6px 6px 0 rgba(0,0,0,.25);-webkit-user-select:text;user-select:text}
 .box2 h2{font-family:var(--head);font-weight:900;font-size:28px;margin:0;text-align:center;border-bottom:1px solid var(--ink);padding-bottom:6px}
 .box2 p{margin:0}
@@ -230,7 +230,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 #sndBtn{display:flex;align-items:center;gap:4px;background:transparent;border:1.5px solid var(--ink);border-radius:6px;padding:3px 6px;font:700 9px/1.1 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);cursor:pointer}
 #sndBtn span{font-size:11px}#sndBtn b{font-size:10px}#sndBtn.on{background:var(--ink);color:var(--card)}
 #menu h2{text-align:left}
-#hintBtn{font:800 16px var(--sans)}#hintBtn small{display:block;font:italic 12.5px var(--body);color:var(--ink2);margin-top:3px}
+.card.lock .face{background:var(--hi)}.card.lock::after{content:'💡';position:absolute;top:-9px;right:-7px;font-size:13px}#hintBtn{font:800 20px var(--sans);padding:14px 10px;justify-content:center}#foldAsk.hm #foldWarn,#foldAsk.hm #foldTbl{display:none}#foldAsk.hm #foldQ{font-size:21px!important;line-height:1.3;padding:4px 0}#hintBtn small{display:block;font:italic 12.5px var(--body);color:var(--ink2);margin-top:3px}
 #menu .sect{font:800 10px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);margin-top:4px;text-align:left}
 .go.try .play{flex:none;width:32px;height:32px;border-radius:50%;background:var(--ink);color:var(--hi);font:800 20px/30px var(--sans);text-align:center}
 .duo{display:grid;grid-template-columns:1fr 1fr;gap:8px}.duo .go{margin:0;font-size:13px;letter-spacing:.06em;padding-left:6px;padding-right:6px;white-space:nowrap}
@@ -323,7 +323,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
   <div id="hp2" hidden>
   <ul class="rules">
     <li><b>🃏 A, B, C, Deal ’Em:</b> a second deal every day, played like Texas Hold’em. You and the dealer share the board in the middle and each get 2 cards of your own. Your word must use at least one of them.</li>
-    <li><b>🏳️ Fold:</b> can't find a word? You get <b>1 💡 hint</b> a day: the Fold button is a Hint button until you use it. Pick any slot and see its letter; it costs one star. After that the button is Fold. Or give up the hand and see a word you could have played.</li>
+    <li><b>🏳️ Fold:</b> can't find a word? You get <b>1 💡 hint</b> a day: the Fold button is a Hint button until you use it. Pick any slot and see its letter; it locks there for the hand and costs one star. After that the button is Fold. Or give up the hand and see a word you could have played.</li>
     <li><b>💯 Perfect:</b> play the best word in every hand to score every possible point.</li>
     <li><b>📊 Difficulty:</b> a careful robot plays each deal ahead of time and rates it from Easy to Hard.</li>
     <li><b>🔥 Streak:</b> finish each day's deal on its day to build your streak. Archive deals played late don't count.</li>
@@ -497,7 +497,7 @@ function difficulty(day){const e=expectedWins(day);return e>=4?1:e>=3.5?2:e>=3?3
 function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/864e5)+1}
 //module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
 
-const VERSION='35',VDATE='Oct 30',GAME='abc';
+const VERSION='36',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -622,8 +622,12 @@ function checkStuck(){const h=H();clearTimeout(stuckT);if(h.done||busy)return fa
   if(DRAW_SWAP&&(!h.drew||!h.swapped)){const opt=!h.drew&&!h.swapped?'Draw or swap':!h.drew?'Draw':'Swap';$('preview').innerHTML=`<b>No ${LEN()}-letter word here.</b> ${opt}, or bust.`;return true}
   $('preview').innerHTML=`<b>No ${LEN()}-letter word${DRAW_SWAP?' still':''} in your hand.</b> You bust.`;busy=true;['drawBtn','swapBtn','mixBtn','clearBtn','foldBtn','goBtn'].forEach(id=>$(id).disabled=true);
   stuckT=setTimeout(()=>{busy=false;resolve(null)},1400);return true}
+/* A hinted letter locks to its slot for the rest of the hand */
+function applyLock(){const h=H(),k=h&&h.lock;if(!k||h.done)return;const at=sel.indexOf(k.c);if(at>=0&&at!==k.j)sel[at]=null;
+  for(let m=sel.length;m<k.j;m++)sel[m]=null;sel[k.j]=k.c}
+const locked=j=>{const h=H();return !!(h&&h.lock&&!h.done&&h.lock.j===j)};
 function render(deal){
-  const h=H(),len=LEN(),db=DAY.dealerBest[S.cur],cards=shown();
+  applyLock();const h=H(),len=LEN(),db=DAY.dealerBest[S.cur],cards=shown();
   /* Always the full name, so A, B, C, Deal ’Em keeps the brand */
   $('noLabel').textContent=GNAME();
   $('dateLabel').textContent=`No. ${dayNumber(DATE)} · `+new Date(DATE+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+(REPLAY?' · Replay':PAST?' · Late':'');
@@ -647,7 +651,7 @@ function render(deal){
   // word slots: exactly the length this hand needs
   const wr=$('wordRow');wr.innerHTML='';const w=h.done?(h.word||''):word(),slotL=i=>h.done?w[i]:(sel[i]!=null?S.cards[sel[i]]:null);
   if(h.done&&h.bust){const s=document.createElement('div');s.className='bust';s.textContent=h.fold?'FOLD':'BUST';wr.appendChild(s)}
-  else for(let i=0;i<len;i++){let el;const L=slotL(i);if(L){el=cardEl(L);if(!h.done){el.onclick=()=>{if(dragJust())return;if(hintMode)return revealAt(i);sel[i]=null;trimSel();sfx('take');render()};dragify(el,'word',i)}}else{el=document.createElement('div');el.className='slot';el.onclick=()=>{if(hintMode)revealAt(i)}}
+  else for(let i=0;i<len;i++){let el;const L=slotL(i);if(L){el=cardEl(L);if(locked(i)){el.classList.add('lock');el.onclick=()=>{if(hintMode){hintMode=false;render()}toast('Your hint letter stays put')}}else if(!h.done){el.onclick=()=>{if(dragJust())return;if(hintMode)return revealAt(i);sel[i]=null;trimSel();sfx('take');render()};dragify(el,'word',i)}}else{el=document.createElement('div');el.className='slot';el.onclick=()=>{if(hintMode)revealAt(i)}}
     if(hintMode&&!h.done)el.classList.add('pick');
     if(i===0&&MULT[S.cur]>1){el.classList.add('mx');el.dataset.m='×'+MULT[S.cur]}wr.appendChild(el)}
   // one quiet line: points so far and how many words are possible
@@ -686,6 +690,7 @@ function dragify(el,kind,i){
     end=ev=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',end);el.removeEventListener('pointercancel',end);wr.classList.remove('over');
       if(!on)return;dragT=Date.now();const x=ev.clientX,y=ev.clientY,ov=ev.type==='pointerup'&&overWord(x,y),j=ov?slotAt(x,mids):-1;
       const from=kind==='word'?i:sel.indexOf(i);   // the slot this card is in now, or -1 from your hand
+      if(locked(j)||locked(from)){sfx('nope');render();return}
       if(j<0){if(from>=0)sel[from]=null}
       else if(from>=0){[sel[from],sel[j]]=[sel[j]??null,sel[from]]}
       else sel[j]=i;                               // from your hand: fills the slot, or replaces the card there
@@ -696,7 +701,7 @@ function dragify(el,kind,i){
 function tapCard(i){const h=H();if(h.done||busy)return;if(hintMode){hintMode=false;render();return}
   if(swapMode){if(sel.includes(i))return;S.cards[i]=DAY.swapCard[S.cur];h.swapped=true;sfx('flip');swapMode=false;save();render();
     const el=$('handRow').children[i];el.classList.add('down');requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.remove('down')));toast(`Swapped for ${S.cards[i]} (−${SWAP_COST[S.cur]})`);return}
-  const k=sel.indexOf(i);if(k>=0){sel[k]=null;trimSel();sfx('take');render();return}
+  const k=sel.indexOf(i);if(locked(k)){toast('Your hint letter stays put');return}if(k>=0){sel[k]=null;trimSel();sfx('take');render();return}
   const j=freeSlot();if(j<0){sfx('nope');toast(`This hand is a ${LEN()}-letter word`);return}
   sel[j]=i;sfx('place');render()}
 function typeLetter(ch){const h=H(),j=freeSlot();if(h.done||busy||j<0)return;const i=S.cards.findIndex((c,k)=>c===ch&&!sel.includes(k));if(i>=0){sel[j]=i;sfx('place');render()}}
@@ -709,18 +714,18 @@ $('mixBtn').onclick=()=>{const h=H();if(h.done)return;const idx=S.cards.map((_,i
   const n=idx.length-HOLE,same=()=>idx.every((o,k)=>S.cards[o]===S.cards[k]);
   /* always show a new order, unless every card is the same letter */
   for(let t=0;t<20;t++){for(let i=n-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]]}if(!same())break}
-  sfx('shuffle');S.cards=idx.map(i=>S.cards[i]);const remap=Object.fromEntries(idx.map((old,nw)=>[old,nw]));sel=sel.map(i=>i==null?null:remap[i]);S.fresh=null;save();render(true);if(HOLDEM())[...$('handRow').children].forEach(el=>el.classList.remove('dealt'))};
+  sfx('shuffle');S.cards=idx.map(i=>S.cards[i]);const remap=Object.fromEntries(idx.map((old,nw)=>[old,nw]));sel=sel.map(i=>i==null?null:remap[i]);if(h.lock)h.lock.c=remap[h.lock.c];S.fresh=null;save();render(true);if(HOLDEM())[...$('handRow').children].forEach(el=>el.classList.remove('dealt'))};
 /* Fold asks first in a pop-up, like the hint pop-up in The Daily 15 */
 $('foldBtn').onclick=()=>{const h=H();if(h.done||busy)return;
   const w=wins(),left=S.hands.filter(x=>!x.done).length-1,n=countWords(S.cards,LEN());
   /* While hints are left, this button is Hint: the pop-up offers a letter first, with Fold below it */
   const hl=hintsLeft(),hm=hl>0&&n>0;
   $('foldH').textContent=hm?'💡 Hint':'🏳️ Fold';
-  $('foldQ').textContent=hm?`Stuck on hand ${S.cur+1}? Reveal a letter.`:`Give up hand ${S.cur+1}? The dealer wins it.`;
-  $('foldWarn').textContent=hm?(MAX_HINTS>1?`Each hint costs one star. ${hl} of ${MAX_HINTS} left today.`:'It costs one star. You get one hint a day.'):n?`There ${n>1?`are ${n} words`:'is 1 word'} in your hand.`:'';
-  $('foldTbl').innerHTML=(hintsLeft()>0&&n>0?'':`<p class="fine" style="margin:4px 0 0">${w} won so far, ${left} hand${left===1?'':'s'} left after this.</p>`)+$('starTbl').outerHTML.replace('id="starTbl"','');
-  $('hintBtn').hidden=!hm;$('hintBtn').innerHTML=`💡 Reveal a letter<small>Pick any slot and see its letter. −1 ⭐</small>`;
-  $('foldYes').className=hm?'go alt':'go';
+  $('foldQ').textContent=hm?'Reveal one letter for 1 ⭐':`Give up hand ${S.cur+1}? The dealer wins it.`;
+  $('foldWarn').textContent=hm?'':n?`There ${n>1?`are ${n} words`:'is 1 word'} in your hand.`:'';
+  $('foldTbl').innerHTML=hm?'':`<p class="fine" style="margin:4px 0 0">${w} won so far, ${left} hand${left===1?'':'s'} left after this.</p>`+$('starTbl').outerHTML.replace('id="starTbl"','');
+  $('hintBtn').hidden=!hm;$('hintBtn').textContent='💡 Reveal a letter';
+  $('foldAsk').classList.toggle('hm',hm);$('foldYes').className=hm?'go alt':'go';$('foldYes').textContent=hm?'Fold instead':'Fold this hand';
   only('foldAsk')};
 /* Hint: you pick a slot and it shows that slot's letter. The word is the common word that best fits the letters
    you already have in place, so a hint never undoes your work when it doesn't have to. */
@@ -737,7 +742,7 @@ function revealAt(j){hintMode=false;const h=H(),w=hintWord();if(!w){render();toa
   let c=free.length?free[free.length-1]:-1;
   if(c<0){const k=sel.findIndex((i,k)=>i!=null&&k!==j&&S.cards[i]===L&&w[k]!==L);if(k>=0){c=sel[k];sel[k]=null}}
   if(c<0){render();return}
-  sel[j]=c;trimSel();S.hints=hintsUsed()+1;h.hints=(h.hints||0)+1;save();sfx('place');render();toast(`Slot ${j+1} is ${L}`,1800)}
+  sel[j]=c;trimSel();S.hints=hintsUsed()+1;h.hints=(h.hints||0)+1;h.lock={j,c};save();sfx('place');render();toast(`Slot ${j+1} is ${L}`,1800)}
 $('foldYes').onclick=()=>{only('');resolve(null,true)};
 $('foldNo').onclick=()=>only('');
 $('goBtn').onclick=()=>{const h=H();if(busy)return;
