@@ -41,6 +41,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .box{display:flex;align-items:baseline;justify-content:center;gap:8px;border:2px solid var(--ink);padding:2px 12px;background:var(--card);min-width:84px}
 .box small{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
 .box b{font-family:var(--head);font-weight:900;font-size:20px;font-variant-numeric:tabular-nums}
+body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 #menuBtn{flex:none;width:34px;height:30px;padding:0;line-height:1;border-radius:4px;background:transparent;border:1.5px solid var(--ink);font-size:18px}
 
 /* Hand tracker */
@@ -422,7 +423,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 <script>
 /*WORDS*/
 /*LOGIC*/
-const VERSION='42',VDATE='Oct 30',GAME='abc';
+const VERSION='43',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -709,7 +710,7 @@ function recordDay(){const hist=store.json(KEY('hist'),{});const done=S.hands.fi
 
 /* ---------- Screens ---------- */
 let backTo='game';
-function only(id){document.querySelectorAll('.sheet').forEach(x=>x.hidden=x.id!==id);if(!id&&dealWaiting)dealHand()}
+function only(id){document.querySelectorAll('.sheet').forEach(x=>x.hidden=x.id!==id);document.body.classList.toggle('menuOpen',id==='menu');if(!id&&dealWaiting)dealHand()}
 /* Deal the hand like a dealer: one card at a time from the middle of the table, you then the dealer,
    face down, and your cards turn over as they land. Waits if a page is covering the table. */
 let dealWaiting=false;
@@ -848,7 +849,10 @@ $('helpMore').onclick=()=>{helpPage($('hp2').hidden?2:1);$('help').querySelector
 $('coverGo').onclick=()=>{backTo='game';if(finished())return showDone();if(!store.get('abc-seen',''))qOpen();else only('')};
 $('coverHow').onclick=()=>{backTo='cover';qOpen(true)};
 $('cvStats').onclick=$('coverStats').onclick=()=>{backTo='cover';showStats()};
-$('menuBtn').onclick=()=>{backTo='game';only('menu')};
+/* The menu button toggles: a second tap closes the menu and goes back to what was open before */
+let menuFrom='';
+$('menu').addEventListener('click',e=>{if(e.target.id==='menu')only(menuFrom)});
+$('menuBtn').onclick=()=>{if(!$('menu').hidden){only(menuFrom);return}const o=[...document.querySelectorAll('.sheet')].find(x=>!x.hidden);menuFrom=o?o.id:'';backTo='game';only('menu')};
 $('mBack').onclick=()=>only('');
 $('mCover').onclick=cover;
 $('mStats').onclick=()=>{backTo='game';showStats()};

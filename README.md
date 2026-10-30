@@ -151,3 +151,6 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 
 ## v42
 - A quick second tap (under 0.45 s) on a card you just placed no longer takes it back.
+
+## v43
+- ☰ toggles the menu: it stays on top of the open menu, and a second tap goes back to what was open before. Tapping the dimmed area outside the menu also closes it, like The Daily 15 v1.78.
