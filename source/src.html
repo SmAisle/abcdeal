@@ -65,6 +65,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 #handRow .card,#boardRow .card,#wordRow .card{touch-action:none}
 .card.drag{z-index:30;transition:none!important;pointer-events:none}.card.drag .face{box-shadow:4px 6px 0 rgba(0,0,0,.3)}
 #wordRow.over{outline:2px dashed var(--ink2);outline-offset:5px;border-radius:4px}
+#wordRow .card.tgt .face{background:var(--hi)}
 
 /* Cards: big letter, corner letter and points, like a deck of cards */
 .card{width:var(--w);height:calc(var(--w)*1.4);position:relative;perspective:600px;flex:none;border:0;padding:0;background:none}
@@ -302,7 +303,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
   <div id="hp1">
   <ul class="rules">
     <li><b>Goal:</b> beat the dealer in today's <b>5 hands</b>. Everyone gets the same cards, and so does the dealer.</li>
-    <li><b>Spell a word:</b> tap your cards to fill the slots, then tap <b>Play word</b>. Drag a card to move it, or tap it to take it back. Hand 1 needs <b>3 letters</b>, up to <b>7 letters</b> in hand 5.</li>
+    <li><b>Spell a word:</b> tap your cards to fill the slots, then tap <b>Play word</b>. Drag a card onto another to swap them, between two to slide it in, or tap it to take it back. Hand 1 needs <b>3 letters</b>, up to <b>7 letters</b> in hand 5.</li>
     <li><b>Cards:</b> 5 in hand 1, one more each hand, up to 9. The dealer shows you one card. There are always words to find, and your best word always beats the dealer's.</li>
     <li><b>Points:</b> add up the numbers on your cards. Your <b>first letter</b> counts ×1 in hand 1, up to <b>×5</b> in hand 5.<div class="pts">1: A E I L N O R S T U · 2: D G · 3: B C M P<br>4: F H V W Y · 5: K · 8: J X · 10: Q Z</div></li>
     <li><b>The dealer</b> flips its cards and plays its best word. Higher score wins; a tie is a push. No word? The dealer busts.</li>
@@ -410,7 +411,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 <script>
 /*WORDS*/
 /*LOGIC*/
-const VERSION='26',VDATE='Oct 30',GAME='abc';
+const VERSION='27',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -571,17 +572,22 @@ function render(deal){
    A press that doesn't move is still a tap. */
 let dragT=0;const dragJust=()=>Date.now()-dragT<350;
 function dropAt(x,skip){const cs=[...$('wordRow').querySelectorAll('.card')];let t=0;cs.forEach((c,j)=>{if(j===skip)return;const r=c.getBoundingClientRect();if(r.left+r.width/2<x)t++});return t}
+/* The word card under the finger (its middle 70%), for swapping; -1 when you're between cards */
+function onCard(x,skip){const cs=[...$('wordRow').querySelectorAll('.card')];for(let j=0;j<cs.length;j++){if(j===skip)continue;const r=cs[j].getBoundingClientRect();if(Math.abs(x-(r.left+r.width/2))<r.width*.35)return j}return -1}
 function overWord(x,y){const r=$('wordRow').getBoundingClientRect(),pad=r.height*.6;return y>r.top-pad&&y<r.bottom+pad&&x>r.left-30&&x<r.right+30}
 function dragify(el,kind,i){
   el.addEventListener('pointerdown',e=>{if(H().done||busy||swapMode||e.button>0)return;const sx=e.clientX,sy=e.clientY;let on=false;
     try{el.setPointerCapture(e.pointerId)}catch(_){}
     const wr=$('wordRow'),mv=ev=>{const dx=ev.clientX-sx,dy=ev.clientY-sy;if(!on&&Math.hypot(dx,dy)>8){on=true;el.classList.add('drag')}
       if(!on)return;ev.preventDefault();el.style.transform=`translate(${dx}px,${dy}px) scale(1.06)`;
-      const ov=overWord(ev.clientX,ev.clientY);wr.classList.toggle('over',ov)},
+      const ov=overWord(ev.clientX,ev.clientY);wr.classList.toggle('over',ov);
+      const tg=ov&&(kind==='word'||sel.includes(i)||sel.length>=LEN())?onCard(ev.clientX,kind==='word'?i:sel.indexOf(i)):-1;
+      [...wr.querySelectorAll('.card')].forEach((c,j)=>c.classList.toggle('tgt',j===tg))},
     end=ev=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',end);el.removeEventListener('pointercancel',end);wr.classList.remove('over');
       if(!on)return;dragT=Date.now();const x=ev.clientX,y=ev.clientY,ov=ev.type==='pointerup'&&overWord(x,y);
-      if(kind==='word'){const v=sel.splice(i,1)[0];if(ov)sel.splice(Math.min(dropAt(x,i),sel.length),0,v)}
-      else if(ov){const k=sel.indexOf(i);if(k>=0){sel.splice(k,1);sel.splice(Math.min(dropAt(x,k),sel.length),0,i)}
+      /* Dropped on another card in the word: the two swap places. Between cards: it slides in there. */
+      if(kind==='word'){const j=ov?onCard(x,i):-1;if(j>=0)[sel[i],sel[j]]=[sel[j],sel[i]];else{const v=sel.splice(i,1)[0];if(ov)sel.splice(Math.min(dropAt(x,i),sel.length),0,v)}}
+      else if(ov){const k=sel.indexOf(i),j=k>=0?onCard(x,k):-1;if(j>=0)[sel[k],sel[j]]=[sel[j],sel[k]];else if(k>=0){sel.splice(k,1);sel.splice(Math.min(dropAt(x,k),sel.length),0,i)}
         else if(sel.length<LEN())sel.splice(Math.min(dropAt(x,-1),sel.length),0,i);
         else{const cs=[...wr.querySelectorAll('.card')];let best=0,bd=1e9;cs.forEach((c,j)=>{const r=c.getBoundingClientRect(),d=Math.abs(r.left+r.width/2-x);if(d<bd){bd=d;best=j}});sel[best]=i}}
       sfx(ov?'place':kind==='word'?'take':'flip');render()};
