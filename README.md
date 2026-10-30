@@ -87,3 +87,8 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 ## v25
 - Sound, like The Daily 15: soft card snaps when cards are dealt, flipped, placed or taken back; a riffle for Shuffle; a buzz for a word that isn't allowed; chimes for a win, a dealer bust and a push, a falling pair of notes for a loss, and a short fanfare when you finish the day.
 - Sound: On/Off in the menu (saved as abc-sound). On by default.
+
+## v26
+- Play time: counted quietly while you're at the table on an unfinished hand (paused on other pages, between hands, and when the app is in the background). Never shown during play.
+- The results card says "4 of 5 hands won in 3:42", and the share text adds "⏱ 3:42".
+- Saved in history as t; sent in the check-in as a t map per day. The owner page's Last 14 days table has an Avg time column.
