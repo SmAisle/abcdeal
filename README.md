@@ -104,3 +104,7 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 
 ## v29
 - The Sound: On/Off toggle moved to the top-right corner of the menu, the same small chip as The Daily 15, and the Menu heading is left-aligned to match.
+
+## v30
+- Share text: the hands line now reads "4/5 hands won · ⏱ 3:42" on its own line under the squares, like The Daily 15's "12/15 words".
+- Place sound is option 2 from the sound board: a plain card snap.
