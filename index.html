@@ -74,7 +74,10 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .face .br{bottom:calc(var(--w)*.08);right:calc(var(--w)*.09);font-family:var(--sans);font-variant-numeric:tabular-nums}
 .backside{transform:rotateY(180deg);background:var(--card);border:1.5px solid var(--fade);background-image:repeating-linear-gradient(45deg,rgba(26,24,20,.09) 0 1px,transparent 1px 6px)}
 .backside::after{content:"";position:absolute;inset:3px;border:1px solid rgba(26,24,20,.18)}
-#handRow .card{transition:transform .15s,opacity .15s}
+#handRow .card,#boardRow .card{transition:transform .15s,opacity .15s}
+#boardRow .card.used{opacity:.22;transform:translateY(4px)}
+.holdem #handRow .card .face{box-shadow:3px 3px 0 var(--ink)}
+.holdem #handRow .card.used .face{box-shadow:none}
 #handRow .card.used{opacity:.22;transform:translateY(4px)}
 #handRow .card:not(.used):active{transform:translateY(-3px)}
 #handRow.swapping .card:not(.used) .face{box-shadow:0 0 0 3px var(--hi)}
@@ -106,6 +109,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 #bar button small{font-weight:700;margin-left:3px}
 #bar button:disabled{opacity:.35;cursor:default}
 #bar button.on{background:var(--hi)}
+#bar,.go{position:relative;z-index:2}
 .go{padding:12px;border:2px solid var(--ink);border-radius:3px;background:var(--ink);color:var(--paper);font-family:var(--sans);font-weight:800;font-size:16px;text-transform:uppercase;letter-spacing:.08em}
 .go.alt{background:var(--card);color:var(--ink)}
 .go:disabled{opacity:.35;cursor:default}
@@ -145,6 +149,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 #cvStats b{font-family:var(--head);font-weight:900;font-size:22px;line-height:1.1}
 #cvStats span{font-family:var(--sans);font-weight:800;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
 #cover .go{width:100%}
+#coverHold small{font-size:11px;letter-spacing:.08em;margin-left:6px;opacity:.75}
 .links{display:flex;gap:8px;align-items:center;justify-content:center;font-family:var(--sans);font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
 .links button{background:none;border:none;padding:6px 2px;font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--ink);text-decoration:underline}
 
@@ -202,6 +207,10 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
       <div class="row" id="dealerRow"></div>
       <div id="dealerWord"></div>
     </section>
+    <section class="seat" id="boardSeat" hidden>
+      <div class="label">The board</div>
+      <div class="row" id="boardRow"></div>
+    </section>
     <section class="middle">
       <div class="label" id="wordLabel"></div>
       <div class="row" id="wordRow"></div>
@@ -209,6 +218,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
     </section>
     <section class="seat">
       <div class="row" id="handRow"></div>
+      <div class="label" id="yourLabel" style="margin-top:6px" hidden>Your cards</div>
     </section>
     <div id="banner"></div>
   </main>
@@ -229,6 +239,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
   <div id="cvStreak" hidden></div>
   <button id="cvStats" hidden aria-label="Your stats"></button>
   <button class="go" id="coverGo">Play today's deal</button>
+  <button class="go alt" id="coverHold">Deal ’Em <small id="holdTag">🔒 Plus</small></button>
   <div class="links"><button id="coverStats">Stats</button><span>·</span><button id="coverHow">How to play</button></div>
   <div class="ver" id="cvVer"></div>
 </div></div>
@@ -255,6 +266,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
     <li><b>Difficulty:</b> a careful robot plays each deal ahead of time and rates it from Easy to Hard, like The Daily 15. You see it when you finish.</li>
     <li><b>Stars:</b> win hands to earn them.<table class="stars" id="starTbl"><tr><th>Hands won</th><th>3</th><th>4</th><th>5</th></tr><tr><th>Stars</th><td>⭐</td><td>⭐⭐</td><td>⭐⭐⭐</td></tr></table></li>
     <li><b>💯 Perfect:</b> play the best word in every hand to score every possible point.</li>
+    <li><b>Deal ’Em (Plus):</b> a second deal every day, played like Texas Hold’em. You and the dealer share the board in the middle and each get 2 cards of your own. Your word has to use at least one of your 2 cards.</li>
     <li><b>🔥 Streak:</b> finish each day's deal on its day to build your streak.</li>
     <li class="fine">The website version sends an anonymous check-in so we can count players: the day, hands played and the game version. Never your name, contacts or location.</li>
   </ul>
@@ -300,6 +312,16 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
   <button class="go alt" id="foldNo">No, keep playing</button>
 </div></div>
 
+<div class="sheet" id="plus" hidden><div class="box2" style="text-align:center">
+  <h2>A, B, C, Deal Plus</h2>
+  <p style="margin:0">Today's deal is always free. Plus adds:</p>
+  <ul class="rules" style="text-align:left"><li><b>A, B, C, Deal ’Em:</b> a second deal every day, played like Texas Hold’em. Shared cards in the middle, 2 cards of your own, and your word has to use at least one of them.</li><li>Its own stars, streak and stats.</li></ul>
+  <p style="margin:0;font-size:13px">One-time purchase. No subscription, no ads.</p>
+  <button class="go" id="buyBtn">Unlock Plus</button>
+  <button class="go alt" id="restoreBtn">Restore Purchases</button>
+  <button class="go alt" id="plusBack">Not now</button>
+</div></div>
+
 <div class="sheet" id="menu" hidden><div class="box2">
   <h2>Menu</h2>
   <button class="go" id="mBack">Back to the table</button>
@@ -335,7 +357,12 @@ const SIZES=[5,6,7,8,9]; /* cards dealt (you and the dealer): one more each hand
 const HANDS=LENGTHS.length;
 /* Draw and Swap cost more as hands are worth more: hand 1 is 2 and 1, hand 5 is 6 and 5. */
 const DRAW_COST=[2,3,4,5,6],SWAP_COST=[1,2,3,4,5];
-const EPOCH='2026-10-30';
+const EPOCH='2026-10-29';
+/* Hold'em (Plus): shared cards in the middle (3 in hand 1, up to 7 in hand 5) plus 2 private cards each.
+   In Hold'em, card arrays are [board..., your 2 cards] and a word must use at least one of your 2 cards.
+   HOLE is 0 in the regular game, so every rule below works the same as before. */
+let HOLE=0;
+function usesHole(c,letters){return !HOLE||!fits(c,count(letters.slice(0,-HOLE).join('')))}
 
 function unpack(obj){const all=[];for(const k in obj){const n=+k,s=obj[k];for(let i=0;i<s.length;i+=n)all.push(s.slice(i,i+n))}return all}
 const ALL=new Set(unpack(WORDS_ALL));
@@ -347,17 +374,17 @@ function score(word,h=0){if(!word)return 0;let s=0;for(const ch of word)s+=VALUE
 function isWord(w){return w.length>=3&&ALL.has(w)}
 /* Best common word for hand h (its length and first-letter multiplier): highest score, then alphabetical. */
 function best(letters,h){const len=LENGTHS[h];const have=count(letters.join(''));let bw='',bs=0;
-  for(const [w,c] of DEALER_LIST){if(w.length!==len||!fits(c,have))continue;const s=score(w,h);if(s>bs||(s===bs&&w<bw)){bw=w;bs=s}}
+  for(const [w,c] of DEALER_LIST){if(w.length!==len||!fits(c,have)||!usesHole(c,letters))continue;const s=score(w,h);if(s>bs||(s===bs&&w<bw)){bw=w;bs=s}}
   return {word:bw,score:bs}}
 /* Is there any word at all (full list) of exactly len letters in these cards? */
 const BY_LEN={};
 function anyWord(letters,len){if(!BY_LEN[len])BY_LEN[len]=[...ALL].filter(w=>w.length===len).map(count);const have=count(letters.join(''));
-  return BY_LEN[len].some(c=>fits(c,have))}
+  return BY_LEN[len].some(c=>fits(c,have)&&usesHole(c,letters))}
 /* How many common words of exactly len letters these cards can make */
 /* Points for every common word your cards can make this hand */
-function wordScores(letters,h){const len=LENGTHS[h],have=count(letters.join('')),out=[];for(const [w,c] of DEALER_LIST)if(w.length===len&&fits(c,have))out.push(score(w,h));return out}
+function wordScores(letters,h){const len=LENGTHS[h],have=count(letters.join('')),out=[];for(const [w,c] of DEALER_LIST)if(w.length===len&&fits(c,have)&&usesHole(c,letters))out.push(score(w,h));return out}
 const MIN_WORDS=4,WIN_SHARE=0.5;
-function countWords(letters,len){const have=count(letters.join(''));let n=0;for(const [w,c] of DEALER_LIST)if(w.length===len&&fits(c,have))n++;return n}
+function countWords(letters,len){const have=count(letters.join(''));let n=0;for(const [w,c] of DEALER_LIST)if(w.length===len&&fits(c,have)&&usesHole(c,letters))n++;return n}
 function removeLetters(cards,word){const left=cards.slice();for(const ch of word){const i=left.indexOf(ch);if(i>=0)left.splice(i,1)}return left}
 
 function hashStr(s){let h=1779033703^s.length;for(let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),3432918353);h=h<<13|h>>>19}return h>>>0}
@@ -369,16 +396,18 @@ function freshDeck(r){const d=[];for(const k in COUNTS)for(let i=0;i<COUNTS[k];i
    you have at least 4 common words in hands 1-4 and 2 in hand 5, your best word always beats the dealer's,
    but the dealer's word beats at least half of your words (so you have choices, and the dealer wins often). About 3 days in 10 the dealer busts on one
    hand (hands 2-5), meaning it has no word at all. */
+/* Your cards and the dealer's from a shuffled deck: n each, or in Hold'em a shared board of n-2 plus 2 each */
+function split(deck,n){if(!HOLE)return [deck.slice(0,n),deck.slice(n,2*n)];const b=n-HOLE,board=deck.slice(0,b);return [board.concat(deck.slice(b,b+HOLE)),board.concat(deck.slice(b+HOLE,b+2*HOLE))]}
 function dealDay(date){const bustHand=hashStr('bust|'+date)%10<3?1+hashStr('which|'+date)%4:-1;
   const day={you:[],dealer:[],yourBest:[],dealerBest:[],drawCard:[],swapCard:[]};
-  for(let h=0;h<HANDS;h++){const r=rng(hashStr('abcdeal3|'+date+'|'+h)),n=SIZES[h];let pick=null;
-    for(let tries=0;tries<4000&&!pick;tries++){const deck=freshDeck(r),you=deck.slice(0,n),dealer=deck.slice(n,2*n);
+  for(let h=0;h<HANDS;h++){const r=rng(hashStr((HOLE?'abcholdem|':'abcdeal3|')+date+'|'+h)),n=SIZES[h];let pick=null;
+    for(let tries=0;tries<4000&&!pick;tries++){const deck=freshDeck(r),[you,dealer]=split(deck,n);
       const y=best(you,h);if(!y.word)continue;const ys=wordScores(you,h),late=tries>=2000;
       if(ys.length<(h<HANDS-1?(late?3:MIN_WORDS):(late?1:2)))continue;const d=best(dealer,h);
       if(h===bustHand){if(d.word||anyWord(dealer,LENGTHS[h]))continue}
       else{if(!d.word)continue;const win=ys.filter(x=>x>d.score).length;if(win<1||(!late&&win>Math.max(1,Math.floor(ys.length*WIN_SHARE))))continue}
       pick={you,dealer,y,d,draw:deck[2*n],swap:deck[2*n+1]}}
-    if(!pick){const deck=freshDeck(r);pick={you:deck.slice(0,n),dealer:deck.slice(n,2*n),draw:deck[2*n],swap:deck[2*n+1]};pick.y=best(pick.you,h);pick.d=best(pick.dealer,h)}
+    if(!pick){const deck=freshDeck(r),[you,dealer]=split(deck,n);pick={you,dealer,draw:deck[2*n],swap:deck[2*n+1]};pick.y=best(pick.you,h);pick.d=best(pick.dealer,h)}
     day.you.push(pick.you);day.dealer.push(pick.dealer);day.yourBest.push(pick.y);day.dealerBest.push(pick.d);day.drawCard.push(pick.draw);day.swapCard.push(pick.swap)}
   day.bestTotal=day.yourBest.reduce((a,b)=>a+b.score,0);return day}
 
@@ -386,14 +415,14 @@ function dealDay(date){const bustHand=hashStr('bust|'+date)%10<3?1+hashStr('whic
    of the common words it can make. Expected hands won: 4+ = 1, 3.5+ = 2, 3+ = 3, 2.5+ = 4, less = 5. */
 const DIFFW=['','Easy','Gentle','Medium','Tough','Hard'];
 function expectedWins(day){let E=0;for(let h=0;h<HANDS;h++){const have=count(day.you[h].join(''));
-    const ws=DEALER_LIST.filter(([w,c])=>w.length===LENGTHS[h]&&fits(c,have)).map(([w])=>score(w,h)).sort((a,b)=>b-a);
+    const ws=DEALER_LIST.filter(([w,c])=>w.length===LENGTHS[h]&&fits(c,have)&&usesHole(c,day.you[h])).map(([w])=>score(w,h)).sort((a,b)=>b-a);
     const top=ws.slice(0,Math.ceil(ws.length/2)),d=day.dealerBest[h];if(top.length)E+=top.filter(x=>!d.word||x>d.score).length/top.length}
   return E}
 function difficulty(day){const e=expectedWins(day);return e>=4?1:e>=3.5?2:e>=3?3:e>=2.5?4:5}
 function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/864e5)+1}
-//module.exports={difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
+//module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
 
-const VERSION='17',VDATE='Oct 30',GAME='abc';
+const VERSION='18',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -406,12 +435,12 @@ function trimMap(m){const k=Object.keys(m).sort();while(k.length>60)delete m[k.s
 /* kind: 'open' or 'hand'. Opens and hands are counted per day in small maps, plus hands won (w),
    points (p) and difficulty (d) for each day you finish, like The Daily 15's owner page. */
 async function checkIn(kind){
-  if(!agreed())return;
+  if(!agreed()||HOLDEM())return;
   const day=today(),u=store.json('abc-usage',{first:day,days:0,opens:0,hands:0,wins:0,o:{},h:{}});u.w=u.w||{};u.p=u.p||{};u.d=u.d||{};
   if(!u.o[day]){u.days++;u.o[day]=0}
   if(kind==='open'){u.opens++;u.o[day]++}
   if(kind==='hand'){u.hands++;u.h[day]=(u.h[day]||0)+1}
-  const hist=store.json('abc-hist',{}),hd=hist[day];
+  const hist=store.json(KEY('hist'),{}),hd=hist[day];
   if(hd&&(hd.r||'').length>=HANDS&&DAY&&DATE===day){u.w[day]=hd.w;u.p[day]=hd.p;u.d[day]=difficulty(DAY)}
   [u.o,u.h,u.w,u.p,u.d].forEach(trimMap);u.wins=Object.values(hist).reduce((a,d)=>a+(d.w||0),0);
   store.put('abc-usage',u);
@@ -437,15 +466,18 @@ function streaks(hist){const days=Object.keys(hist).filter(k=>(hist[k].r||'').le
 
 /* ---------- Game state ---------- */
 /* S.cards is your live hand: a fresh deal each hand (DAY.you), which you can shuffle. */
+/* Two games: the regular deal (free) and Hold'em (Plus). Each keeps its own day, results and streak. */
+let MODE='deal';const HOLDEM=()=>MODE==='holdem',KEY=k=>(HOLDEM()?'abch-':'abc-')+k,GNAME=()=>HOLDEM()?'A, B, C, Deal ’Em':'A, B, C, Deal';
+function setMode(m){MODE=m;HOLE=m==='holdem'?2:0;loadDay()}
 let DATE=today(),DAY=null,S=null,sel=[],swapMode=false,busy=false;
 function loadDay(){DATE=today();DAY=dealDay(DATE);REPLAY=false;
-  S=store.json('abc-day8',null);
+  S=store.json(KEY('day8'),null);
   if(!S||S.date!==DATE){S={date:DATE,cur:0,cards:[],hands:[]};refill()}
   for(let h=0;h<HANDS;h++)if(!S.hands[h])S.hands[h]={drew:false,swapped:false,done:false};
   sel=[];swapMode=false;save()}
 /* Replay, like The Daily 15: after finishing, play today's deal again for fun. It is never saved and doesn't count. */
 let REPLAY=false;
-function save(){if(!REPLAY)store.put('abc-day8',S)}
+function save(){if(!REPLAY)store.put(KEY('day8'),S)}
 function startReplay(){REPLAY=true;S={date:DATE,cur:0,cards:[],hands:[]};refill();for(let h=0;h<HANDS;h++)S.hands[h]={drew:false,swapped:false,done:false};
   sel=[];$('banner').classList.remove('on');dealWaiting=true;only('')}
 function refill(){S.cards=DAY.you[S.cur].slice()}
@@ -473,22 +505,25 @@ function checkStuck(){const h=H();clearTimeout(stuckT);if(h.done||busy)return fa
   stuckT=setTimeout(()=>{busy=false;resolve(null)},1400);return true}
 function render(deal){
   const h=H(),len=LEN(),db=DAY.dealerBest[S.cur],cards=shown();
-  $('noLabel').textContent=`Deal No. ${dayNumber(DATE)}${REPLAY?' · Replay':''}`;
+  $('noLabel').textContent=`${HOLDEM()?'Deal ’Em':'Deal'} No. ${dayNumber(DATE)}${REPLAY?' · Replay':''}`;
   $('dateLabel').textContent=new Date(DATE+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
   $('tracker').innerHTML=S.hands.map((x,i)=>`<div class="pip ${x.done?x.result:''} ${i===S.cur&&!x.done?'now':''}" title="Hand ${i+1}: ${LENGTHS[i]} letters">${x.done?x.result:LENGTHS[i]}</div>`).join('');
   $('totalPts').textContent=totalPts();
   $('wordLabel').textContent=`Hand ${S.cur+1} · ${len} letters`;
-  fit($('dealerRow'),SIZES[S.cur],50);fitHand(cards.length);fit($('wordRow'),len,64);
+  const B=cards.length-HOLE;document.body.classList.toggle('holdem',HOLDEM());$('boardSeat').hidden=$('yourLabel').hidden=!HOLDEM();
+  /* Deal 'Em has four rows of cards, so they shrink to fit the table's height too */
+  const k=HOLDEM()?Math.max(.4,Math.min(1,($('table').clientHeight-200)/(1.4*(56+62+64+74)))):1;
+  if(HOLDEM()){fit($('dealerRow'),HOLE,56*k);fit($('boardRow'),B,62*k);fit($('handRow'),HOLE,74*k)}else{fit($('dealerRow'),SIZES[S.cur],50);fitHand(cards.length)}fit($('wordRow'),len,64*k);
   // dealer: one card up until you play
   const dr=$('dealerRow');dr.innerHTML='';
   const fly=deal==='deal'&&!h.done,mix=deal&&!fly;
-  DAY.dealer[S.cur].forEach((c,i)=>{const up=h.done||i===0,el=cardEl(c,{down:fly||!up,cls:mix?'dealt':''});if(fly&&up)el.dataset.up=1;if(mix)el.style.animationDelay=(i*40)+'ms';dr.appendChild(el)});
+  (HOLDEM()?DAY.dealer[S.cur].slice(-HOLE):DAY.dealer[S.cur]).forEach((c,i)=>{const up=h.done||(i===0&&!HOLDEM()),el=cardEl(c,{down:fly||!up,cls:mix?'dealt':''});if(fly&&up)el.dataset.up=1;if(mix)el.style.animationDelay=(i*40)+'ms';dr.appendChild(el)});
   $('dealerScore').textContent=h.done?(db.word?db.score+' pts':'bust'):'';
   $('dealerWord').innerHTML=h.done?(db.word?`plays <b>${db.word}</b>`:`<b>BUST</b> · no ${len}-letter word`):'';
   // your hand
-  const hr=$('handRow');hr.innerHTML='';hr.classList.toggle('swapping',swapMode);
+  const hr=$('handRow'),br=$('boardRow');hr.innerHTML='';br.innerHTML='';hr.classList.toggle('swapping',swapMode);
   cards.forEach((c,i)=>{const el=cardEl(c,{down:fly,cls:((h.done?(h.used||[]).includes(i):sel.includes(i))?'used':'')+(mix?' dealt':'')});
-    if(fly)el.dataset.up=1;if(mix)el.style.animationDelay=(280+i*45)+'ms';el.setAttribute('role','button');el.setAttribute('aria-label',`${c}, ${VALUES[c]} points`);el.onclick=()=>tapCard(i);hr.appendChild(el)});
+    if(fly)el.dataset.up=1;if(mix)el.style.animationDelay=(280+i*45)+'ms';el.setAttribute('role','button');el.setAttribute('aria-label',`${c}, ${VALUES[c]} points`);el.onclick=()=>tapCard(i);(HOLDEM()&&i<B?br:hr).appendChild(el)});
   // word slots: exactly the length this hand needs
   const wr=$('wordRow');wr.innerHTML='';const w=h.done?(h.word||''):word();
   if(h.done&&h.bust){const s=document.createElement('div');s.className='bust';s.textContent=h.fold?'FOLD':'BUST';wr.appendChild(s)}
@@ -521,9 +556,12 @@ $('drawBtn').onclick=()=>{const h=H();if(h.done||h.drew||busy)return;swapMode=fa
   $('handRow').lastChild.classList.add('dealt');toast(`Drew ${S.cards[S.cards.length-1]} (−${DRAW_COST[S.cur]})`)};
 $('clearBtn').onclick=()=>{sel=[];swapMode=false;render()};
 $('swapBtn').onclick=()=>{const h=H();if(h.done||h.swapped||busy)return;swapMode=!swapMode;render()};
+/* Shuffle: your cards, or in Hold'em the shared board (your 2 cards stay put) */
 $('mixBtn').onclick=()=>{const h=H();if(h.done)return;const idx=S.cards.map((_,i)=>i);
-  for(let i=idx.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]]}
-  S.cards=idx.map(i=>S.cards[i]);const remap=Object.fromEntries(idx.map((old,nw)=>[old,nw]));sel=sel.map(i=>remap[i]);S.fresh=null;save();render(true)};
+  const n=idx.length-HOLE,same=()=>idx.every((o,k)=>S.cards[o]===S.cards[k]);
+  /* always show a new order, unless every card is the same letter */
+  for(let t=0;t<20;t++){for(let i=n-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]]}if(!same())break}
+  S.cards=idx.map(i=>S.cards[i]);const remap=Object.fromEntries(idx.map((old,nw)=>[old,nw]));sel=sel.map(i=>remap[i]);S.fresh=null;save();render(true);if(HOLDEM())[...$('handRow').children].forEach(el=>el.classList.remove('dealt'))};
 /* Fold asks first in a pop-up, like the hint pop-up in The Daily 15 */
 $('foldBtn').onclick=()=>{const h=H();if(h.done||busy)return;
   const w=wins(),left=S.hands.filter(x=>!x.done).length-1,n=countWords(S.cards,LEN());
@@ -539,6 +577,7 @@ $('goBtn').onclick=()=>{const h=H();if(busy)return;
   play()};
 function play(){const w=word();if(w.length!==LEN())return;
   if(!isWord(w)){toast('Not in word list');$('wordRow').classList.remove('shake');void $('wordRow').offsetWidth;$('wordRow').classList.add('shake');return}
+  if(HOLDEM()&&!sel.some(i=>i>=S.cards.length-HOLE)){toast('Use at least one of your 2 cards');$('wordRow').classList.remove('shake');void $('wordRow').offsetWidth;$('wordRow').classList.add('shake');return}
   resolve(w)}
 /* w is your word, or null for a bust (no word possible) or a fold (gave up). Either loses the hand and throws away your cards. */
 function resolve(w,fold){const h=H();h.fold=!!fold;busy=true;swapMode=false;const d=DAY.dealerBest[S.cur];
@@ -556,8 +595,8 @@ function showBanner(h){const b=$('banner'),d=DAY.dealerBest[S.cur];
   const vs=h.bust?`Dealer ${d.word?d.score:'busts too'}`:`You ${h.net} · Dealer ${d.word?d.score:'bust'}`;
   b.className='on '+h.result;b.innerHTML=`<h3>${title}</h3><div class="vs">${vs}</div>${tip?`<div class="tip">${tip}</div>`:''}`;
   /* stays up until Next hand */}
-function recordDay(){const hist=store.json('abc-hist',{});const done=S.hands.filter(x=>x.done);
-  hist[DATE]={w:done.filter(x=>x.result==='W').length,p:done.reduce((a,x)=>a+x.net,0),r:done.map(x=>x.result).join(''),b:DAY.bestTotal};store.put('abc-hist',hist)}
+function recordDay(){const hist=store.json(KEY('hist'),{});const done=S.hands.filter(x=>x.done);
+  hist[DATE]={w:done.filter(x=>x.result==='W').length,p:done.reduce((a,x)=>a+x.net,0),r:done.map(x=>x.result).join(''),b:DAY.bestTotal};store.put(KEY('hist'),hist)}
 
 /* ---------- Screens ---------- */
 let backTo='game';
@@ -568,29 +607,33 @@ let dealWaiting=false;
 function dealHand(){const covered=[...document.querySelectorAll('.sheet')].some(x=>!x.hidden);
   dealWaiting=covered&&!H().done;if(covered||H().done||matchMedia('(prefers-reduced-motion:reduce)').matches){render();return}
   render('deal');const t=$('table'),tr=t.getBoundingClientRect(),ox=tr.left+tr.width/2,oy=tr.top+tr.height/2;
-  const you=[...$('handRow').children],dl=[...$('dealerRow').children],order=[];
+  const you=[...$('handRow').children],dl=[...$('dealerRow').children],bd=[...$('boardRow').children],order=[],at=[];let tt=0;
   for(let i=0;i<Math.max(you.length,dl.length);i++){if(you[i])order.push(you[i]);if(dl[i])order.push(dl[i])}
-  const step=Math.min(90,1400/order.length),dur=340;t.style.pointerEvents='none';
+  const step=Math.min(90,1400/order.length),dur=340;order.forEach((_,k)=>at.push(k*step));tt=order.length*step;
+  /* Hold'em: then the flop (3 cards), the turn and the river land on the board */
+  if(HOLDEM()){tt+=250;bd.forEach((el,i)=>{order.push(el);at.push(tt);tt+=i<2?110:i===2?450:380})}
+  t.style.pointerEvents='none';
   order.forEach((el,k)=>{const r=el.getBoundingClientRect(),dx=ox-(r.left+r.width/2),dy=oy-(r.top+r.height/2);
-    el.animate([{transform:`translate(${dx}px,${dy}px) rotate(${(k*7)%15-7}deg)`},{transform:'none'}],{duration:dur,delay:k*step,easing:'cubic-bezier(.2,.8,.3,1)',fill:'backwards'});
-    if(el.dataset.up)setTimeout(()=>el.classList.remove('down'),k*step+dur-60)});
-  setTimeout(()=>{t.style.pointerEvents='';render()},order.length*step+dur+400)}
+    el.animate([{transform:`translate(${dx}px,${dy}px) rotate(${(k*7)%15-7}deg)`},{transform:'none'}],{duration:dur,delay:at[k],easing:'cubic-bezier(.2,.8,.3,1)',fill:'backwards'});
+    if(el.dataset.up)setTimeout(()=>el.classList.remove('down'),at[k]+dur-60)});
+  setTimeout(()=>{t.style.pointerEvents='';render()},tt+dur+400)}
 function goBack(){if(backTo==='cover')cover();else only('')}
 function finished(){return S.hands.every(x=>x.done)}
 function wins(){return S.hands.filter(x=>x.result==='W').length}
 function nextDeal(){const n=new Date();const m=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1);const s=Math.max(0,Math.floor((m-n)/1000));
   return [Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(x=>String(x).padStart(2,'0')).join(':')}
-function allStats(){const hist=store.json('abc-hist',{}),days=Object.entries(hist).filter(([k,d])=>(d.r||'').length>=HANDS);
+function allStats(){const hist=store.json(KEY('hist'),{}),days=Object.entries(hist).filter(([k,d])=>(d.r||'').length>=HANDS);
   let stars=0,three=0,hands=0,won=0,bestDay=0;for(const [,d] of days){const st=starsFor(d.w);stars+=st;if(st===3)three++;hands+=d.r.length;won+=d.w;bestDay=Math.max(bestDay,d.p||0)}
   const sk=streaks(hist);return {played:days.length,stars,three,pct:hands?Math.round(won/hands*100)+'%':'–',bestDay,cur:sk.cur,best:sk.max}}
-function cover(){const s=allStats();
+function cover(){if(HOLDEM())setMode('deal');const s=allStats();
   $('cvDate').textContent=new Date(DATE+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
   $('cvNo').textContent='Deal No. '+dayNumber(DATE);$('cvVer').textContent=`v${VERSION} · ${VDATE}`;
+  $('holdTag').textContent=hasPlus()?(holdStatus()||'New'):'🔒 Plus';
   $('coverGo').textContent=finished()?"See today's result":S.hands.some(x=>x.done)?'Keep playing':"Play today's deal";
   const doneToday=finished();$('cvStreak').hidden=!s.cur;$('cvStreak').textContent='🔥 '+s.cur+'-day streak'+(doneToday?'':' · play today to keep it');
   $('cvStats').hidden=!s.played;if(s.played)$('cvStats').innerHTML=[[s.stars,'⭐ Stars'],[s.played,'Played'],[s.three,'⭐⭐⭐'],[s.best,'Best streak']].map(([v,l])=>`<div><b>${v}</b><span>${l}</span></div>`).join('');
   only('cover')}
-function showStats(){const s=allStats(),hist=store.json('abc-hist',{}),dd=n=>n+' day'+(n===1?'':'s');
+function showStats(){const s=allStats(),hist=store.json(KEY('hist'),{}),dd=n=>n+' day'+(n===1?'':'s');
   $('statStreak').innerHTML=`<div><em>🔥</em>Current streak:<b>${dd(s.cur)}</b></div><div><em></em>Best streak:<b>${dd(s.best)}</b></div>`;
   let wp=0,ws=0,W='';for(let i=6;i>=0;i--){const d=new Date(Date.parse(DATE+'T12:00:00')-i*864e5);const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
     const r=hist[k],wd=d.toLocaleDateString('en-US',{weekday:'short'}).toUpperCase();
@@ -602,7 +645,7 @@ function showStats(){const s=allStats(),hist=store.json('abc-hist',{}),dd=n=>n+'
 /* Difficulty, shown the same way as The Daily 15 */
 function diffHTML(d){return `Difficulty<span class="dbox">${[1,2,3,4,5].map(k=>`<i${k<=d?' class="on"':''}></i>`).join('')}</span>${DIFFW[d]}`}
 function shareText(){const r=S.hands.map(x=>x.done?{W:'🟩',L:'🟥',P:'🟨'}[x.result]:'⬜').join('');const st=starsFor(wins());
-  return `A, B, C, Deal No. ${dayNumber(DATE)}${st?' '+starStr(st):''}\n${r} ${wins()}/${HANDS}\n${totalPts()} of ${DAY.bestTotal} points${totalPts()>=DAY.bestTotal?' 💯':''}\nsmaisle.app`}
+  return `${GNAME()} No. ${dayNumber(DATE)}${st?' '+starStr(st):''}\n${r} ${wins()}/${HANDS}\n${totalPts()} of ${DAY.bestTotal} points${totalPts()>=DAY.bestTotal?' 💯':''}\nsmaisle.app`}
 function showDone(){const w=wins(),st=starsFor(w),s=allStats();
   $('doneTitle').textContent=w===5?'Perfect deal!':w>=4?'Hot table!':w>=3?'You beat the house':w===2?'Close one':'The house wins';
   $('doneBig').textContent=st?starStr(st):'No stars today';$('doneBig').style.fontSize=st?'':'18px';
@@ -618,6 +661,14 @@ $('shareBtn').onclick=async()=>{const t=shareText();
   try{await navigator.clipboard.writeText(t);toast('Copied. Paste it in a text.')}catch(e){const ta=$('shareText');ta.hidden=false;ta.value=t;ta.focus();ta.select();toast('Select and copy the text above')}};
 $('lookBtn').onclick=()=>only('');
 $('replayBtn').onclick=startReplay;
+/* Plus, like Daily 15 Plus: a one-time purchase in the App Store app (window.ABC_APP). The website stays free, so Deal 'Em is open to everyone there. */
+function hasPlus(){return !window.ABC_APP||!!window.ABC_APP.plus}
+function holdStatus(){let k=null;try{k=JSON.parse(localStorage.getItem('abch-day8')||'null')}catch(e){}if(!k||k.date!==today())return '';const n=(k.hands||[]).filter(x=>x.done).length;return n>=HANDS?'Done ✓':n?'Keep playing':''}
+function showPlus(){only('plus')}
+function playHoldem(){if(!hasPlus())return showPlus();backTo='game';setMode('holdem');if(finished())return showDone();dealWaiting=true;only('')}
+$('coverHold').onclick=playHoldem;
+$('buyBtn').onclick=$('restoreBtn').onclick=()=>toast('Plus comes with the App Store app');
+$('plusBack').onclick=()=>cover();
 $('doneStats').onclick=()=>{backTo='done';showStats()};
 $('statsBack').onclick=()=>{if(backTo==='done')only('done');else goBack()};
 
