@@ -248,7 +248,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
   <ul class="rules">
     <li><b>Goal:</b> beat the dealer in today's <b>5 hands</b>. Everyone gets the same cards.</li>
     <li><b>Spell a word:</b> tap your cards to fill the slots, then tap <b>Play word</b>. Hand 1 needs <b>3 letters</b>, then 4, 5, 6 and <b>7 letters</b> in hand 5.</li>
-    <li><b>Cards:</b> 5 in hand 1, one more each hand, up to 9. The dealer gets the same number and shows you one card. There are always at least two common words to find.</li>
+    <li><b>Cards:</b> 5 in hand 1, one more each hand, up to 9. The dealer gets the same number and shows you one card. There are always at least 4 common words to find (2 in hand 5), and your best word always beats the dealer's.</li>
     <li><b>Points:</b> add up the numbers on your cards. Your <b>first letter</b> counts ×1 in hand 1, ×2 in hand 2, up to <b>×5</b> in hand 5.<div class="pts">1: A E I L N O R S T U · 2: D G · 3: B C M P<br>4: F H V W Y · 5: K · 8: J X · 10: Q Z</div></li>
     <li><b>The dealer</b> flips its cards and plays its best word. Higher score wins the hand; a tie is a push. No word for the dealer? It busts and you win.</li>
     <li><b>Stuck?</b> Can't find a word? Tap <b>Fold</b> to give up the hand.</li>
@@ -325,7 +325,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 <script>
 /*WORDS*/
 /*LOGIC*/
-const VERSION='15',VDATE='Oct 30',GAME='abc';
+const VERSION='16',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
