@@ -30,3 +30,7 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 
 ## v13
 - Fold opens a pop-up first (like the hint pop-up in The Daily 15): how many words are in your hand, hands won so far, and the star table.
+
+## v14
+- After you fold, the result shows a word you could have played and its points.
+- ABC-Deal-invite.pdf: one-page friends and family invite with a QR code to smaisle.github.io/abcdeal.
