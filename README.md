@@ -179,3 +179,6 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 ## v51
 - The "N words possible" count under the cards now uses the whole dictionary, so every usable word counts (today's last hand shows 4: WHATNOT, ETHANOL, ANETHOL, TOWNLET). A hand with none says "no words possible".
 - Hints still pick a common word first, and fall back to the full dictionary when no common word fits.
+
+## Invite gate
+On smaisle.github.io the page loads `https://smaisle.github.io/gate.js`, which asks for an invite code made on the smAisle stats page (this game's code, or an every-game code) and remembers it per browser. smaisle.app passes the code along as `?code=`, so it opens straight away. A soft lock only.
