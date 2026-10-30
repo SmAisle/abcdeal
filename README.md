@@ -1,2 +1,22 @@
-# abcdeal
-abcdeal
+# A, B, C, Deal
+
+A daily word game in the style of the NYT games, played like blackjack with letter cards. Five hands a day, the same deal for everyone, with a share grid, streaks and a countdown to the next deal.
+
+- Word length by hand: 3, 4, 5, 6, 7 letters. Cards dealt: 5, 6, 7, 8, 9 (you and the dealer). A fresh deal every hand, the same for everyone.
+- Score = letter points, and the first letter counts ×1 to ×5 by hand.
+- Every deal is checked: you always have at least one common word, and your best word beats the dealer's best by a little, so a perfect day is possible. About 3 days in 10 the dealer busts (has no word) on one hand.
+- Before you play it shows how many common words your cards make; after the hand, what the best word was worth. Results and share show "X of Y possible points".
+- Fold gives up a hand. Draw and Swap are turned off (DRAW_SWAP=false in src.html).
+
+- Version shows in the menu, How to Play and the stats sheet (v9 · Oct 30).
+- `index.html` is the whole game (built from `source/` with `python3 source/build.py`). Words: ENABLE list (public domain) for checking your word; the dealer, word counts and "best word" use a common-word list (The Daily 15 list for 3-4 letters, plus frequent ENABLE words for 5-7 letters, with rude words removed).
+
+## Usage
+
+After agreeing to the terms, the website version (github.io or smaisle.app) sends an anonymous check-in to Firebase project `aislerun-88e79`, collection `abc_devices`, when the game opens and after each hand: version, opens, hands, wins, days finished, best day, streak, terms date, desk, plus two small per-day maps (`o` = opens, `h` = hands played; last 60 days). The Claude-link version doesn't check in. No Firestore rules change needed.
+
+`owner.html` (sign in with Jeff's Google account) shows devices opened and played today, per-day opens/plays/finishes for 14 days, hands won %, streaks, versions and phone vs computer.
+
+## Ideas for later
+
+- Texas Hold'em mode: a few shared face-up cards in the middle plus a couple of private cards each, so you and the dealer race to the best word from the same pool. Jeff likes it; holding off for now (Oct 30).
