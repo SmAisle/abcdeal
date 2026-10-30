@@ -438,7 +438,7 @@ function difficulty(day){const e=expectedWins(day);return e>=4?1:e>=3.5?2:e>=3?3
 function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/864e5)+1}
 //module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
 
-const VERSION='19',VDATE='Oct 30',GAME='abc';
+const VERSION='20',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -516,7 +516,7 @@ function starStr(n){return n?'⭐'.repeat(n):''}
 /* Size cards so n of them fit across the table */
 function fit(row,n,max){const W=$('table').clientWidth-4,g=n>7?4:6;row.style.gap=g+'px';const w=Math.max(26,Math.min(max,Math.floor((W-g*(n-1))/n)));row.style.setProperty('--w',w+'px');return w}
 /* Your hand: one row while the cards stay big; otherwise two rows of bigger cards */
-function fitHand(n){const hr=$('handRow'),one=fit(hr,n,74);if(one>=56||n<6){hr.classList.remove('two');hr.style.maxWidth='';return}const per=Math.ceil(n/2),w=fit(hr,per,74);hr.style.maxWidth=(w*per+6*(per-1)+2)+'px';hr.classList.add('two')}
+function fitHand(n,k=1){const hr=$('handRow'),one=fit(hr,n,74*k);if(one>=56*k||n<6){hr.classList.remove('two');hr.style.maxWidth='';return}const per=Math.ceil(n/2),w=fit(hr,per,74*k);hr.style.maxWidth=(w*per+6*(per-1)+2)+'px';hr.classList.add('two')}
 let stuckT=0;
 function checkStuck(){const h=H();clearTimeout(stuckT);if(h.done||busy)return false;if(anyWord(S.cards,LEN()))return false;
   if(DRAW_SWAP&&(!h.drew||!h.swapped)){const opt=!h.drew&&!h.swapped?'Draw or swap':!h.drew?'Draw':'Swap';$('preview').innerHTML=`<b>No ${LEN()}-letter word here.</b> ${opt}, or bust.`;return true}
@@ -530,9 +530,9 @@ function render(deal){
   $('totalPts').textContent=totalPts();
   $('wordLabel').textContent=`Hand ${S.cur+1} · ${len} letters`;
   const B=cards.length-HOLE;document.body.classList.toggle('holdem',HOLDEM());$('boardSeat').hidden=$('yourLabel').hidden=!HOLDEM();
-  /* Deal 'Em has four rows of cards, so they shrink to fit the table's height too */
-  const k=HOLDEM()?Math.max(.4,Math.min(1,($('table').clientHeight-200)/(1.4*(56+62+64+74)))):1;
-  if(HOLDEM()){fit($('dealerRow'),HOLE,56*k);fit($('boardRow'),B,62*k);fit($('handRow'),HOLE,74*k)}else{fit($('dealerRow'),SIZES[S.cur],50);fitHand(cards.length)}fit($('wordRow'),len,64*k);
+  /* Card sizes: as wide as the table allows, scaled by k when the screen is short (see the end of render) */
+  const size=k=>{if(HOLDEM()){fit($('dealerRow'),HOLE,56*k);fit($('boardRow'),B,62*k);fit($('handRow'),HOLE,74*k)}else{fit($('dealerRow'),SIZES[S.cur],50*k);fitHand(cards.length,k)}fit($('wordRow'),len,64*k)};
+  size(1);
   // dealer: one card up until you play
   const dr=$('dealerRow');dr.innerHTML='';
   const fly=deal==='deal'&&!h.done,mix=deal&&!fly;
@@ -561,6 +561,8 @@ function render(deal){
   if(!h.done){g.textContent=w.length<len?`Play word (${w.length}/${len})`:'Play word';g.disabled=busy||w.length!==len}
   else if(S.hands.every(x=>x.done)){g.textContent='See today’s result';g.disabled=false}
   else{g.textContent='Next hand';g.disabled=false}
+  /* Short screens (a phone with 8 or 9 cards, or Deal 'Em's four rows): shrink every card until the table fits above the buttons */
+  const t=$('table');for(let k=.92;k>.4&&t.scrollHeight>t.clientHeight+1;k-=.06)size(k);
   if(!h.done&&!busy)checkStuck();
 }
 /* ---------- Actions ---------- */
