@@ -485,7 +485,7 @@ function difficulty(day){const e=expectedWins(day);return e>=4?1:e>=3.5?2:e>=3?3
 function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/864e5)+1}
 //module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,isWord,best,dealDay,dayNumber,removeLetters,HANDS};
 
-const VERSION='25',VDATE='Oct 30',GAME='abc';
+const VERSION='26',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -499,19 +499,19 @@ function trimMap(m){const k=Object.keys(m).sort();while(k.length>60)delete m[k.s
    points (p) and difficulty (d) for each day you finish, like The Daily 15's owner page. */
 async function checkIn(kind){
   if(!agreed()||HOLDEM())return;
-  const day=today(),u=store.json('abc-usage',{first:day,days:0,opens:0,hands:0,wins:0,o:{},h:{}});u.w=u.w||{};u.p=u.p||{};u.d=u.d||{};
+  const day=today(),u=store.json('abc-usage',{first:day,days:0,opens:0,hands:0,wins:0,o:{},h:{}});u.w=u.w||{};u.p=u.p||{};u.d=u.d||{};u.t=u.t||{};
   if(!u.o[day]){u.days++;u.o[day]=0}
   if(kind==='open'){u.opens++;u.o[day]++}
   if(kind==='hand'){u.hands++;u.h[day]=(u.h[day]||0)+1}
   const hist=store.json(KEY('hist'),{}),hd=hist[day];
-  if(hd&&(hd.r||'').length>=HANDS&&DAY&&DATE===day){u.w[day]=hd.w;u.p[day]=hd.p;u.d[day]=difficulty(DAY)}
-  [u.o,u.h,u.w,u.p,u.d].forEach(trimMap);u.wins=Object.values(hist).reduce((a,d)=>a+(d.w||0),0);
+  if(hd&&(hd.r||'').length>=HANDS&&DAY&&DATE===day){u.w[day]=hd.w;u.p[day]=hd.p;u.d[day]=difficulty(DAY);if(hd.t)u.t[day]=hd.t}
+  [u.o,u.h,u.w,u.p,u.d,u.t].forEach(trimMap);u.wins=Object.values(hist).reduce((a,d)=>a+(d.w||0),0);
   store.put('abc-usage',u);
   if(!/github\.io$|smaisle\.app$/.test(location.hostname)&&!window.ABC_TEST)return;
   const I=n=>({integerValue:String(Math.round(n)||0)}),T=v=>({stringValue:String(v)}),M=m=>({mapValue:{fields:Object.fromEntries(Object.entries(m).map(([k,v])=>[k,I(v)]))}});
   const st=streaks(hist),bestDay=Object.values(hist).reduce((a,d)=>Math.max(a,d.p||0),0),done=Object.values(hist).filter(d=>(d.r||'').length>=HANDS).length;
   const body={fields:{first:T(u.first),last:T(day),days:I(u.days),v:T(VERSION),opens:I(u.opens),hands:I(u.hands),wins:I(u.wins),done:I(done),best:I(bestDay),streak:I(st.cur),
-    terms:T(store.get(TERMS_KEY,'').slice(0,10)),desk:{booleanValue:innerWidth>=820},t:I(Date.now()),o:M(u.o),h:M(u.h),w:M(u.w),p:M(u.p),d:M(u.d),x:M(u.x||{})}};
+    terms:T(store.get(TERMS_KEY,'').slice(0,10)),desk:{booleanValue:innerWidth>=820},t:I(Date.now()),o:M(u.o),h:M(u.h),w:M(u.w),p:M(u.p),d:M(u.d),t:M(u.t),x:M(u.x||{})}};
   try{await fetch(`https://firestore.googleapis.com/v1/projects/${FB_PROJ}/databases/(default)/documents/${GAME}_devices/${devId()}?key=${FB_KEY}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),keepalive:true})}catch(e){}
 }
 
@@ -565,6 +565,11 @@ function loadDay(past){PAST=past||null;DATE=PAST||today();DAY=dealDay(DATE);REPL
   sel=[];swapMode=false;save()}
 /* Replay, like The Daily 15: after finishing, play today's deal again for fun. It is never saved and doesn't count. */
 let REPLAY=false;
+/* Play time: counts quietly while you're at the table on an unfinished hand (not on other pages, between hands,
+   or with the app in the background). Never shown while playing, only on the results card. */
+const mmss=t=>{t=Math.round(t||0);return t>=3600?`${Math.floor(t/3600)}:${String(Math.floor(t/60)%60).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`:`${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}`};
+setInterval(()=>{if(!S||!S.hands.length||document.visibilityState!=='visible'||finished()||H().done||busy)return;
+  if([...document.querySelectorAll('.sheet')].some(x=>!x.hidden))return;S.secs=(S.secs||0)+1;if(S.secs%5===0)save()},1000);
 function save(){if(!REPLAY)store.put(PAST?KEY('d_'+DATE):KEY('day8'),S)}
 function startReplay(){REPLAY=true;S={date:DATE,cur:0,cards:[],hands:[]};refill();for(let h=0;h<HANDS;h++)S.hands[h]={drew:false,swapped:false,done:false};
   sel=[];$('banner').classList.remove('on');dealWaiting=true;only('')}
@@ -711,7 +716,7 @@ function showBanner(h){const b=$('banner'),d=DAY.dealerBest[S.cur];
   /* stays up until Next hand */}
 function recordDay(){const hist=store.json(KEY('hist'),{});const done=S.hands.filter(x=>x.done);
   if(hist[DATE]&&!hist[DATE].late&&PAST)return;
-  hist[DATE]={w:done.filter(x=>x.result==='W').length,p:done.reduce((a,x)=>a+x.net,0),r:done.map(x=>x.result).join(''),b:DAY.bestTotal,...(PAST?{late:1}:{})};store.put(KEY('hist'),hist)}
+  hist[DATE]={w:done.filter(x=>x.result==='W').length,p:done.reduce((a,x)=>a+x.net,0),r:done.map(x=>x.result).join(''),b:DAY.bestTotal,t:S.secs||0,...(PAST?{late:1}:{})};store.put(KEY('hist'),hist)}
 
 /* ---------- Screens ---------- */
 let backTo='game';
@@ -761,11 +766,11 @@ function showStats(){const s=allStats(),hist=store.json(KEY('hist'),{}),dd=n=>n+
 /* Difficulty, shown the same way as The Daily 15 */
 function diffHTML(d){return `Difficulty<span class="dbox">${[1,2,3,4,5].map(k=>`<i${k<=d?' class="on"':''}></i>`).join('')}</span>${DIFFW[d]}`}
 function shareText(){const r=S.hands.map(x=>x.done?{W:'🟩',L:'🟥',P:'🟨'}[x.result]:'⬜').join('');const st=starsFor(wins());
-  return `${GNAME()} No. ${dayNumber(DATE)}${st?' '+starStr(st):''}\n${r} ${wins()}/${HANDS}\n${totalPts()} of ${DAY.bestTotal} points${totalPts()>=DAY.bestTotal?' 💯':''}\nsmaisle.app`}
+  return `${GNAME()} No. ${dayNumber(DATE)}${st?' '+starStr(st):''}\n${r} ${wins()}/${HANDS}${S.secs?' ⏱ '+mmss(S.secs):''}\n${totalPts()} of ${DAY.bestTotal} points${totalPts()>=DAY.bestTotal?' 💯':''}\nsmaisle.app`}
 function showDone(){const w=wins(),st=starsFor(w),s=allStats();
   $('doneTitle').textContent=w===5?'Perfect deal!':w>=4?'Hot table!':w>=3?'You beat the house':w===2?'Close one':'The house wins';
   $('doneBig').textContent=st?starStr(st):'No stars today';$('doneBig').style.fontSize=st?'':'18px';
-  $('doneLine').textContent=`${w} of ${HANDS} hands won`;
+  $('doneLine').textContent=`${w} of ${HANDS} hands won`+(S.secs?` in ${mmss(S.secs)}`:'');
   const perfect=totalPts()>=DAY.bestTotal;$('donePts').innerHTML=perfect?`💯 Every possible point: ${totalPts()} of ${DAY.bestTotal}`:`${totalPts()} of ${DAY.bestTotal} possible points`;
   $('doneDiff').innerHTML=diffHTML(difficulty(DAY));
   $('doneRecap').innerHTML=S.hands.map((x,i)=>`<tr><td>${i+1}</td><td class="wd">${x.word||(x.fold?'FOLD':'BUST')}</td><td>${x.dealerWord==='BUST'?'dealer bust':`vs ${x.dealerWord} ${x.dealerScore}`}</td><td class="${x.result}">${x.net}</td></tr>`).join('');
