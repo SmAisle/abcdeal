@@ -422,7 +422,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 <script>
 /*WORDS*/
 /*LOGIC*/
-const VERSION='40',VDATE='Oct 30',GAME='abc';
+const VERSION='41',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -560,7 +560,7 @@ function render(deal){
   applyLock();const h=H(),len=LEN(),db=DAY.dealerBest[S.cur],cards=shown();
   /* Always the full name, so A, B, C, Deal ’Em keeps the brand */
   $('noLabel').textContent=GNAME();
-  $('dateLabel').textContent=`No. ${dayNumber(DATE)} · `+new Date(DATE+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+(REPLAY?' · Replay':PAST?' · Late':'');
+  $('dateLabel').textContent=`No. ${dayNumber(DATE)} · `+new Date(DATE+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+(REPLAY?' · Replay':PAST?' · Late':'')+(DAY.holiday?` · ${DAY.holiday.icon} ${DAY.holiday.label}`:'');
   $('tracker').innerHTML=S.hands.map((x,i)=>`<div class="pip ${x.done?x.result:''} ${i===S.cur&&!x.done?'now':''}" title="Hand ${i+1}: ${LENGTHS[i]} letters">${x.done?x.result:LENGTHS[i]}</div>`).join('');
   $('totalPts').textContent=totalPts();
   $('wordLabel').textContent=`Hand ${S.cur+1} · ${len} letters`;
@@ -753,7 +753,7 @@ function showStats(){const s=allStats(),hist=store.json(KEY('hist'),{}),dd=n=>n+
 /* Difficulty, shown the same way as The Daily 15 */
 function diffHTML(d){return `Difficulty<span class="dbox">${[1,2,3,4,5].map(k=>`<i${k<=d?' class="on"':''}></i>`).join('')}</span>${DIFFW[d]}`}
 function shareText(){const st=starsFor(wins(),hintsUsed());
-  return `${GNAME()} No. ${dayNumber(DATE)}${st?' '+starStr(st):''}\n${wins()}/${HANDS} won${hintsUsed()?' · '+'💡'.repeat(hintsUsed()):''}${S.secs?' · ⏱ '+mmss(S.secs):''}\n${totalPts()} of ${DAY.bestTotal} points${totalPts()>=DAY.bestTotal?' 💯':''}\nsmaisle.app`}
+  return `${GNAME()} No. ${dayNumber(DATE)}${DAY.holiday?' '+DAY.holiday.icon:''}${st?' '+starStr(st):''}\n${wins()}/${HANDS} won${hintsUsed()?' · '+'💡'.repeat(hintsUsed()):''}${S.secs?' · ⏱ '+mmss(S.secs):''}\n${totalPts()} of ${DAY.bestTotal} points${totalPts()>=DAY.bestTotal?' 💯':''}\nsmaisle.app`}
 function showDone(){const w=wins(),st=starsFor(w,hintsUsed()),s=allStats();
   $('doneTitle').textContent=w===5?'Perfect deal!':w>=4?'Hot table!':w>=3?'You beat the house':w===2?'Close one':'The house wins';
   $('doneBig').textContent=st?starStr(st):'No stars today';$('doneBig').style.fontSize=st?'':'18px';

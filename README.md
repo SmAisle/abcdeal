@@ -144,3 +144,7 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 
 ## v40
 - The moving bonus starts today (MOVE_FROM 2026-10-30). Any game for today saved by v39 or earlier is started fresh (S.dv), since some of today's hands are dealt differently now.
+
+## v41
+- Holiday Edition, like The Daily 15. On Halloween, Thanksgiving, Christmas, New Year's Eve, Valentine's Day and July 4 the dealer plays a festive word in every hand (BOO, MASK, GHOST, SPOOKY, PUMPKIN on Halloween 2026). There's a different set each year, and if a word's cards don't work out, the next one on the list is used. On the birthdays (Dec 6 TESS, Jun 12 LYLA) the dealer plays the name in hand 2.
+- The header reads "🎃 Holiday Edition", and the share's first line gets the icon. Lists are in HOLI in logic.js.
