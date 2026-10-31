@@ -182,3 +182,6 @@ After agreeing to the terms, the website version (github.io or smaisle.app) send
 
 ## Invite gate
 On smaisle.github.io the page loads `https://smaisle.github.io/gate.js`, which asks for an invite code made on the smAisle stats page (this game's code, or an every-game code) and remembers it per browser. smaisle.app passes the code along as `?code=`, so it opens straight away. A soft lock only.
+
+## v53
+- Fix: on deals made before the word-list change (Sep 1 – Dec 26), the end-of-hand card could name a "best word" that loses to the dealer, because it searched only the new common list. It now includes the deal's own winning word (Oct 31, hand 2: DYER 12 beats MASK 11, not RELY 8). Hints aim for that word too.
