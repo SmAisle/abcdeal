@@ -191,3 +191,6 @@ On smaisle.github.io the page loads `https://smaisle.github.io/gate.js`, which a
 
 ## v55
 - Deal 'Em's name now leads with "Deal 'Em": "A, B, C," is shown small in front of it, so the two games read apart. This applies to the header, the "Today's second deal" card, the cover button and the Archive tab. The share text keeps the full plain name.
+
+## v56
+- In hands 4 and 5 (6 and 7 letters), the count under the cards also says how many of the words are common, e.g. "14 words possible · 1 common".
