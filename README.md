@@ -188,3 +188,6 @@ On smaisle.github.io the page loads `https://smaisle.github.io/gate.js`, which a
 
 ## v54
 - Today's game (Oct 31) starts over for anyone who already played it, so they can replay with the v53 best-word fix. `RESET_DAYS` in src.html lists days to reset; each saved game resets once.
+
+## v55
+- Deal 'Em's name now leads with "Deal 'Em": "A, B, C," is shown small in front of it, so the two games read apart. This applies to the header, the "Today's second deal" card, the cover button and the Archive tab. The share text keeps the full plain name.
