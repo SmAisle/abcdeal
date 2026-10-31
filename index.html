@@ -179,11 +179,11 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 #pastList{display:flex;flex-direction:column;gap:7px;max-height:50vh;overflow-y:auto}
 #pastList .go{display:flex;justify-content:space-between;align-items:center;text-transform:none;letter-spacing:0;text-align:left;padding:10px 12px;margin:0}
 #pastList .go>span{display:flex;flex-direction:column;gap:4px}#pastList em{font-style:normal}
-#coverHold small{font-size:10px;letter-spacing:.08em;margin-right:4px;opacity:.7}
-#cover .go.mc{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;align-items:center;text-align:left;padding:12px 14px;text-transform:none;letter-spacing:0}
+#coverHold small{display:block;font-size:10px;letter-spacing:.08em;margin-bottom:3px;opacity:.7}
+#cover .go.mc{display:grid;grid-template-columns:1fr auto;column-gap:10px;grid-template-rows:auto auto;align-items:center;text-align:left;padding:12px 14px;text-transform:none;letter-spacing:0}
 .mc .lk{font:900 22px/1.1 var(--head);white-space:nowrap}
-.mc .st{grid-row:2;font:800 11px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;margin-top:6px}
-.mc .act{grid-row:1/3;grid-column:2;font:800 12px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.mc .st{grid-row:2;justify-self:start;font:800 11px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;margin-top:7px;background:var(--hi);padding:3px 5px 2px}
+.mc .act{grid-row:1/3;grid-column:2;font:800 12px/1.3 var(--sans);letter-spacing:.08em;text-transform:uppercase;text-align:right;max-width:78px}
 .mode{font:800 9px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;border:1.5px solid var(--ink);padding:3px 5px 2px;margin-left:6px;vertical-align:4px;border-radius:3px}
 .mode.he{font:inherit;letter-spacing:0;text-transform:none;background:var(--ink);color:var(--paper);border:0;padding:1px 7px 2px;margin-left:2px;vertical-align:0}
 .links{display:flex;gap:8px;align-items:center;justify-content:center;font-family:var(--sans);font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
@@ -228,7 +228,7 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 .go.try .fan i.k{background:var(--ink);color:var(--hi)}
 .go.try .txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
 .go.try .kick{font:800 9.5px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--ink2)}
-#pno #styleLabel{font-size:12px;letter-spacing:.08em;font-weight:800;color:var(--ink);margin-top:5px}
+#pno #styleLabel{font-size:11px;letter-spacing:.08em;font-weight:800;color:var(--ink);margin-top:5px;background:var(--hi);padding:2px 4px 1px;align-self:flex-start}
 #pno #styleLabel+small{margin-top:2px}
 .go.try .nm{font:900 19px/1.1 var(--head);white-space:nowrap}
 .go.try .sub{font:italic 11.5px/1.3 var(--body);color:var(--ink2)}
@@ -560,7 +560,7 @@ function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/
 //module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,bonusSlots,holiday,isWord,best,fullList,dealDay,dayNumber,removeLetters,HANDS};
 
 const RESET_DAYS={'2026-10-31':3};
-const VERSION='58',VDATE='Oct 30',GAME='abc';
+const VERSION='59',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
