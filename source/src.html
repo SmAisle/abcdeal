@@ -179,7 +179,13 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 #pastList{display:flex;flex-direction:column;gap:7px;max-height:50vh;overflow-y:auto}
 #pastList .go{display:flex;justify-content:space-between;align-items:center;text-transform:none;letter-spacing:0;text-align:left;padding:10px 12px;margin:0}
 #pastList .go>span{display:flex;flex-direction:column;gap:4px}#pastList em{font-style:normal}
-#coverHold small{font-size:11px;letter-spacing:.08em;margin-left:6px;opacity:.75}
+#coverHold small{font-size:10px;letter-spacing:.08em;margin-right:4px;opacity:.7}
+#cover .go.mc{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;align-items:center;text-align:left;padding:12px 14px;text-transform:none;letter-spacing:0}
+.mc .lk{font:900 22px/1.1 var(--head);white-space:nowrap}
+.mc .st{grid-row:2;font:800 11px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;margin-top:6px}
+.mc .act{grid-row:1/3;grid-column:2;font:800 12px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.mode{font:800 9px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;border:1.5px solid var(--ink);padding:3px 5px 2px;margin-left:6px;vertical-align:4px;border-radius:3px}
+.mode.he{font:inherit;letter-spacing:0;text-transform:none;background:var(--ink);color:var(--paper);border:0;padding:1px 7px 2px;margin-left:2px;vertical-align:0}
 .links{display:flex;gap:8px;align-items:center;justify-content:center;font-family:var(--sans);font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
 .links button{background:none;border:none;padding:6px 2px;font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--ink);text-decoration:underline}
 
@@ -222,8 +228,6 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 .go.try .fan i.k{background:var(--ink);color:var(--hi)}
 .go.try .txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
 .go.try .kick{font:800 9.5px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--ink2)}
-#pno b .mode{font:800 9px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;border:1.5px solid var(--ink);padding:3px 5px 2px;margin-left:6px;vertical-align:4px;border-radius:3px}
-#pno b .mode.he{font:inherit;letter-spacing:0;text-transform:none;background:var(--ink);color:var(--paper);border:0;padding:1px 7px 2px;margin-left:2px;vertical-align:0}
 #pno #styleLabel{font-size:12px;letter-spacing:.08em;font-weight:800;color:var(--ink);margin-top:5px}
 #pno #styleLabel+small{margin-top:2px}
 .go.try .nm{font:900 19px/1.1 var(--head);white-space:nowrap}
@@ -299,8 +303,9 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
   <p class="tag">Five hands. One dealer. Spell the better word.</p>
   <div id="cvStreak" hidden></div>
   <button id="cvStats" hidden aria-label="Your stats"></button>
-  <button class="go" id="coverGo">Play Classic</button>
-  <button class="go alt" id="coverHold">Play Deal ’Em <small id="holdTag">🔒 Plus</small></button>
+  <!-- the two modes, drawn like their game headers -->
+  <button class="go alt mc" id="coverGo"><span class="lk">A, B, C, Deal <span class="mode">Classic</span></span><span class="st">5-card poker style</span><span class="act" id="coverGoAct">Play ›</span></button>
+  <button class="go alt mc" id="coverHold"><span class="lk">A, B, C, <span class="mode he">Deal ’Em</span></span><span class="st">Texas Hold ’em style</span><span class="act"><small id="holdTag">🔒 Plus</small> Play ›</span></button>
   <div class="links"><button id="coverPast">Archive</button><span>·</span><button id="coverStats">Stats</button><span>·</span><button id="coverHow">How to play</button></div>
   <button id="cvMore"><img src="" data-ic="sm" alt="">smAisle <i>See our other games ›</i></button>
   <div class="ver" id="cvVer"></div>
@@ -438,7 +443,7 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 /*WORDS*/
 /*LOGIC*/
 const RESET_DAYS={'2026-10-31':3};
-const VERSION='57',VDATE='Oct 30',GAME='abc';
+const VERSION='58',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -789,7 +794,7 @@ function cover(){if(HOLDEM()||PAST){if(HOLDEM())setMode('deal');else loadDay();r
   $('cvDate').textContent=new Date(DATE+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
   $('cvNo').textContent='Deal No. '+dayNumber(DATE);$('cvVer').textContent=`v${VERSION} · ${VDATE}`;
   $('holdTag').textContent=hasPlus()?(holdStatus()||'New'):'🔒 Plus';
-  $('coverGo').textContent=finished()?"See today's result":S.hands.some(x=>x.done)?'Keep playing':"Play Classic";
+  $('coverGoAct').textContent=finished()?'Result ›':S.hands.some(x=>x.done)?'Keep playing ›':'Play ›';
   const doneToday=finished();$('cvStreak').hidden=!s.cur;$('cvStreak').textContent='🔥 '+s.cur+'-day streak'+(doneToday?'':' · play today to keep it');
   $('cvStats').hidden=!s.played;if(s.played)$('cvStats').innerHTML=[[s.stars,'⭐ Stars'],[s.played,'Played'],[s.three,'⭐⭐⭐'],[s.best,'Best streak']].map(([v,l])=>`<div><b>${v}</b><span>${l}</span></div>`).join('');
   only('cover')}
