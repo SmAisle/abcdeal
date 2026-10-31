@@ -572,7 +572,7 @@ function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/
 //module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,bonusSlots,holiday,isWord,best,fullList,dealDay,dayNumber,removeLetters,HANDS};
 
 const RESET_DAYS={'2026-10-31':3};
-const VERSION='63',VDATE='Oct 30',GAME='abc';
+const VERSION='64',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -605,9 +605,18 @@ async function checkIn(kind){
 /* ---------- Sound, like The Daily 15: little synth tones, plus a soft noise "snap" for cards. On/off in the menu. ---------- */
 let ac=null;const soundOn=()=>store.get('abc-sound','on')!=='off';
 // iPhones only let sound start inside a tap, so wake the audio on every tap until it's running.
-function unlockAudio(){if(!soundOn()||(ac&&ac.state==='running'))return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume();const b=ac.createBufferSource();b.buffer=ac.createBuffer(1,1,22050);b.connect(ac.destination);b.start(0)}catch(e){}}
+// Leaving the app suspends (or kills) the audio, so coming back marks it stale; the next tap resumes it,
+// and if it still isn't running 250 ms later, it is thrown away and rebuilt (the Gramble fix).
+let acStale=false;
+function newAc(){ac=new (window.AudioContext||window.webkitAudioContext)();const b=ac.createBufferSource();b.buffer=ac.createBuffer(1,1,22050);b.connect(ac.destination);b.start(0)}
+function unlockAudio(){if(!soundOn()||(ac&&ac.state==='running'&&!acStale))return;acStale=false;
+  try{if(!ac)return newAc();ac.resume().catch(()=>{});const b=ac.createBufferSource();b.buffer=ac.createBuffer(1,1,22050);b.connect(ac.destination);b.start(0);
+    const old=ac;setTimeout(()=>{if(ac===old&&old.state!=='running'){try{old.close().catch(()=>{})}catch(e){}ac=null;try{newAc()}catch(e){}}},250)}catch(e){}}
 ['pointerdown','touchend','click','keydown'].forEach(ev=>document.addEventListener(ev,unlockAudio,true));
-function actx(){if(!soundOn())return null;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state!=='running')ac.resume();return ac}catch(e){return null}}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)acStale=true;else if(ac&&ac.state!=='running')try{ac.resume().catch(()=>{})}catch(e){}});
+window.addEventListener('pagehide',()=>{acStale=true});
+window.addEventListener('pageshow',()=>{acStale=true;if(ac&&ac.state!=='running')try{ac.resume().catch(()=>{})}catch(e){}});
+function actx(){if(!soundOn())return null;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state!=='running')ac.resume().catch(()=>{});return ac}catch(e){return null}}
 function tone(f,dur=.08,type='sine',vol=.1,delay=0){const a=actx();if(!a)return;try{const o=a.createOscillator(),g=a.createGain(),t=a.currentTime+delay;o.type=type;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g).connect(a.destination);o.start(t);o.stop(t+dur+.02)}catch(e){}}
 function snap(dur=.04,freq=2600,vol=.16,delay=0){const a=actx();if(!a)return;try{const n=Math.ceil(a.sampleRate*dur),b=a.createBuffer(1,n,a.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);
   const src=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain(),t=a.currentTime+delay;src.buffer=b;f.type='bandpass';f.frequency.value=freq;f.Q.value=.8;g.gain.value=vol;src.connect(f).connect(g).connect(a.destination);src.start(t)}catch(e){}}
