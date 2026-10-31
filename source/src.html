@@ -433,7 +433,8 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 <script>
 /*WORDS*/
 /*LOGIC*/
-const VERSION='53',VDATE='Oct 30',GAME='abc';
+const RESET_DAYS={'2026-10-31':3};
+const VERSION='54',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -529,8 +530,9 @@ let PAST=null;
 function loadDay(past){PAST=past||null;DATE=PAST||today();DAY=dealDay(DATE);REPLAY=false;
   S=store.json(PAST?KEY('d_'+DATE):KEY('day8'),null);
   /* A game saved before the moving bonus came in (dv missing) on a moving-bonus day was dealt differently: start it fresh */
-  const stale=S&&S.date===DATE&&DATE>=MOVE_FROM&&S.dv!==2;if(stale){const k=KEY('diff'),m=store.json(k,{});delete m[DATE];store.put(k,m)}
-  if(!S||S.date!==DATE||stale){S={date:DATE,cur:0,cards:[],hands:[],dv:2};refill()}
+  /* a saved game from an older version of the day's rules starts over; RESET_DAYS forces a fresh start for one day */
+  const dv=RESET_DAYS[DATE]||2,stale=S&&S.date===DATE&&DATE>=MOVE_FROM&&S.dv!==dv;if(stale){const k=KEY('diff'),m=store.json(k,{});delete m[DATE];store.put(k,m)}
+  if(!S||S.date!==DATE||stale){S={date:DATE,cur:0,cards:[],hands:[],dv};refill()}
   for(let h=0;h<HANDS;h++)if(!S.hands[h])S.hands[h]={drew:false,swapped:false,done:false};
   /* a banner from the other game or day must not stay up */
   sel=[];swapMode=false;hintMode=false;const bn=document.getElementById('banner');if(bn)bn.classList.remove('on');save()}
@@ -542,7 +544,7 @@ const mmss=t=>{t=Math.round(t||0);return t>=3600?`${Math.floor(t/3600)}:${String
 setInterval(()=>{if(!S||!S.hands.length||document.visibilityState!=='visible'||finished()||H().done||busy)return;
   if([...document.querySelectorAll('.sheet')].some(x=>!x.hidden))return;S.secs=(S.secs||0)+1;if(S.secs%5===0)save()},1000);
 function save(){if(!REPLAY)store.put(PAST?KEY('d_'+DATE):KEY('day8'),S)}
-function startReplay(){REPLAY=true;S={date:DATE,cur:0,cards:[],hands:[],dv:2};refill();for(let h=0;h<HANDS;h++)S.hands[h]={drew:false,swapped:false,done:false};
+function startReplay(){REPLAY=true;S={date:DATE,cur:0,cards:[],hands:[],dv:RESET_DAYS[DATE]||2};refill();for(let h=0;h<HANDS;h++)S.hands[h]={drew:false,swapped:false,done:false};
   sel=[];$('banner').classList.remove('on');dealWaiting=true;only('')}
 function refill(){S.cards=DAY.you[S.cur].slice()}
 function H(){return S.hands[S.cur]}
