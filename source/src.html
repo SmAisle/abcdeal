@@ -433,7 +433,7 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 <script>
 /*WORDS*/
 /*LOGIC*/
-const VERSION='52',VDATE='Oct 30',GAME='abc';
+const VERSION='53',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -693,9 +693,14 @@ $('foldBtn').onclick=()=>{const h=H();if(h.done||busy)return;
 /* Hint: you pick a slot and it shows that slot's letter. The word is the common word that best fits the letters
    you already have in place, so a hint never undoes your work when it doesn't have to. */
 $('hintBtn').onclick=()=>{only('');if(H().done)return;hintMode=true;render();toast('Tap a slot to reveal its letter',2200)};
+/* The deal's own best word counts too: deals made before the word-list change (through Dec 26) were checked
+   against the old list, so their winning word may not be on today's common list. */
+function dealWord(letters){const y=DAY.yourBest[S.cur];if(!y||!y.word)return null;const c=count(y.word);
+  return fits(c,count(letters.join('')))&&usesHole(c,letters)?y:null}
+function topWord(letters){const b=best(letters,S.cur,BON()),y=dealWord(letters);return y&&y.score>b.score?{word:y.word,score:score(y.word,S.cur,BON())}:b}
 /* common words first; only when none fit does a hint use the rest of the dictionary */
 function hintWord(){const len=LEN(),have=count(S.cards.join(''));let bw='',bm=-1,bs=-1;
-  for(const list of [DEALER_LIST,fullList(len)]){if(bw)break;for(const [w,c] of list){if(w.length!==len||!fits(c,have)||!usesHole(c,S.cards))continue;
+  const dw=dealWord(S.cards);for(const list of [dw?[[dw.word,count(dw.word)]].concat(DEALER_LIST):DEALER_LIST,fullList(len)]){if(bw)break;for(const [w,c] of list){if(w.length!==len||!fits(c,have)||!usesHole(c,S.cards))continue;
     let m=0;for(let k=0;k<len;k++)if(sel[k]!=null&&S.cards[sel[k]]===w[k])m++;const sc=score(w,S.cur,BON());if(m>bm||(m===bm&&sc>bs)){bw=w;bm=m;bs=sc}}}
   return bw}
 function revealAt(j){hintMode=false;const h=H(),w=hintWord();if(!w){render();toast('No word in this hand. Folding is the move.',2200);return}
@@ -728,7 +733,7 @@ function resolve(w,fold){const h=H();h.fold=!!fold;busy=true;swapMode=false;cons
 
 function showBanner(h){const b=$('banner'),d=DAY.dealerBest[S.cur];
   const title=h.bust?(h.fold?'Fold':'Bust!'):!d.word?'Dealer busts!':{W:'You win!',L:'Dealer wins',P:'Push'}[h.result];
-  const yb=best(h.snap,S.cur,BON());
+  const yb=topWord(h.snap);
   const tip=!yb.word?(h.bust?'There was no common word in that hand.':''):h.fold?`You could have played <b>${yb.word}</b> for ${yb.score} points`:h.bust?`Best word was worth ${yb.score} points`:h.score>=yb.score?'You found the best word!':`Best word was worth ${yb.score} points`;
   /* Both words side by side, the winner highlighted */
   const row=(who,w,p,win)=>`<tr${win?' class="win"':''}><th>${who}</th><td class="w">${w}</td><td>${p}</td></tr>`;
