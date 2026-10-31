@@ -216,3 +216,7 @@ On smaisle.github.io the page loads `https://smaisle.github.io/gate.js`, which a
 
 ## v62
 - The finish screen's button for the other mode is more inviting: yellow with a drop shadow, an "Up next · Today's second deal" line, and a big round play button.
+
+## v63
+- The finish screen always links to the other game mode, never the Daily 15.
+- What the link says depends on that mode: "Have you tried:" if you've never played it, "Up next · Today's second (or first) deal" if you haven't played it today, and "✓ Done today · See your result" (on a plain button) if you've already finished it.
