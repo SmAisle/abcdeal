@@ -201,3 +201,7 @@ On smaisle.github.io the page loads `https://smaisle.github.io/gate.js`, which a
 
 ## v58
 - The start screen's two buttons now look like the game headers: "A, B, C, Deal" with a CLASSIC tag and "5-card poker style", and "A, B, C," with the black "Deal 'Em" banner and "Texas Hold 'em style". The right side shows Play, Keep playing or Result.
+
+## v59
+- The style line ("5-card poker style" or "Texas Hold 'em style") now sits on the game's yellow highlight, in the header and on the start buttons.
+- On the start buttons, "Keep playing" and "New / Play" stack on the right, so they no longer run into the Classic tag.
