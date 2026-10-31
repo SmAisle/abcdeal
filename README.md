@@ -185,3 +185,6 @@ On smaisle.github.io the page loads `https://smaisle.github.io/gate.js`, which a
 
 ## v53
 - Fix: on deals made before the word-list change (Sep 1 – Dec 26), the end-of-hand card could name a "best word" that loses to the dealer, because it searched only the new common list. It now includes the deal's own winning word (Oct 31, hand 2: DYER 12 beats MASK 11, not RELY 8). Hints aim for that word too.
+
+## v54
+- Today's game (Oct 31) starts over for anyone who already played it, so they can replay with the v53 best-word fix. `RESET_DAYS` in src.html lists days to reset; each saved game resets once.
