@@ -208,3 +208,8 @@ On smaisle.github.io the page loads `https://smaisle.github.io/gate.js`, which a
 
 ## v60
 - In the game header, only the name shows: "A, B, C, Deal" for Classic, and "A, B, C," with the black "Deal 'Em" banner for Deal 'Em. The Classic tag and the style line now appear only on the start screen's buttons.
+
+## v61
+- Game modes. The start screen has a "Game modes" label with two buttons: Classic (5-card poker style) and Deal 'Em (Texas Hold 'em style, in the black banner).
+- The in-game header reads "A, B, C, Deal", with the mode tag (an outlined CLASSIC or a black DEAL 'EM) on the line below.
+- On the finish screen, the button for the other mode looks the same as its start-screen button.
