@@ -179,9 +179,13 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 #pastList{display:flex;flex-direction:column;gap:7px;max-height:50vh;overflow-y:auto}
 #pastList .go{display:flex;justify-content:space-between;align-items:center;text-transform:none;letter-spacing:0;text-align:left;padding:10px 12px;margin:0}
 #pastList .go>span{display:flex;flex-direction:column;gap:4px}#pastList em{font-style:normal}
-#coverHold small{display:block;font-size:10px;letter-spacing:.08em;margin-bottom:3px;opacity:.7}
-#cover .go.mc{display:grid;grid-template-columns:1fr auto;column-gap:10px;grid-template-rows:auto auto;align-items:center;text-align:left;padding:12px 14px;text-transform:none;letter-spacing:0}
-.mc .lk{font:900 22px/1.1 var(--head);white-space:nowrap}
+#coverHold small,.mc .act small{display:block;font-size:10px;letter-spacing:.08em;margin-bottom:3px;opacity:.7}
+#cover .go.mc,#done .go.mc{display:grid;grid-template-columns:1fr auto;column-gap:10px;grid-template-rows:auto auto;align-items:center;text-align:left;padding:12px 14px;text-transform:none;letter-spacing:0}
+.mc .lk{font:900 26px/1.1 var(--head);white-space:nowrap}
+.gm{font:800 11px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--ink2);text-align:center;margin:2px 0 -4px}
+.chip{display:inline-block;font:800 9px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;border:1.5px solid var(--ink);padding:3px 5px 2px;border-radius:3px;color:var(--ink)}
+.chip.he{background:var(--ink);color:var(--paper)}
+#pno #modeLine{margin-top:4px}
 .mc .st{grid-row:2;justify-self:start;font:800 11px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;margin-top:7px;background:var(--hi);padding:3px 5px 2px}
 .mc .act{grid-row:1/3;grid-column:2;font:800 12px/1.3 var(--sans);letter-spacing:.08em;text-transform:uppercase;text-align:right;max-width:78px}
 .mode{font:800 9px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;border:1.5px solid var(--ink);padding:3px 5px 2px;margin-left:6px;vertical-align:4px;border-radius:3px}
@@ -229,6 +233,7 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 .go.try .txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
 .go.try .kick{font:800 9.5px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--ink2)}
 .go.try .nm{font:900 19px/1.1 var(--head);white-space:nowrap}
+.go.try .nm .mode.he{display:inline-block;margin:4px 0 3px;padding:1px 6px 2px;line-height:1.1}
 .go.try .sub{font:italic 11.5px/1.3 var(--body);color:var(--ink2)}
 .go.try img{flex:none;width:44px;height:44px;border-radius:10px;border:1.5px solid var(--ink)}
 .go.try.more{background:var(--card)}
@@ -259,7 +264,7 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 <body>
 <div id="app">
   <div class="top">
-    <div id="pno"><b id="noLabel">Deal No. 1</b><small id="dateLabel"></small></div>
+    <div id="pno"><b id="noLabel">Deal No. 1</b><small id="modeLine"></small><small id="dateLabel"></small></div>
     <div class="box"><small>Points</small><b id="totalPts">0</b></div>
     <button id="menuBtn" aria-label="Menu">☰</button>
   </div>
@@ -301,9 +306,10 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
   <p class="tag">Five hands. One dealer. Spell the better word.</p>
   <div id="cvStreak" hidden></div>
   <button id="cvStats" hidden aria-label="Your stats"></button>
-  <!-- the two modes, drawn like their game headers -->
-  <button class="go alt mc" id="coverGo"><span class="lk">A, B, C, Deal <span class="mode">Classic</span></span><span class="st">5-card poker style</span><span class="act" id="coverGoAct">Play ›</span></button>
-  <button class="go alt mc" id="coverHold"><span class="lk">A, B, C, <span class="mode he">Deal ’Em</span></span><span class="st">Texas Hold ’em style</span><span class="act"><small id="holdTag">🔒 Plus</small> Play ›</span></button>
+  <!-- Game modes: Classic and Deal 'Em -->
+  <div class="gm">Game modes</div>
+  <button class="go alt mc" id="coverGo"><span class="lk">Classic</span><span class="st">5-card poker style</span><span class="act" id="coverGoAct">Play ›</span></button>
+  <button class="go alt mc" id="coverHold"><span class="lk"><span class="mode he">Deal ’Em</span></span><span class="st">Texas Hold ’em style</span><span class="act"><small id="holdTag">🔒 Plus</small> Play ›</span></button>
   <div class="links"><button id="coverPast">Archive</button><span>·</span><button id="coverStats">Stats</button><span>·</span><button id="coverHow">How to play</button></div>
   <button id="cvMore"><img src="" data-ic="sm" alt="">smAisle <i>See our other games ›</i></button>
   <div class="ver" id="cvVer"></div>
@@ -558,7 +564,7 @@ function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/
 //module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,bonusSlots,holiday,isWord,best,fullList,dealDay,dayNumber,removeLetters,HANDS};
 
 const RESET_DAYS={'2026-10-31':3};
-const VERSION='60',VDATE='Oct 30',GAME='abc';
+const VERSION='61',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -647,8 +653,9 @@ function streaks(hist){const days=Object.keys(hist).filter(k=>(hist[k].r||'').le
 /* S.cards is your live hand: a fresh deal each hand (DAY.you), which you can shuffle. */
 /* Two games: the regular deal (free) and Hold'em (Plus). Each keeps its own day, results and streak. */
 let MODE='deal';const HOLDEM=()=>MODE==='holdem',KEY=k=>(HOLDEM()?'abch-':'abc-')+k,GNAME=()=>HOLDEM()?'A, B, C, Deal ’Em':'A, B, C, Deal',
-  /* one game, two modes: A, B, C, Deal with a Classic tag, or A, B, C, with Deal 'Em in a black banner ; in the game header only the name shows, and the Classic tag and style line are only on the start buttons */
-  MNAME=()=>HOLDEM()?'Deal ’Em':'Classic',GHTML=()=>HOLDEM()?`A, B, C, <span class="mode he">Deal ’Em</span>`:'A, B, C, Deal';
+  /* one game, two modes: A, B, C, Deal with a Classic tag, or A, B, C, with Deal 'Em in a black banner ; the game header shows the name with the mode on the line below */
+  MNAME=()=>HOLDEM()?'Deal ’Em':'Classic',GHTML=()=>'A, B, C, Deal',
+  CHIP=()=>`<span class="chip${HOLDEM()?' he':''}">${MNAME()}</span>`;
 function setMode(m){MODE=m;HOLE=m==='holdem'?2:0;loadDay()}
 let DATE=today(),DAY=null,S=null,sel=[],swapMode=false,busy=false,hintMode=false;
 /* PAST is a past deal's date while you play it from the archive, otherwise null (today's deal) */
@@ -713,7 +720,7 @@ const locked=j=>locks(H()).some(k=>k.j===j);
 function render(deal){
   applyLock();const h=H(),len=LEN(),db=DAY.dealerBest[S.cur],cards=shown();
   /* The name plus a mode tag: Classic or Hold 'Em */
-  $('noLabel').innerHTML=GHTML();
+  $('noLabel').innerHTML=GHTML();$('modeLine').innerHTML=CHIP();
   $('dateLabel').textContent=`No. ${dayNumber(DATE)} · `+new Date(DATE+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+(REPLAY?' · Replay':PAST?' · Late':'')+(DAY.holiday?` · ${DAY.holiday.icon} ${DAY.holiday.label}`:'');
   $('tracker').innerHTML=S.hands.map((x,i)=>`<div class="pip ${x.done?x.result:''} ${i===S.cur&&!x.done?'now':''}" title="Hand ${i+1}: ${LENGTHS[i]} letters">${x.done?x.result:LENGTHS[i]}</div>`).join('');
   $('totalPts').textContent=totalPts();
@@ -937,10 +944,12 @@ function showDone(){const w=wins(),st=starsFor(w,hintsUsed()),s=allStats();
   $('replayNote').hidden=!REPLAY;$('doneStreak').hidden=$('doneStreak').hidden||REPLAY;if(REPLAY)$('doneTitle').textContent='Replay: '+$('doneTitle').textContent;
   /* Nudge to the other game when it isn't finished today (A, B, C, Deal ’Em is Plus in the app) */
   const other=HOLDEM()?'deal':'holdem',od=otherDone(other);const toD15=od||PAST||REPLAY;$('tryOther').hidden=false;$('tryOther').dataset.to=toD15?'d15':other;
-  const fan=(ls,k)=>`<span class="fan" aria-hidden="true">${ls.map((l,i)=>`<i class="${i===k?'k':''}" style="left:${i*(ls.length>2?12:22)}px;top:${ls.length>2?Math.abs(i-1)*3:0}px;transform:rotate(${(i-(ls.length-1)/2)*(ls.length>2?14:10)}deg)">${l}</i>`).join('')}</span>`;
+  /* fan of cards, no longer drawn */const fan=(ls,k)=>`<span class="fan" aria-hidden="true">${ls.map((l,i)=>`<i class="${i===k?'k':''}" style="left:${i*(ls.length>2?12:22)}px;top:${ls.length>2?Math.abs(i-1)*3:0}px;transform:rotate(${(i-(ls.length-1)/2)*(ls.length>2?14:10)}deg)">${l}</i>`).join('')}</span>`;
+  /* the other mode is drawn just like its start-screen button; The Daily 15 keeps its yellow tile */
+  $('tryOther').className=toD15?'go try':'go alt mc';
   $('tryOther').innerHTML=toD15?d15Tile('More from smAisle','Today’s crossword-style puzzle'):other==='holdem'
-    ?`${fan(['E','M'],1)}<span class="txt"><span class="kick">Today’s second deal${hasPlus()?'':' · Plus'}</span><span class="nm">Deal ’Em</span><span class="sub">Texas Hold ’em style</span></span><span class="play" aria-hidden="true">›</span>`
-    :`${fan(['A','B','C'],2)}<span class="txt"><span class="kick">Today’s first deal</span><span class="nm">Classic</span><span class="sub">5-card poker style</span></span><span class="play" aria-hidden="true">›</span>`;
+    ?`<span class="lk"><span class="mode he">Deal ’Em</span></span><span class="st">Texas Hold ’em style</span><span class="act">${hasPlus()?'':'<small>🔒 Plus</small>'}Play ›</span>`
+    :`<span class="lk">Classic</span><span class="st">5-card poker style</span><span class="act">Play ›</span>`;
   $('cd').textContent=nextDeal();$('shareText').hidden=true;only('done')}
 $('shareBtn').onclick=async()=>{const t=shareText();
   if(window.top===window&&navigator.share){try{await navigator.share({text:t});return}catch(e){if(e.name==='AbortError')return}}
