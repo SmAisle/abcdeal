@@ -213,3 +213,6 @@ On smaisle.github.io the page loads `https://smaisle.github.io/gate.js`, which a
 - Game modes. The start screen has a "Game modes" label with two buttons: Classic (5-card poker style) and Deal 'Em (Texas Hold 'em style, in the black banner).
 - The in-game header reads "A, B, C, Deal", with the mode tag (an outlined CLASSIC or a black DEAL 'EM) on the line below.
 - On the finish screen, the button for the other mode looks the same as its start-screen button.
+
+## v62
+- The finish screen's button for the other mode is more inviting: yellow with a drop shadow, an "Up next · Today's second deal" line, and a big round play button.

@@ -186,6 +186,11 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 .chip{display:inline-block;font:800 9px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;border:1.5px solid var(--ink);padding:3px 5px 2px;border-radius:3px;color:var(--ink)}
 .chip.he{background:var(--ink);color:var(--paper)}
 #pno #modeLine{margin-top:4px}
+#done .go.mc.nx{background:var(--hi);box-shadow:4px 4px 0 var(--ink);grid-template-rows:auto auto auto}
+#done .go.mc.nx:active{transform:translate(4px,4px);box-shadow:none}
+.mc.nx .kk{grid-column:1;grid-row:1;font:800 9.5px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);margin-bottom:6px}
+.mc.nx .lk{grid-column:1;grid-row:2}.mc.nx .st{grid-column:1;grid-row:3;background:var(--card)}
+.mc.nx .act{grid-row:1/4;width:46px;height:46px;border-radius:50%;background:var(--ink);color:var(--hi);display:grid;place-items:center;font-size:22px;max-width:none}
 .mc .st{grid-row:2;justify-self:start;font:800 11px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;margin-top:7px;background:var(--hi);padding:3px 5px 2px}
 .mc .act{grid-row:1/3;grid-column:2;font:800 12px/1.3 var(--sans);letter-spacing:.08em;text-transform:uppercase;text-align:right;max-width:78px}
 .mode{font:800 9px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;border:1.5px solid var(--ink);padding:3px 5px 2px;margin-left:6px;vertical-align:4px;border-radius:3px}
@@ -564,7 +569,7 @@ function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/
 //module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,bonusSlots,holiday,isWord,best,fullList,dealDay,dayNumber,removeLetters,HANDS};
 
 const RESET_DAYS={'2026-10-31':3};
-const VERSION='61',VDATE='Oct 30',GAME='abc';
+const VERSION='62',VDATE='Oct 30',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -945,11 +950,11 @@ function showDone(){const w=wins(),st=starsFor(w,hintsUsed()),s=allStats();
   /* Nudge to the other game when it isn't finished today (A, B, C, Deal ’Em is Plus in the app) */
   const other=HOLDEM()?'deal':'holdem',od=otherDone(other);const toD15=od||PAST||REPLAY;$('tryOther').hidden=false;$('tryOther').dataset.to=toD15?'d15':other;
   /* fan of cards, no longer drawn */const fan=(ls,k)=>`<span class="fan" aria-hidden="true">${ls.map((l,i)=>`<i class="${i===k?'k':''}" style="left:${i*(ls.length>2?12:22)}px;top:${ls.length>2?Math.abs(i-1)*3:0}px;transform:rotate(${(i-(ls.length-1)/2)*(ls.length>2?14:10)}deg)">${l}</i>`).join('')}</span>`;
-  /* the other mode is drawn just like its start-screen button; The Daily 15 keeps its yellow tile */
-  $('tryOther').className=toD15?'go try':'go alt mc';
+  /* the other mode is drawn like its start-screen button, on yellow with an Up next line and a big play button to invite you in; The Daily 15 keeps its own tile */
+  $('tryOther').className=toD15?'go try':'go alt mc nx';
   $('tryOther').innerHTML=toD15?d15Tile('More from smAisle','Today’s crossword-style puzzle'):other==='holdem'
-    ?`<span class="lk"><span class="mode he">Deal ’Em</span></span><span class="st">Texas Hold ’em style</span><span class="act">${hasPlus()?'':'<small>🔒 Plus</small>'}Play ›</span>`
-    :`<span class="lk">Classic</span><span class="st">5-card poker style</span><span class="act">Play ›</span>`;
+    ?`<span class="kk">Up next · Today’s second deal${hasPlus()?'':' · 🔒 Plus'}</span><span class="lk"><span class="mode he">Deal ’Em</span></span><span class="st">Texas Hold ’em style</span><span class="act" aria-hidden="true">›</span>`
+    :`<span class="kk">Up next · Today’s first deal</span><span class="lk">Classic</span><span class="st">5-card poker style</span><span class="act" aria-hidden="true">›</span>`;
   $('cd').textContent=nextDeal();$('shareText').hidden=true;only('done')}
 $('shareBtn').onclick=async()=>{const t=shareText();
   if(window.top===window&&navigator.share){try{await navigator.share({text:t});return}catch(e){if(e.name==='AbortError')return}}
