@@ -220,3 +220,6 @@ On smaisle.github.io the page loads `https://smaisle.github.io/gate.js`, which a
 ## v63
 - The finish screen always links to the other game mode, never the Daily 15.
 - What the link says depends on that mode: "Have you tried:" if you've never played it, "Up next · Today's second (or first) deal" if you haven't played it today, and "✓ Done today · See your result" (on a plain button) if you've already finished it.
+
+## v64
+- Sound fix for iPhone: after you leave the app and come back, the sound turns back on. Leaving marks the audio as stale, and the next tap resumes it. If it still isn't running 250 ms later, it is closed and rebuilt (the same fix as Gramble).
