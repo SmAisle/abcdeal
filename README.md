@@ -194,3 +194,7 @@ On smaisle.github.io the page loads `https://smaisle.github.io/gate.js`, which a
 
 ## v56
 - In hands 4 and 5 (6 and 7 letters), the count under the cards also says how many of the words are common, e.g. "14 words possible · 1 common".
+
+## v57
+- One name, two modes. The Classic header reads "A, B, C, Deal" with an outlined CLASSIC tag and "5-card poker style" underneath. Deal 'Em reads "A, B, C," with "Deal 'Em" in one black banner and "Texas Hold 'em style" underneath.
+- The start buttons read Play Classic and Play Deal 'Em. The finish-screen card and the Archive tabs use the same names.
