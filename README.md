@@ -234,3 +234,7 @@ On smaisle.github.io the page loads `https://smaisle.github.io/gate.js`, which a
 ## v67
 - One look with smAisle Daily (website copy only): a thin cream "‹ smAisle Daily" bar sits at the top of the game screen.
 - The menu order is now Back to the table, Front page, How to Play, Archive, Stats, "‹ smAisle Daily" (yellow), then Terms and the version. On the website, smAisle Daily replaces the Daily 15 tile.
+
+## v68
+- The game now lives at smaisle.app/abcdeal/, and github.io links forward there. gate.js, the smAisle Daily bar and menu button, and the Daily 15 link all point to smaisle.app. Hostname checks already matched smaisle.app. Saved browser data starts fresh on smaisle.app (Jeff accepted this).
+- The QR code in invite.pdf still points to smaisle.github.io/abcdeal, which forwards to smaisle.app.
