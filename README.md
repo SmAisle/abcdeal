@@ -250,3 +250,6 @@ On smaisle.github.io the page loads `https://smaisle.github.io/gate.js`, which a
 
 ## v72
 - The Plus screen is renamed "smAisle Daily Plus" to match the hub: one purchase unlocks extras in The Daily 15, A, B, C, Deal and Gramble. In this game it adds Deal 'Em. Nothing is charged yet: the button shows "smAisle Daily Plus is coming soon".
+
+## v73
+- Simpler screens. The menu has 5 buttons (Back to the table, How to Play, Archive, Stats, smAisle Daily), with Front page and Terms as small links. The finish screen has two buttons (Share result, the other-mode tile), with See the table, Stats and Play again as small links.
