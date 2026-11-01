@@ -413,8 +413,8 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 </div></div>
 
 <div class="sheet" id="plus" hidden><div class="box2" style="text-align:center">
-  <h2>A, B, C, Deal Plus</h2>
-  <p style="margin:0">Today's deal is always free. Plus adds:</p>
+  <h2>smAisle Daily Plus</h2>
+  <p style="margin:0">One purchase unlocks extras in all the daily games: The Daily 15, A, B, C, Deal and Gramble. Today's deal is always free. In A, B, C, Deal, Plus adds:</p>
   <ul class="rules" style="text-align:left"><li><b>Deal ’Em:</b> a second deal every day, played like Texas Hold’em. Shared cards in the middle, 2 cards of your own, and your word has to use at least one of them.</li><li>Its own stars, streak and stats.</li></ul>
   <p style="margin:0;font-size:13px">One-time purchase. No subscription, no ads.</p>
   <button class="go" id="buyBtn">Unlock Plus</button>
@@ -461,7 +461,7 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 /*WORDS*/
 /*LOGIC*/
 const RESET_DAYS={'2026-10-31':3};
-const VERSION='71',VDATE='Nov 1',GAME='abc';
+const VERSION='72',VDATE='Nov 1',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -915,13 +915,13 @@ $('pastDeal').onclick=()=>showPast('deal');$('pastEm').onclick=()=>showPast('hol
 $('coverPast').onclick=()=>{pastBack='cover';showPast(MODE)};
 $('mPast').onclick=()=>{pastBack='game';showPast(MODE)};
 $('pastBack').onclick=()=>pastBack==='cover'?cover():only('');
-/* Plus, like Daily 15 Plus: a one-time purchase in the App Store app (window.ABC_APP). The website stays free, so Deal 'Em is open to everyone there. */
+/* smAisle Daily Plus: one purchase that covers The Daily 15, A, B, C, Deal and Gramble; a one-time purchase in the App Store app (window.ABC_APP). The website stays free, so Deal 'Em is open to everyone there. */
 function hasPlus(){return !window.ABC_APP||!!window.ABC_APP.plus}
 function holdStatus(){let k=null;try{k=JSON.parse(localStorage.getItem('abch-day8')||'null')}catch(e){}if(!k||k.date!==today())return '';const n=(k.hands||[]).filter(x=>x.done).length;return n>=HANDS?'Done ✓':n?'Keep playing':''}
 function showPlus(){only('plus')}
 function playHoldem(){if(!hasPlus())return showPlus();backTo='game';setMode('holdem');if(finished())return showDone();dealWaiting=true;only('')}
 $('coverHold').onclick=playHoldem;
-$('buyBtn').onclick=$('restoreBtn').onclick=()=>toast('Plus comes with the App Store app');
+$('buyBtn').onclick=$('restoreBtn').onclick=()=>toast('smAisle Daily Plus is coming soon');
 $('plusBack').onclick=()=>cover();
 $('doneStats').onclick=()=>{backTo='done';showStats()};
 $('statsBack').onclick=()=>{if(backTo==='done')only('done');else goBack()};

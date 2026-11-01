@@ -247,3 +247,6 @@ On smaisle.github.io the page loads `https://smaisle.github.io/gate.js`, which a
 
 ## v71
 - Cards no longer resize mid-hand. Whether the rack shows one row or two is decided at full size, and the card size is set once per hand and can only shrink, so placing letters never flips the rack from two rows of 4 to one row of 8.
+
+## v72
+- The Plus screen is renamed "smAisle Daily Plus" to match the hub: one purchase unlocks extras in The Daily 15, A, B, C, Deal and Gramble. In this game it adds Deal 'Em. Nothing is charged yet: the button shows "smAisle Daily Plus is coming soon".
