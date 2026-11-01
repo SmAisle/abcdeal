@@ -439,6 +439,7 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
   <button class="go alt" id="mPast">Archive</button>
   <button class="go alt" id="mStats">Stats</button>
   <button class="go alt" id="mDaily" hidden>‹ smAisle Daily</button>
+  <button class="go alt" id="mHome" style="text-transform:none" hidden>‹ smAisle Home</button>
   <button class="go alt" id="mTerms">Terms and privacy</button>
   <div class="sect" id="mMore">More from smAisle</div>
   <button class="go try more" id="mD15"></button>
@@ -461,7 +462,7 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 /*WORDS*/
 /*LOGIC*/
 const RESET_DAYS={'2026-10-31':3};
-const VERSION='68',VDATE='Nov 1',GAME='abc';
+const VERSION='69',VDATE='Nov 1',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -885,7 +886,7 @@ $('mD15').onclick=()=>outLink('d15','menu');
 /* website copy only: back link to the smAisle Daily hub */
 /* website copy: the hub replaces the Daily 15 tile */
 if(/github\.io$|smaisle\.app$/.test(location.hostname))dailyLinks();
-function dailyLinks(){$('mDaily').hidden=false;$('dailyBar').hidden=false;$('mMore').hidden=true;$('mD15').hidden=true;$('mDaily').onclick=()=>{location.href='https://smaisle.app/daily/'}}
+function dailyLinks(){$('mDaily').hidden=false;$('mHome').hidden=false;$('mHome').onclick=()=>{location.href='https://smaisle.app/'};$('dailyBar').hidden=false;$('mMore').hidden=true;$('mD15').hidden=true;$('mDaily').onclick=()=>{location.href='https://smaisle.app/daily/'}}
 $('cvMore').onclick=()=>outLink('sm','cover');
 $('tryOther').onclick=()=>{if($('tryOther').dataset.to==='d15')return outLink('d15','done');if(HOLDEM()){backTo='game';setMode('deal');if(finished())return showDone();dealWaiting=true;only('')}else playHoldem()};
 /* Past deals, like The Daily 15's past puzzles: every deal back to No. 1, for both games. They count, marked as played late. */
