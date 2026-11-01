@@ -244,3 +244,6 @@ On smaisle.github.io the page loads `https://smaisle.github.io/gate.js`, which a
 
 ## v70
 - Website copy only: the start screen's bottom line is now "‹ smAisle Daily · Back to today's games" (with the Daily icon), linking to smaisle.app/daily/. The "smAisle Home" menu item is removed, so smAisle Daily is the only way back.
+
+## v71
+- Cards no longer resize mid-hand. Whether the rack shows one row or two is decided at full size, and the card size is set once per hand and can only shrink, so placing letters never flips the rack from two rows of 4 to one row of 8.

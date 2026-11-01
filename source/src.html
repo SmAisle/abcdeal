@@ -461,7 +461,7 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 /*WORDS*/
 /*LOGIC*/
 const RESET_DAYS={'2026-10-31':3};
-const VERSION='70',VDATE='Nov 1',GAME='abc';
+const VERSION='71',VDATE='Nov 1',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -612,8 +612,9 @@ function starStr(n){return n?'⭐'.repeat(n):''}
 /* Size cards so n of them fit across the table */
 function fit(row,n,max){const W=$('table').clientWidth-4,g=n>7?4:6;row.style.gap=g+'px';const w=Math.max(26,Math.min(max,Math.floor((W-g*(n-1))/n)));row.style.setProperty('--w',w+'px');return w}
 /* Your hand: one row while the cards stay big; otherwise two rows of bigger cards */
-function fitHand(n,k=1){const hr=$('handRow'),one=fit(hr,n,74*k);if(one>=56*k||n<6){hr.classList.remove('two');hr.style.maxWidth='';return}const per=Math.ceil(n/2),w=fit(hr,per,74*k);hr.style.maxWidth=(w*per+6*(per-1)+2)+'px';hr.classList.add('two')}
-let stuckT=0;
+/* one row or two is decided at full size, so shrinking a short screen never flips the layout */
+function fitHand(n,k=1){const hr=$('handRow'),one=fit(hr,n,74);if(one>=56||n<6){fit(hr,n,74*k);hr.classList.remove('two');hr.style.maxWidth='';return}const per=Math.ceil(n/2),w=fit(hr,per,74*k);hr.style.maxWidth=(w*per+6*(per-1)+2)+'px';hr.classList.add('two')}
+let stuckT=0,sizeKey='',sizeK=1;
 function checkStuck(){const h=H();clearTimeout(stuckT);if(h.done||busy)return false;if(anyWord(S.cards,LEN()))return false;
   if(DRAW_SWAP&&(!h.drew||!h.swapped)){const opt=!h.drew&&!h.swapped?'Draw or swap':!h.drew?'Draw':'Swap';$('preview').innerHTML=`<b>No ${LEN()}-letter word here.</b> ${opt}, or bust.`;return true}
   $('preview').innerHTML=`<b>No ${LEN()}-letter word${DRAW_SWAP?' still':''} in your hand.</b> You bust.`;busy=true;['drawBtn','swapBtn','mixBtn','clearBtn','foldBtn','goBtn'].forEach(id=>$(id).disabled=true);
@@ -669,7 +670,9 @@ function render(deal){
   else if(S.hands.every(x=>x.done)){g.textContent='See today’s result';g.disabled=false}
   else{g.textContent='Next hand';g.disabled=false}
   /* Short screens (a phone with 8 or 9 cards, or Deal 'Em's four rows): shrink every card until the table fits above the buttons */
-  const t=$('table');for(let k=.92;k>.4&&t.scrollHeight>t.clientHeight+1;k-=.06)size(k);
+  /* Card size is fixed for the whole hand: it only ever shrinks, so placing letters never resizes the cards */
+  const t=$('table'),hk=DATE+MODE+S.cur+'|'+t.clientWidth+'x'+t.clientHeight;if(sizeKey!==hk){sizeKey=hk;sizeK=1}
+  if(sizeK<1)size(sizeK);for(let k=sizeK-.06;k>.4&&t.scrollHeight>t.clientHeight+1;k-=.06){size(k);sizeK=k}
   if(!h.done&&!busy)checkStuck();
 }
 /* ---------- Dragging cards ----------
