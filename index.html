@@ -572,7 +572,7 @@ function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/
 //module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,bonusSlots,holiday,isWord,best,fullList,dealDay,dayNumber,removeLetters,HANDS};
 
 const RESET_DAYS={'2026-10-31':3};
-const VERSION='64',VDATE='Oct 30',GAME='abc';
+const VERSION='65',VDATE='Nov 1',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -763,8 +763,8 @@ function render(deal){
     if(hintMode&&!h.done)el.classList.add('pick');
     if(i===BON()&&MULT[S.cur]>1){el.classList.add('mx');el.dataset.m='×'+MULT[S.cur]}wr.appendChild(el)}
   // one quiet line: points so far and how many words are possible
-  /* hands 4 and 5 (6 and 7 letters) also say how many of those words are common */
-  const n=countWords(S.cards,len),nc=S.cur>=3&&n?commonWords(S.cards,len):-1,
+  /* every hand says how many words are possible and how many of those are common */
+  const n=countWords(S.cards,len),nc=n?commonWords(S.cards,len):-1,
     poss=n?`${n} word${n>1?'s':''} possible${nc>=0?` · ${nc} common`:''}`:'no words possible';
   if(h.done)$('preview').innerHTML=h.bust?(h.fold?'You folded':'You busted'):`<b>${h.score}</b> pts${cost(h)?` − ${cost(h)} = <b>${h.net}</b>`:''}`;
   else if(swapMode)$('preview').textContent='Tap a card to swap it out';
