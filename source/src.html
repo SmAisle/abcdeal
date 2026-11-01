@@ -390,8 +390,7 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
   <button class="go" id="shareBtn">Share result</button>
   <button class="go try" id="tryOther" hidden></button>
   <textarea id="shareText" readonly hidden></textarea>
-  <div class="duo"><button class="go alt" id="lookBtn">See the table</button><button class="go alt" id="doneStats">Stats</button></div>
-  <button class="go alt" id="replayBtn">Play again (for fun)</button>
+  <div class="links"><button id="lookBtn">See the table</button><span>·</span><button id="doneStats">Stats</button><span id="replayDot">·</span><button id="replayBtn">Play again</button></div>
   <p class="fine" id="replayNote" style="font-style:italic;margin:0" hidden>Replays don't count toward your stats or streak.</p>
 </div></div>
 
@@ -434,12 +433,11 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
   <div id="togs"><button id="sndBtn" aria-label="Sound"></button></div>
   <h2>Menu</h2>
   <button class="go" id="mBack">Back to the table</button>
-  <button class="go alt" id="mCover">Front page</button>
   <button class="go alt" id="mHelp">How to Play</button>
   <button class="go alt" id="mPast">Archive</button>
   <button class="go alt" id="mStats">Stats</button>
   <button class="go alt" id="mDaily" hidden>‹ smAisle Daily</button>
-  <button class="go alt" id="mTerms">Terms and privacy</button>
+  <div class="links"><button id="mCover">Front page</button><span id="mTermsDot">·</span><button id="mTerms">Terms</button></div>
   <div class="sect" id="mMore">More from smAisle</div>
   <button class="go try more" id="mD15"></button>
   <div class="ver" id="menuVer"></div>
@@ -461,7 +459,7 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 /*WORDS*/
 /*LOGIC*/
 const RESET_DAYS={'2026-10-31':3};
-const VERSION='72',VDATE='Nov 1',GAME='abc';
+const VERSION='73',VDATE='Nov 1',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
