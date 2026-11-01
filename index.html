@@ -439,7 +439,6 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
   <button class="go alt" id="mPast">Archive</button>
   <button class="go alt" id="mStats">Stats</button>
   <button class="go alt" id="mDaily" hidden>‹ smAisle Daily</button>
-  <button class="go alt" id="mHome" style="text-transform:none" hidden>‹ smAisle Home</button>
   <button class="go alt" id="mTerms">Terms and privacy</button>
   <div class="sect" id="mMore">More from smAisle</div>
   <button class="go try more" id="mD15"></button>
@@ -579,7 +578,7 @@ function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/
 //module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,bonusSlots,holiday,isWord,best,fullList,dealDay,dayNumber,removeLetters,HANDS};
 
 const RESET_DAYS={'2026-10-31':3};
-const VERSION='69',VDATE='Nov 1',GAME='abc';
+const VERSION='70',VDATE='Nov 1',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -1002,9 +1001,9 @@ $('mD15').innerHTML=d15Tile('','Crossword-style daily puzzle').replace('<span cl
 $('mD15').onclick=()=>outLink('d15','menu');
 /* website copy only: back link to the smAisle Daily hub */
 /* website copy: the hub replaces the Daily 15 tile */
-if(/github\.io$|smaisle\.app$/.test(location.hostname))dailyLinks();
-function dailyLinks(){$('mDaily').hidden=false;$('mHome').hidden=false;$('mHome').onclick=()=>{location.href='https://smaisle.app/'};$('dailyBar').hidden=false;$('mMore').hidden=true;$('mD15').hidden=true;$('mDaily').onclick=()=>{location.href='https://smaisle.app/daily/'}}
+function dailyLinks(){const cm=$('cvMore');cm.innerHTML='<img src="data:image/jpeg;base64,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" alt="">‹ smAisle Daily <i>Back to today’s games</i>';cm.onclick=()=>{location.href='https://smaisle.app/daily/'};$('mDaily').hidden=false;$('dailyBar').hidden=false;$('mMore').hidden=true;$('mD15').hidden=true;$('mDaily').onclick=()=>{location.href='https://smaisle.app/daily/'}}
 $('cvMore').onclick=()=>outLink('sm','cover');
+if(/github\.io$|smaisle\.app$/.test(location.hostname))dailyLinks();
 $('tryOther').onclick=()=>{if($('tryOther').dataset.to==='d15')return outLink('d15','done');if(HOLDEM()){backTo='game';setMode('deal');if(finished())return showDone();dealWaiting=true;only('')}else playHoldem()};
 /* Past deals, like The Daily 15's past puzzles: every deal back to No. 1, for both games. They count, marked as played late. */
 const dateAt=i=>{const d=new Date(Date.parse(today()+'T12:00:00')-i*864e5);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
