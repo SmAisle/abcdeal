@@ -267,10 +267,15 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 .countdown{font-variant-numeric:tabular-nums}
 @media (max-height:700px){#qText{font-size:16.5px}#qPic{min-height:80px}#table{padding:8px 0}.go{padding:10px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* thin bar back to the smAisle Daily hub (website copy only) */
+#dailyBar{margin:-6px -10px 0;padding:8px 10px;background:#fffdf6;border-bottom:2px solid #1a1814;color:#1a1814;font:800 12px "Libre Franklin",system-ui,sans-serif;text-decoration:none;letter-spacing:.01em}
+#dailyBar:not([hidden]){display:block}
+#mDaily{background:var(--hi);text-transform:none}
 </style>
 </head>
 <body>
 <div id="app">
+  <a id="dailyBar" href="https://smaisle.github.io/daily/" hidden>‹ smAisle Daily</a>
   <div class="top">
     <div id="pno"><b id="noLabel">Deal No. 1</b><small id="modeLine"></small><small id="dateLabel"></small></div>
     <div class="box"><small>Points</small><b id="totalPts">0</b></div>
@@ -430,12 +435,12 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
   <h2>Menu</h2>
   <button class="go" id="mBack">Back to the table</button>
   <button class="go alt" id="mCover">Front page</button>
+  <button class="go alt" id="mHelp">How to Play</button>
   <button class="go alt" id="mPast">Archive</button>
   <button class="go alt" id="mStats">Stats</button>
-  <button class="go alt" id="mHelp">How to play</button>
+  <button class="go alt" id="mDaily" hidden>‹ smAisle Daily</button>
   <button class="go alt" id="mTerms">Terms and privacy</button>
-  <div class="sect">More from smAisle</div>
-  <button class="go alt" id="mDaily" style="text-transform:none" hidden>‹ smAisle Daily</button>
+  <div class="sect" id="mMore">More from smAisle</div>
   <button class="go try more" id="mD15"></button>
   <div class="ver" id="menuVer"></div>
 </div></div>
@@ -456,7 +461,7 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 /*WORDS*/
 /*LOGIC*/
 const RESET_DAYS={'2026-10-31':3};
-const VERSION='66',VDATE='Nov 1',GAME='abc';
+const VERSION='67',VDATE='Nov 1',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -878,7 +883,9 @@ function outLink(k,where){const u=store.json('abc-usage',null);if(u){u.x=u.x||{}
 $('mD15').innerHTML=d15Tile('','Crossword-style daily puzzle').replace('<span class="kick"></span>','');
 $('mD15').onclick=()=>outLink('d15','menu');
 /* website copy only: back link to the smAisle Daily hub */
-if(/github\.io$|smaisle\.app$/.test(location.hostname)){$('mDaily').hidden=false;$('mDaily').onclick=()=>{location.href='https://smaisle.github.io/daily/'}}
+/* website copy: the hub replaces the Daily 15 tile */
+if(/github\.io$|smaisle\.app$/.test(location.hostname))dailyLinks();
+function dailyLinks(){$('mDaily').hidden=false;$('dailyBar').hidden=false;$('mMore').hidden=true;$('mD15').hidden=true;$('mDaily').onclick=()=>{location.href='https://smaisle.github.io/daily/'}}
 $('cvMore').onclick=()=>outLink('sm','cover');
 $('tryOther').onclick=()=>{if($('tryOther').dataset.to==='d15')return outLink('d15','done');if(HOLDEM()){backTo='game';setMode('deal');if(finished())return showDone();dealWaiting=true;only('')}else playHoldem()};
 /* Past deals, like The Daily 15's past puzzles: every deal back to No. 1, for both games. They count, marked as played late. */

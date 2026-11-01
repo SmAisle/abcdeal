@@ -230,3 +230,7 @@ On smaisle.github.io the page loads `https://smaisle.github.io/gate.js`, which a
 ## v66
 - smAisle Daily hub: when all 5 of today's hands are done, the game adds itself to localStorage `smaisle_done` (`{"YYYY-MM-DD":["abc"]}`, device date, last 60 days). Classic writes "abc", Deal 'Em writes "abch".
 - Menu has a "‹ smAisle Daily" button to https://smaisle.github.io/daily/ (website copy only).
+
+## v67
+- One look with smAisle Daily (website copy only): a thin cream "‹ smAisle Daily" bar sits at the top of the game screen.
+- The menu order is now Back to the table, Front page, How to Play, Archive, Stats, "‹ smAisle Daily" (yellow), then Terms and the version. On the website, smAisle Daily replaces the Daily 15 tile.
