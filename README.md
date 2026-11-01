@@ -223,3 +223,6 @@ On smaisle.github.io the page loads `https://smaisle.github.io/gate.js`, which a
 
 ## v64
 - Sound fix for iPhone: after you leave the app and come back, the sound turns back on. Leaving marks the audio as stale, and the next tap resumes it. If it still isn't running 250 ms later, it is closed and rebuilt (the same fix as Gramble).
+
+## v65
+- Every hand now shows "N words possible · M common", not just hands 4 and 5.
