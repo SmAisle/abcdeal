@@ -226,3 +226,7 @@ On smaisle.github.io the page loads `https://smaisle.github.io/gate.js`, which a
 
 ## v65
 - Every hand now shows "N words possible · M common", not just hands 4 and 5.
+
+## v66
+- smAisle Daily hub: when all 5 of today's hands are done, the game adds itself to localStorage `smaisle_done` (`{"YYYY-MM-DD":["abc"]}`, device date, last 60 days). Classic writes "abc", Deal 'Em writes "abch".
+- Menu has a "‹ smAisle Daily" button to https://smaisle.github.io/daily/ (website copy only).

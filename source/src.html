@@ -435,6 +435,7 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
   <button class="go alt" id="mHelp">How to play</button>
   <button class="go alt" id="mTerms">Terms and privacy</button>
   <div class="sect">More from smAisle</div>
+  <button class="go alt" id="mDaily" style="text-transform:none" hidden>‹ smAisle Daily</button>
   <button class="go try more" id="mD15"></button>
   <div class="ver" id="menuVer"></div>
 </div></div>
@@ -455,7 +456,7 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 /*WORDS*/
 /*LOGIC*/
 const RESET_DAYS={'2026-10-31':3};
-const VERSION='65',VDATE='Nov 1',GAME='abc';
+const VERSION='66',VDATE='Nov 1',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -767,7 +768,7 @@ function resolve(w,fold){const h=H();h.fold=!!fold;busy=true;swapMode=false;cons
   h.result=!w?'L':!d.word?'W':h.net>d.score?'W':h.net<d.score?'L':'P';
   S.cards=S.cards.filter((_,i)=>!h.used.includes(i));
   const cards=[...$('dealerRow').children];if(fold)sfx('fold');cards.forEach((el,i)=>setTimeout(()=>{if(el.classList.contains('down'))sfx('flip');el.classList.remove('down')},120+i*110));
-  setTimeout(()=>{h.done=true;sel=[];busy=false;save();if(!REPLAY)recordDay();render();showBanner(h);if(!fold)sfx(h.result==='W'?(d.word?'win':'bust'):h.result==='P'?'push':'lose');if(!REPLAY)checkIn('hand')},120+cards.length*110+350)}
+  setTimeout(()=>{h.done=true;sel=[];busy=false;save();if(!REPLAY){recordDay();markDone()}render();showBanner(h);if(!fold)sfx(h.result==='W'?(d.word?'win':'bust'):h.result==='P'?'push':'lose');if(!REPLAY)checkIn('hand')},120+cards.length*110+350)}
 
 function showBanner(h){const b=$('banner'),d=DAY.dealerBest[S.cur];
   const title=h.bust?(h.fold?'Fold':'Bust!'):!d.word?'Dealer busts!':{W:'You win!',L:'Dealer wins',P:'Push'}[h.result];
@@ -783,6 +784,12 @@ function showBanner(h){const b=$('banner'),d=DAY.dealerBest[S.cur];
 function recordDay(){const hist=store.json(KEY('hist'),{});const done=S.hands.filter(x=>x.done);
   if(hist[DATE]&&!hist[DATE].late&&PAST)return;
   hist[DATE]={w:done.filter(x=>x.result==='W').length,p:done.reduce((a,x)=>a+x.net,0),r:done.map(x=>x.result).join(''),b:DAY.bestTotal,t:S.secs||0,...(hintsUsed()?{hint:hintsUsed()}:{}),...(PAST?{late:1}:{})};store.put(KEY('hist'),hist)}
+/* smAisle Daily hub: when today's 5 hands are done, add this game to localStorage 'smaisle_done'
+   {"YYYY-MM-DD":["abc",...]} (device-local date, last 60 days), same as SMAISLE.markDone in daily/games.js.
+   Classic writes "abc", Deal 'Em writes "abch". */
+function markDone(){if(PAST||REPLAY||!finished())return;try{const d=new Date(),day=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'),id=HOLDEM()?'abch':'abc';
+  let s={};try{s=JSON.parse(localStorage.getItem('smaisle_done')||'{}')||{}}catch(e){}s[day]=s[day]||[];if(s[day].indexOf(id)<0)s[day].push(id);
+  const k=Object.keys(s).sort();while(k.length>60)delete s[k.shift()];localStorage.setItem('smaisle_done',JSON.stringify(s))}catch(e){}}
 
 /* ---------- Screens ---------- */
 let backTo='game';
@@ -870,6 +877,8 @@ function outLink(k,where){const u=store.json('abc-usage',null);if(u){u.x=u.x||{}
   checkIn('link');if(window.ABC_APP&&window.ABC_APP.open)return window.ABC_APP.open(k);window.open(LINKS[k],'_blank','noopener')}
 $('mD15').innerHTML=d15Tile('','Crossword-style daily puzzle').replace('<span class="kick"></span>','');
 $('mD15').onclick=()=>outLink('d15','menu');
+/* website copy only: back link to the smAisle Daily hub */
+if(/github\.io$|smaisle\.app$/.test(location.hostname)){$('mDaily').hidden=false;$('mDaily').onclick=()=>{location.href='https://smaisle.github.io/daily/'}}
 $('cvMore').onclick=()=>outLink('sm','cover');
 $('tryOther').onclick=()=>{if($('tryOther').dataset.to==='d15')return outLink('d15','done');if(HOLDEM()){backTo='game';setMode('deal');if(finished())return showDone();dealWaiting=true;only('')}else playHoldem()};
 /* Past deals, like The Daily 15's past puzzles: every deal back to No. 1, for both games. They count, marked as played late. */
