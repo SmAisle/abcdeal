@@ -253,3 +253,6 @@ On smaisle.github.io the page loads `https://smaisle.github.io/gate.js`, which a
 
 ## v73
 - Simpler screens. The menu has 5 buttons (Back to the table, How to Play, Archive, Stats, smAisle Daily), with Front page and Terms as small links. The finish screen has two buttons (Share result, the other-mode tile), with See the table, Stats and Play again as small links.
+
+## v74
+- All of the dealer's cards stay face down until you play your word. The single face-up card from the old blackjack idea is gone, and How to Play is updated to match.
