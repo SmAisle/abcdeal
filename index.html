@@ -265,15 +265,27 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 .countdown{font-variant-numeric:tabular-nums}
 @media (max-height:700px){#qText{font-size:16.5px}#qPic{min-height:80px}#table{padding:8px 0}.go{padding:10px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-/* yellow button back to the smAisle Daily hub (website copy only): same spot in the game and on the cover */
-#dailyBar,#coverHub{font:800 13px/1.2 var(--sans);letter-spacing:.06em;color:#1a1814;background:var(--hi);border:2px solid var(--ink);border-radius:4px;padding:5px 10px;text-decoration:none;white-space:nowrap}#dailyBar{flex:none;align-self:flex-start}#dailyBar[hidden],#coverHub[hidden]{display:none}
+/* yellow button back to the smAisle Daily hub (website copy only): cover only. During play the way back is the menu row. */
+#coverHub{font:800 13px/1.2 var(--sans);letter-spacing:.06em;color:#1a1814;background:var(--hi);border:2px solid var(--ink);border-radius:4px;padding:5px 10px;text-decoration:none;white-space:nowrap}#coverHub[hidden]{display:none}
 #coverHub{position:fixed;top:6px;left:calc(max(0px,(100vw - 560px)/2) + max(10px,env(safe-area-inset-left,0px)))}#cover.hub{padding-top:42px}
 #mDaily{background:var(--hi);text-transform:none}
+/* Demo: one self-playing hand */
+#demo{background:var(--paper);z-index:45;padding:calc(env(safe-area-inset-top,0px) + 8px) 12px calc(env(safe-area-inset-bottom,0px) + 8px)}
+#dmBox{width:100%;max-width:400px;max-height:100%;display:flex;flex-direction:column;gap:14px;justify-content:center}
+.dmTop{display:flex;justify-content:space-between;align-items:baseline;border-bottom:3px double var(--ink);padding-bottom:6px}.dmTop b{font:900 24px var(--head)}.dmTop span{font:800 11px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--ink2)}
+#dmDealer{--w:40px}#dmWord{--w:46px;min-height:calc(var(--w)*1.4)}#dmHand{--w:52px}
+#dmHand .card{transition:opacity .2s,transform .2s}#dmHand .card.tap{transform:translateY(-8px)}#dmHand .card.tap .face{background:var(--hi)}#dmHand .card.used{opacity:.2}
+#dmDealer .card{transition:opacity .2s}#dmDealer .card.pick .face{background:var(--hi)}
+#dmDealerWord,#dmPrev{min-height:1.4em;font:italic 14px var(--body);color:var(--ink2);text-align:center}#dmPrev b{font:800 14px var(--sans);font-style:normal;color:var(--ink)}#dmPrev b.win{background:var(--hi);padding:1px 6px}
+#dmBar{background:var(--card);border:2px solid var(--ink);border-radius:4px;box-shadow:3px 3px 0 rgba(0,0,0,.25);padding:8px 10px;display:grid;grid-template-columns:minmax(0,1fr) 78px;gap:4px 10px;align-items:center}
+#dmBar .dt{grid-column:1/-1;display:flex;justify-content:space-between;font:800 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+#dmSkip{background:none;border:0;padding:4px 0 4px 8px;font:inherit;color:inherit;text-decoration:underline}
+#dmText{margin:0;font:500 14px/1.3 var(--sans);min-height:72px}
+#dmNext{height:42px;border:2px solid var(--ink);border-radius:3px;background:var(--hi);color:var(--ink);font:800 14px var(--sans)}#dmNext:disabled{opacity:.4}
 </style>
 </head>
 <body>
 <div id="app">
-  <a id="dailyBar" href="https://smaisle.app/daily/" hidden>‹ smAisle Daily</a>
   <div class="top">
     <div id="pno"><b id="noLabel">Deal No. 1</b><small id="modeLine"></small><small id="dateLabel"></small></div>
     <div class="box"><small>Points</small><b id="totalPts">0</b></div>
@@ -322,8 +334,17 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
   <div class="gm">Game modes</div>
   <button class="go alt mc" id="coverGo"><span class="lk">Classic</span><span class="st">5-card poker style</span><span class="act" id="coverGoAct">Play ›</span></button>
   <button class="go alt mc" id="coverHold"><span class="lk"><span class="mode he">Deal ’Em</span></span><span class="st">Texas Hold ’em style</span><span class="act"><small id="holdTag">🔒 Plus</small> Play ›</span></button>
-  <div class="links"><button id="coverPast">Archive</button><span>·</span><button id="coverStats">Stats</button><span>·</span><button id="coverHow">How to Play</button></div>
+  <div class="links"><button id="coverPast">Archive</button><span>·</span><button id="coverStats">Stats</button><span>·</span><button id="coverHow">How to Play</button><span>·</span><button id="coverDemo">Demo</button></div>
   <div class="ver smhome"><a id="cvMore" href="https://smaisle.app/">smAisle Home</a> · <span id="cvVer"></span></div>
+</div></div>
+
+<!-- Demo: one made-up hand on its own screen. It never touches the saved game, stats or check-ins. -->
+<div class="sheet" id="demo" hidden><div id="dmBox">
+  <div class="dmTop"><b>Demo</b><span id="dmHandNo">Hand 1 · 3 letters</span></div>
+  <div class="seat"><div class="label">Dealer</div><div class="row" id="dmDealer"></div><div id="dmDealerWord"></div></div>
+  <div class="middle"><div class="row" id="dmWord"></div><div id="dmPrev"></div></div>
+  <div class="row" id="dmHand"></div>
+  <div id="dmBar"><div class="dt"><span id="dmStep">Demo</span><button id="dmSkip">Skip</button></div><p id="dmText"></p><button id="dmNext">Next</button></div>
 </div></div>
 
 <div class="sheet" id="quick" hidden><div class="box2" id="qCard">
@@ -334,6 +355,7 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
   <div id="qDots"></div>
   <button class="go" id="quickGo">Next</button>
   <button class="go alt" id="qAll" hidden>See all rules</button>
+  <div class="links" id="qDemoRow" hidden><button id="qDemo">Watch the demo</button></div>
 </div></div>
 
 <div class="sheet" id="help" hidden><div class="box2">
@@ -574,7 +596,7 @@ function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/
 //module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,bonusSlots,holiday,isWord,best,fullList,dealDay,dayNumber,removeLetters,HANDS};
 
 const RESET_DAYS={'2026-10-31':3};
-const VERSION='75',VDATE='Nov 3',GAME='abc';
+const VERSION='76',VDATE='Nov 3',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -999,7 +1021,7 @@ $('mD15').innerHTML=d15Tile('','Crossword-style daily puzzle').replace('<span cl
 $('mD15').onclick=()=>outLink('d15','menu');
 /* website copy only: back link to the smAisle Daily hub */
 /* website copy: the hub replaces the Daily 15 tile */
-function dailyLinks(){$('mDaily').hidden=false;$('dailyBar').hidden=false;$('coverHub').hidden=false;$('cover').classList.add('hub');$('mMore').hidden=true;$('mD15').hidden=true;$('mDaily').onclick=()=>{location.href='https://smaisle.app/daily/'}}
+function dailyLinks(){$('mDaily').hidden=false;$('coverHub').hidden=false;$('cover').classList.add('hub');$('mMore').hidden=true;$('mD15').hidden=true;$('mDaily').onclick=()=>{location.href='https://smaisle.app/daily/'}}
 $('cvMore').onclick=e=>{e.preventDefault();outLink('sm','cover')};
 if(/github\.io$|smaisle\.app$/.test(location.hostname))dailyLinks();
 $('tryOther').onclick=()=>{if($('tryOther').dataset.to==='d15')return outLink('d15','done');if(HOLDEM()){backTo='game';setMode('deal');if(finished())return showDone();dealWaiting=true;only('')}else playHoldem()};
@@ -1025,6 +1047,31 @@ function showPast(m){pastMode=m||pastMode;if(pastMode==='holdem'&&!hasPlus())ret
 function playPast(m,d){backTo='game';MODE=m;HOLE=m==='holdem'?2:0;loadDay(d);if(finished())return showDone();dealWaiting=true;only('')}
 $('pastDeal').onclick=()=>showPast('deal');$('pastEm').onclick=()=>showPast('holdem');
 $('coverPast').onclick=()=>{pastBack='cover';showPast(MODE)};
+/* Demo: one made-up hand that plays itself. It only draws on its own screen, so nothing is saved and no check-in is sent. */
+const DM={hand:[...'RJTAO'],dealer:[...'BUGLE'],you:'JAR',them:'BUG'};
+let dmFrom='cover',dmStep=-1,dmTimers=[];
+const dmAfter=(ms,f)=>dmTimers.push(setTimeout(f,ms));
+const dmClear=()=>{dmTimers.forEach(clearTimeout);dmTimers=[]};
+const dmPts=()=>score(DM.you,0,0),dmThem=()=>score(DM.them,0,0);
+function dmDraw(){const fill=(id,ls,o)=>{$(id).replaceChildren(...ls.map(l=>cardEl(l,o)))};
+  fill('dmDealer',DM.dealer,{down:true});fill('dmHand',DM.hand);
+  $('dmWord').replaceChildren(...[...DM.you].map(()=>{const d=document.createElement('div');d.className='slot';return d}));
+  $('dmPrev').textContent='';$('dmDealerWord').textContent=''}
+const DMS=[
+ {t:()=>'You and the dealer each get <b>5 cards</b>. The dealer’s stay face down. Spell a <b>3-letter word</b> from yours.',run:()=>{dmDraw();return 0}},
+ {t:()=>`Tap cards to fill the slots. Rare letters score more: <b>J is worth ${VALUES.J}</b>. ${DM.you} scores ${dmPts()}.`,run:()=>{const cards=[...$('dmHand').children];[...DM.you].forEach((l,i)=>{const c=cards[DM.hand.indexOf(l)];
+   dmAfter(300+i*750,()=>{c.classList.add('tap');sfx('deal')});
+   dmAfter(650+i*750,()=>{c.classList.remove('tap');c.classList.add('used');$('dmWord').children[i].replaceWith(cardEl(l));if(i===DM.you.length-1)$('dmPrev').innerHTML=`<b>${dmPts()}</b> pts`})});return 300+DM.you.length*750}},
+ {t:()=>`Tap <b>Play word</b>. The dealer flips its cards and plays its best word: ${DM.them}, for ${dmThem()}.`,run:()=>{[...$('dmDealer').children].forEach((c,i)=>dmAfter(150+i*180,()=>{c.classList.remove('down');sfx('flip')}));
+   dmAfter(1300,()=>{[...DM.them].forEach(l=>[...$('dmDealer').children][DM.dealer.indexOf(l)].classList.add('pick'));$('dmDealerWord').textContent=`${DM.them} · ${dmThem()} pts`});return 1500}},
+ {t:()=>`${DM.you} ${dmPts()} beats ${DM.them} ${dmThem()}. <b>You win the hand.</b> Higher score wins, and a tie is a push.`,run:()=>{$('dmPrev').innerHTML=`<b class="win">${DM.you} ${dmPts()}</b> beats ${DM.them} ${dmThem()}`;sfx('win');return 500}},
+ {t:()=>'Each hand adds a card, up to 9, and from hand 2 a <b>bonus spot</b> multiplies its letter. Win 3 of the day’s <b>5 hands</b> for a star.',run:()=>0}];
+function dmNext(){dmClear();dmStep++;if(dmStep>=DMS.length)return dmEnd();const s=DMS[dmStep],last=dmStep===DMS.length-1;
+  $('dmStep').textContent=`Demo · ${dmStep+1} of ${DMS.length}`;$('dmNext').textContent=last?'Done':'Next';$('dmNext').disabled=true;$('dmText').innerHTML=s.t();
+  dmAfter(s.run()+80,()=>{$('dmNext').disabled=false})}
+function startDemo(){dmFrom=[...document.querySelectorAll('.sheet')].find(x=>!x.hidden)?.id||'cover';dmStep=-1;only('demo');dmNext()}
+function dmEnd(){dmClear();if(dmFrom==='cover')cover();else only(dmFrom)}
+$('dmNext').onclick=dmNext;$('dmSkip').onclick=dmEnd;$('coverDemo').onclick=$('qDemo').onclick=startDemo;
 $('mPast').onclick=()=>{pastBack='game';showPast(MODE)};
 $('pastBack').onclick=()=>pastBack==='cover'?cover():only('');
 /* smAisle Daily Plus: one purchase that covers The Daily 15, A, B, C, Deal and Gramble; a one-time purchase in the App Store app (window.ABC_APP). The website stays free, so Deal 'Em is open to everyone there. */
@@ -1048,7 +1095,7 @@ const QS=[
 let qStep=0,qHelp=false;
 function qShow(){const q=QS[qStep];$('qPic').innerHTML=q[0];$('qPic').hidden=!q[0];$('qTitle').textContent=q[1];$('qText').innerHTML=q[2];
   $('qDots').innerHTML=QS.map((_,k)=>`<span${k===qStep?' class="on"':''}></span>`).join('');const last=qStep===QS.length-1;
-  $('quickGo').textContent=!last?'Next':qHelp?'Got it':"Let's play";$('qSkip').textContent=qHelp?'Close':'Skip intro';$('qAll').hidden=!(qHelp&&last)}
+  $('quickGo').textContent=!last?'Next':qHelp?'Got it':"Let's play";$('qSkip').textContent=qHelp?'Close':'Skip intro';$('qAll').hidden=!(qHelp&&last);$('qDemoRow').hidden=!qHelp}
 function qOpen(help){qHelp=!!help;qStep=0;qShow();only('quick')}
 function qDone(){store.set('abc-seen','1');if(qHelp)goBack();else only('')}
 $('quickGo').onclick=()=>{if(qStep<QS.length-1){qStep++;qShow()}else qDone()};
