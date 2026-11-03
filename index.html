@@ -247,12 +247,11 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 .go.try.more{background:var(--card)}
 .smhome{font-size:12px;opacity:1;color:var(--ink2);margin-top:-4px}.smhome a{color:inherit;padding:6px 2px}
 /* Sound toggle in the menu's top corner, like The Daily 15 */
-#togs{position:absolute;top:8px;right:8px;display:flex;gap:5px}
-#sndBtn{display:flex;align-items:center;gap:4px;background:transparent;border:1.5px solid var(--ink);border-radius:6px;padding:3px 6px;font:700 9px/1.1 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);cursor:pointer}
-#sndBtn span{font-size:11px}#sndBtn b{font-size:10px}#sndBtn.on{background:var(--ink);color:var(--card)}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mgrid .go{margin:0;padding:10px 4px;font-size:12px;white-space:nowrap}.mgrid .hubrow{background:var(--hi);color:#1a1814;text-transform:none}.mgrid[hidden]{display:none}
+.sets{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--ink);padding-top:10px}.sets button.tg{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:10px;background:transparent;border:2px solid var(--ink);border-radius:3px;font:800 12px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);cursor:pointer}.sets button.tg span{font-size:14px}.sets button.tg.on{background:var(--ink);color:#fffdf6}
 #menu h2{text-align:left}
 .card.lock .face{background:var(--hi)}.card.lock::after{content:'💡';position:absolute;top:-9px;right:-7px;font-size:13px}#hintBtn{font:800 20px var(--sans);padding:14px 10px;justify-content:center}#foldAsk.hm #foldWarn,#foldAsk.hm #foldTbl{display:none}#foldAsk.hm #foldQ{font-size:21px!important;line-height:1.3;padding:4px 0}#hintBtn small{display:block;font:italic 12.5px var(--body);color:var(--ink2);margin-top:3px}
-#menu .sect{font:800 10px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);margin-top:4px;text-align:left}
+#settings .sect{font:800 10px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);margin-top:4px;text-align:left}
 .go.try .play{flex:none;width:32px;height:32px;border-radius:50%;background:var(--ink);color:var(--hi);font:800 20px/30px var(--sans);text-align:center}
 .duo{display:grid;grid-template-columns:1fr 1fr;gap:8px}.duo .go{margin:0;font-size:13px;letter-spacing:.06em;padding-left:6px;padding-right:6px;white-space:nowrap}
 .sheet>.box2{max-height:calc(100dvh - 32px)}
@@ -268,7 +267,6 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 /* yellow button back to the smAisle Daily hub (website copy only): cover only. During play the way back is the menu row. */
 #coverHub{font:800 13px/1.2 var(--sans);letter-spacing:.06em;color:#1a1814;background:var(--hi);border:2px solid var(--ink);border-radius:4px;padding:5px 10px;text-decoration:none;white-space:nowrap}#coverHub[hidden]{display:none}
 #coverHub{position:fixed;top:6px;left:calc(max(0px,(100vw - 560px)/2) + max(10px,env(safe-area-inset-left,0px)))}#cover.hub{padding-top:42px}
-#mDaily{background:var(--hi);text-transform:none}
 /* Demo: one self-playing hand */
 #demo{background:var(--paper);z-index:45;padding:calc(env(safe-area-inset-top,0px) + 8px) 12px calc(env(safe-area-inset-bottom,0px) + 8px)}
 #dmBox{width:100%;max-width:400px;max-height:100%;display:flex;flex-direction:column;gap:14px;justify-content:center}
@@ -450,17 +448,20 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 </div></div>
 
 <div class="sheet" id="menu" hidden><div class="box2" style="position:relative">
-  <div id="togs"><button id="sndBtn" aria-label="Sound"></button></div>
   <h2>Menu</h2>
-  <button class="go" id="mBack">Back to the table</button>
-  <button class="go alt" id="mHelp">How to Play</button>
-  <button class="go alt" id="mPast">Archive</button>
-  <button class="go alt" id="mStats">Stats</button>
-  <button class="go alt" id="mDaily" hidden>‹ smAisle Daily</button>
-  <div class="links"><button id="mCover">Front page</button><span id="mTermsDot">·</span><button id="mTerms">Terms</button></div>
+  <button class="go" id="mBack">Back to game</button>
+  <div class="mgrid"><button class="go alt" id="mPast">Archive</button><button class="go alt" id="mStats">Stats</button><button class="go alt" id="mHelp">How to Play</button><button class="go alt" id="mPlus">Plus</button></div>
+  <div class="mgrid"><button class="go alt" id="mCover">Home Screen</button><button class="go alt hubrow" id="mDaily" hidden>‹ smAisle Daily</button></div>
+  <button class="go alt" id="mSet">Settings</button>
+  <div class="ver" id="menuVer"></div>
+</div></div>
+
+<div class="sheet" id="settings" hidden><div class="box2" style="position:relative">
+  <h2>Settings</h2>
+  <div class="sets"><button class="tg" id="sndBtn" aria-label="Sound"></button><button class="tg" id="mTerms">Terms</button></div>
   <div class="sect" id="mMore">More from smAisle</div>
   <button class="go try more" id="mD15"></button>
-  <div class="ver" id="menuVer"></div>
+  <button class="go" id="setBack">Back to the menu</button>
 </div></div>
 
 <div class="sheet" id="terms" hidden><div class="box2">
@@ -596,7 +597,7 @@ function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/
 //module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,bonusSlots,holiday,isWord,best,fullList,dealDay,dayNumber,removeLetters,HANDS};
 
 const RESET_DAYS={'2026-10-31':3};
-const VERSION='76',VDATE='Nov 3',GAME='abc';
+const VERSION='77',VDATE='Nov 3',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -1112,13 +1113,16 @@ $('cvStats').onclick=$('coverStats').onclick=()=>{backTo='cover';showStats()};
 /* The menu button toggles: a second tap closes the menu and goes back to what was open before */
 let menuFrom='';
 $('menu').addEventListener('click',e=>{if(e.target.id==='menu')only(menuFrom)});
-$('menuBtn').onclick=()=>{if(!$('menu').hidden){only(menuFrom);return}const o=[...document.querySelectorAll('.sheet')].find(x=>!x.hidden);menuFrom=o?o.id:'';backTo='game';only('menu')};
+$('menuBtn').onclick=()=>{if(!$('menu').hidden){only(menuFrom);return}const o=[...document.querySelectorAll('.sheet')].find(x=>!x.hidden);menuFrom=o?o.id:'';backTo='game';mFit();only('menu')};
+/* Menu grids: an odd last button spans the full width. */
+function mFit(){document.querySelectorAll('#menu .mgrid').forEach(g=>{const v=[...g.children].filter(x=>!x.hidden&&x.style.display!=='none');g.hidden=!v.length;v.forEach((x,i)=>{x.style.gridColumn=v.length%2&&i===v.length-1?'1/-1':''})})}
+$('mSet').onclick=()=>only('settings');$('setBack').onclick=()=>{mFit();only('menu')};$('mPlus').onclick=playHoldem;
 $('mBack').onclick=()=>only('');
 $('mCover').onclick=cover;
 $('mStats').onclick=()=>{backTo='game';showStats()};
 const sndLabel=()=>{$('sndBtn').innerHTML='<span>'+(soundOn()?'🔊':'🔇')+'</span>Sound: <b>'+(soundOn()?'On':'Off')+'</b>';$('sndBtn').classList.toggle('on',soundOn())};sndLabel();
 $('sndBtn').onclick=()=>{store.set('abc-sound',soundOn()?'off':'on');sndLabel();sfx('place')};
-$('mHelp').onclick=()=>{backTo='game';helpPage(1);only('help')};
+$('mHelp').onclick=()=>{backTo='game';qOpen(true)};
 $('mTerms').onclick=()=>{backTo='game';only('terms')};
 $('termsGo').onclick=()=>{const first=!agreed();if(first){store.set(TERMS_KEY,new Date().toISOString().slice(0,10));checkIn('open');cover()}else goBack()};
 
