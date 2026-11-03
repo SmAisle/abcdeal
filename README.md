@@ -263,3 +263,6 @@ On smaisle.github.io the page loads `https://smaisle.github.io/gate.js`, which a
 ## v76
 - The yellow ‹ smAisle Daily button shows on the cover only, never during play. In the game the way back is the ‹ smAisle Daily row in the menu.
 - New Demo: one made-up hand that plays itself, with Next and Skip. It is the last link on the cover (Archive, Stats, How to Play, Demo) and is also on the How to Play card as Watch the demo. It draws on its own screen, so it saves nothing and sends no check-ins.
+
+## v77
+- Same menu as Straight Down Spell: Back to game; a grid of Archive, Stats, How to Play, Plus (Deal ’Em if you have Plus, otherwise the Plus offer); Home Screen beside the yellow smAisle Daily; Settings; the version. How to Play in the menu now opens the card with Watch the demo. Sound, Terms and the More from smAisle tile live in Settings.
