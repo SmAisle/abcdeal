@@ -256,3 +256,10 @@ On smaisle.github.io the page loads `https://smaisle.github.io/gate.js`, which a
 
 ## v74
 - All of the dealer's cards stay face down until you play your word. The single face-up card from the old blackjack idea is gone, and How to Play is updated to match.
+
+## v75
+- One way home, same in every daily game: a yellow ‹ smAisle Daily button at the top left, in the same spot on the cover and in the game (website only, plus the menu row). The old footer row with the icon is gone. smAisle Home is one small line next to the version at the bottom of the cover. Links under Play run Archive, Stats, How to Play.
+
+## v76
+- The yellow ‹ smAisle Daily button shows on the cover only, never during play. In the game the way back is the ‹ smAisle Daily row in the menu.
+- New Demo: one made-up hand that plays itself, with Next and Skip. It is the last link on the cover (Archive, Stats, How to Play, Demo) and is also on the How to Play card as Watch the demo. It draws on its own screen, so it saves nothing and sends no check-ins.
