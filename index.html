@@ -268,19 +268,30 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 /* yellow button back to the smAisle Daily hub (website copy only): cover only. During play the way back is the menu row. */
 #coverHub{font:800 13px/1.2 var(--sans);letter-spacing:.06em;color:#1a1814;background:var(--hi);border:2px solid var(--ink);border-radius:4px;padding:5px 10px;text-decoration:none;white-space:nowrap}#coverHub[hidden]{display:none}
 #coverHub{position:fixed;top:6px;left:calc(max(0px,(100vw - 560px)/2) + max(10px,env(safe-area-inset-left,0px)))}#cover.hub{padding-top:42px}
-/* Demo: one self-playing hand */
-#demo{background:var(--paper);z-index:45;padding:calc(env(safe-area-inset-top,0px) + 8px) 12px calc(env(safe-area-inset-bottom,0px) + 8px)}
-#dmBox{width:100%;max-width:400px;max-height:100%;display:flex;flex-direction:column;gap:14px;justify-content:center}
-.dmTop{display:flex;justify-content:space-between;align-items:baseline;border-bottom:3px double var(--ink);padding-bottom:6px}.dmTop b{font:900 24px var(--head)}.dmTop span{font:800 11px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--ink2)}
-#dmDealer{--w:40px}#dmWord{--w:46px;min-height:calc(var(--w)*1.4)}#dmHand{--w:52px}
-#dmHand .card{transition:opacity .2s,transform .2s}#dmHand .card.tap{transform:translateY(-8px)}#dmHand .card.tap .face{background:var(--hi)}#dmHand .card.used{opacity:.2}
-#dmDealer .card{transition:opacity .2s}#dmDealer .card.pick .face{background:var(--hi)}
-#dmDealerWord,#dmPrev{min-height:1.4em;font:italic 14px var(--body);color:var(--ink2);text-align:center}#dmPrev b{font:800 14px var(--sans);font-style:normal;color:var(--ink)}#dmPrev b.win{background:var(--hi);padding:1px 6px}
-#dmBar{background:var(--card);border:2px solid var(--ink);border-radius:4px;box-shadow:3px 3px 0 rgba(0,0,0,.25);padding:8px 10px;display:grid;grid-template-columns:minmax(0,1fr) 78px;gap:4px 10px;align-items:center}
-#dmBar .dt{grid-column:1/-1;display:flex;justify-content:space-between;font:800 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
-#dmSkip{background:none;border:0;padding:4px 0 4px 8px;font:inherit;color:inherit;text-decoration:underline}
-#dmText{margin:0;font:500 14px/1.3 var(--sans);min-height:72px}
-#dmNext{height:42px;border:2px solid var(--ink);border-radius:3px;background:var(--hi);color:var(--ink);font:800 14px var(--sans)}#dmNext:disabled{opacity:.4}
+#cover .links button{white-space:nowrap}@media (max-width:400px){#cover .links{gap:4px;font-size:11px;letter-spacing:.03em}}
+/* Demo: Try it with a coach, the shared smAisle frame */
+#smDemo{position:fixed;left:0;right:0;top:0;height:100vh;height:100dvh;z-index:50;display:flex;flex-direction:column;background:var(--paper);color:var(--ink);font-family:var(--sans,"Libre Franklin",Arial,sans-serif);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+#smDemo::after{content:"";position:absolute;inset:0;z-index:30;pointer-events:none;border:6px solid transparent;background:repeating-linear-gradient(45deg,#ffe27a 0 12px,#1a1814 12px 24px) border-box;-webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) padding-box exclude,linear-gradient(#000 0 0)}
+.smTop{flex:none;height:50px;display:flex;align-items:center;justify-content:space-between;padding:6px 12px 0 14px;background:#ffe27a;color:#1a1814;border-bottom:3px solid #1a1814}.smTop span{display:flex;align-items:center;gap:8px;min-width:0}.smTop b{background:#1a1814;color:#ffe27a;font:900 15px/1 var(--sans,Arial);letter-spacing:.14em;padding:5px 7px 5px 9px;border-radius:3px}.smTop i{font:800 11.5px var(--sans,Arial);font-style:normal}.smTop button{position:relative;z-index:31;height:32px;padding:0 12px;border:2px solid #1a1814;border-radius:3px;background:#fffdf6;color:#1a1814;font:800 12px var(--sans,Arial);letter-spacing:.08em;text-transform:uppercase}
+.smStage{position:relative;flex:1 1 0;min-height:0;overflow:hidden;padding:10px 14px 8px}.smStage::before{content:"DEMO";position:absolute;left:50%;top:52%;z-index:3;transform:translate(-50%,-50%) rotate(-22deg);font:900 118px/1 var(--head,Georgia,serif);letter-spacing:.04em;color:var(--ink);opacity:.09;pointer-events:none}
+.smCap{flex:none;background:var(--card);border-top:2px solid var(--ink);padding:9px 16px 14px;display:grid;gap:5px}.smH{display:flex;justify-content:space-between;align-items:baseline}.smH b{font:900 19px var(--head,Georgia,serif)}.smH small{font:800 11px var(--sans,Arial);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}.smCap p{margin:0;min-height:60px;font:500 15px/20px var(--sans,Arial)}.smCap p.nudge{background:#ffe27a;color:#1a1814;margin:0 -6px;padding:0 6px;border-radius:3px}
+.smDots{display:flex;gap:6px}.smDots i{width:10px;height:10px;border:2px solid var(--ink);border-radius:50%}.smDots i.on{background:var(--btn)}
+.smSlot{min-height:44px;margin-top:2px}.smTurn{height:44px;display:flex;align-items:center;justify-content:center;text-align:center;border:2px dashed var(--ink2);border-radius:3px;font:800 12px var(--sans,Arial);letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+.smBtn{display:block;width:100%;height:46px;border:2px solid var(--ink);border-radius:3px;background:var(--btn);color:var(--paper);font:800 14px var(--sans,Arial);letter-spacing:.08em;text-transform:uppercase}.smBtn.alt{background:var(--card);color:var(--ink)}
+.smF{position:absolute;z-index:7;width:0;height:0;pointer-events:none;transition:left .5s ease,top .5s ease}.smF svg{position:absolute;left:-13px;top:-2px;width:38px;height:46px;transform-origin:13px 2px;animation:smBob .9s ease-in-out infinite}.smF.up svg{transform:scaleY(-1);animation:none}.smR{position:absolute;z-index:6;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;border:3px solid #ffe27a;pointer-events:none;animation:smRip .5s ease-out forwards}.smW{animation:smWob .28s ease 2}
+@keyframes smBob{50%{translate:3px 6px}}@keyframes smRip{to{transform:scale(4.4);opacity:0}}@keyframes smWob{25%{translate:-4px 0}75%{translate:4px 0}}
+.smPop{position:absolute;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(26,24,20,.62);animation:smIn .25s ease both}.smPc{width:100%;max-width:340px;background:var(--paper);color:var(--ink);border:3px double var(--ink);box-shadow:6px 6px 0 rgba(0,0,0,.3);padding:16px;display:grid;gap:10px;text-align:center}.smPc h3{margin:0;font:900 34px/1.1 var(--head,Georgia,serif);border-bottom:3px double var(--ink);padding-bottom:8px}.smPc p{margin:0 0 4px;font:500 15px/1.35 var(--sans,Arial)}
+@keyframes smIn{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.smF svg{animation:none}.smF{transition:none}}
+@media (max-height:640px){.smTop{height:42px;padding-top:4px}.smStage{padding:6px 12px 4px}.smCap{padding:5px 14px 9px;gap:3px}.smCap p{min-height:40px;font-size:13.5px;line-height:18px}.smH b{font-size:16px}.smDots{display:none}.smSlot{min-height:0;margin:0}.smTurn{display:none}.smBtn{height:40px}}
+
+#smDemo{--btn:var(--ink)}
+.abD{display:flex;flex-direction:column;justify-content:space-between;gap:6px;height:100%}.abD .seat{gap:5px}.abD .middle{gap:5px}
+.abTk{display:flex;justify-content:center;gap:8px}.abDl{--w:36px}.abWd{--w:42px;min-height:calc(var(--w)*1.4)}.abHd{--w:50px}.abHd .card{transition:transform .15s,opacity .15s}.abHd .card.used{opacity:.22;transform:translateY(4px)}
+.abDl .card.pick .face{background:var(--hi);color:#1a1814}
+.abDw,.abPv{min-height:1.35em;font:italic 13.5px var(--body);color:var(--ink2);text-align:center}.abPv b{font:800 14px var(--sans);font-style:normal;color:var(--ink)}.abPv b.win{background:var(--hi);color:#1a1814;padding:1px 6px}
+.abGo{flex:none}.abGo.off{opacity:.45}
+@media (max-height:640px){.abDl{--w:30px}.abWd{--w:36px}.abHd{--w:44px}.abD,.abD .seat,.abD .middle{gap:3px}.abDw:empty{display:none}}
 </style>
 </head>
 <body>
@@ -333,17 +344,8 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
   <div class="gm">Game modes</div>
   <button class="go alt mc" id="coverGo"><span class="lk">Classic</span><span class="st">5-card poker style</span><span class="act" id="coverGoAct">Play ›</span></button>
   <button class="go alt mc" id="coverHold"><span class="lk"><span class="mode he">Deal ’Em</span></span><span class="st">Texas Hold ’em style</span><span class="act"><small id="holdTag">🔒 Plus</small> Play ›</span></button>
-  <div class="links"><button id="coverPast">Archive</button><span>·</span><button id="coverStats">Stats</button><span>·</span><button id="coverHow">How to Play</button><span>·</span><button id="coverDemo">Demo</button></div>
+  <div class="links"><button id="coverPast">Archive</button><span>·</span><button id="coverStats">Stats</button><span>·</span><button id="coverHow">How to Play</button><span>·</span><button id="coverDemo">Try the demo</button></div>
   <div class="ver smhome"><a id="cvMore" href="https://smaisle.app/">smAisle Home</a> · <span id="cvVer"></span></div>
-</div></div>
-
-<!-- Demo: one made-up hand on its own screen. It never touches the saved game, stats or check-ins. -->
-<div class="sheet" id="demo" hidden><div id="dmBox">
-  <div class="dmTop"><b>Demo</b><span id="dmHandNo">Hand 1 · 3 letters</span></div>
-  <div class="seat"><div class="label">Dealer</div><div class="row" id="dmDealer"></div><div id="dmDealerWord"></div></div>
-  <div class="middle"><div class="row" id="dmWord"></div><div id="dmPrev"></div></div>
-  <div class="row" id="dmHand"></div>
-  <div id="dmBar"><div class="dt"><span id="dmStep">Demo</span><button id="dmSkip">Skip</button></div><p id="dmText"></p><button id="dmNext">Next</button></div>
 </div></div>
 
 <div class="sheet" id="quick" hidden><div class="box2" id="qCard">
@@ -354,7 +356,7 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
   <div id="qDots"></div>
   <button class="go" id="quickGo">Next</button>
   <button class="go alt" id="qAll" hidden>See all rules</button>
-  <div class="links" id="qDemoRow" hidden><button id="qDemo">Watch the demo</button></div>
+  <div class="links" id="qDemoRow" hidden><button id="qDemo">Try the demo</button></div>
 </div></div>
 
 <div class="sheet" id="help" hidden><div class="box2">
@@ -598,7 +600,7 @@ function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/
 //module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,bonusSlots,holiday,isWord,best,fullList,dealDay,dayNumber,removeLetters,HANDS};
 
 const RESET_DAYS={'2026-10-31':3};
-const VERSION='78',VDATE='Nov 4',GAME='abc';
+const VERSION='79',VDATE='Nov 4',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -1049,31 +1051,45 @@ function showPast(m){pastMode=m||pastMode;if(pastMode==='holdem'&&!hasPlus())ret
 function playPast(m,d){backTo='game';MODE=m;HOLE=m==='holdem'?2:0;loadDay(d);if(finished())return showDone();dealWaiting=true;only('')}
 $('pastDeal').onclick=()=>showPast('deal');$('pastEm').onclick=()=>showPast('holdem');
 $('coverPast').onclick=()=>{pastBack='cover';showPast(MODE)};
-/* Demo: one made-up hand that plays itself. It only draws on its own screen, so nothing is saved and no check-in is sent. */
-const DM={hand:[...'RJTAO'],dealer:[...'BUGLE'],you:'JAR',them:'BUG'};
-let dmFrom='cover',dmStep=-1,dmTimers=[];
-const dmAfter=(ms,f)=>dmTimers.push(setTimeout(f,ms));
-const dmClear=()=>{dmTimers.forEach(clearTimeout);dmTimers=[]};
-const dmPts=()=>score(DM.you,0,0),dmThem=()=>score(DM.them,0,0);
-function dmDraw(){const fill=(id,ls,o)=>{$(id).replaceChildren(...ls.map(l=>cardEl(l,o)))};
-  fill('dmDealer',DM.dealer,{down:true});fill('dmHand',DM.hand);
-  $('dmWord').replaceChildren(...[...DM.you].map(()=>{const d=document.createElement('div');d.className='slot';return d}));
-  $('dmPrev').textContent='';$('dmDealerWord').textContent=''}
-const DMS=[
- {t:()=>'You and the dealer each get <b>5 cards</b>. The dealer’s stay face down. Spell a <b>3-letter word</b> from yours.',run:()=>{dmDraw();return 0}},
- {t:()=>`Tap cards to fill the slots. Rare letters score more: <b>J is worth ${VALUES.J}</b>. ${DM.you} scores ${dmPts()}.`,run:()=>{const cards=[...$('dmHand').children];[...DM.you].forEach((l,i)=>{const c=cards[DM.hand.indexOf(l)];
-   dmAfter(300+i*750,()=>{c.classList.add('tap');sfx('deal')});
-   dmAfter(650+i*750,()=>{c.classList.remove('tap');c.classList.add('used');$('dmWord').children[i].replaceWith(cardEl(l));if(i===DM.you.length-1)$('dmPrev').innerHTML=`<b>${dmPts()}</b> pts`})});return 300+DM.you.length*750}},
- {t:()=>`Tap <b>Play word</b>. The dealer flips its cards and plays its best word: ${DM.them}, for ${dmThem()}.`,run:()=>{[...$('dmDealer').children].forEach((c,i)=>dmAfter(150+i*180,()=>{c.classList.remove('down');sfx('flip')}));
-   dmAfter(1300,()=>{[...DM.them].forEach(l=>[...$('dmDealer').children][DM.dealer.indexOf(l)].classList.add('pick'));$('dmDealerWord').textContent=`${DM.them} · ${dmThem()} pts`});return 1500}},
- {t:()=>`${DM.you} ${dmPts()} beats ${DM.them} ${dmThem()}. <b>You win the hand.</b> Higher score wins, and a tie is a push.`,run:()=>{$('dmPrev').innerHTML=`<b class="win">${DM.you} ${dmPts()}</b> beats ${DM.them} ${dmThem()}`;sfx('win');return 500}},
- {t:()=>'Each hand adds a card, up to 9, and from hand 2 a <b>bonus spot</b> multiplies its letter. Win 3 of the day’s <b>5 hands</b> for a star.',run:()=>0}];
-function dmNext(){dmClear();dmStep++;if(dmStep>=DMS.length)return dmEnd();const s=DMS[dmStep],last=dmStep===DMS.length-1;
-  $('dmStep').textContent=`Demo · ${dmStep+1} of ${DMS.length}`;$('dmNext').textContent=last?'Done':'Next';$('dmNext').disabled=true;$('dmText').innerHTML=s.t();
-  dmAfter(s.run()+80,()=>{$('dmNext').disabled=false})}
-function startDemo(){dmFrom=[...document.querySelectorAll('.sheet')].find(x=>!x.hidden)?.id||'cover';dmStep=-1;only('demo');dmNext()}
-function dmEnd(){dmClear();if(dmFrom==='cover')cover();else only(dmFrom)}
-$('dmNext').onclick=dmNext;$('dmSkip').onclick=dmEnd;$('coverDemo').onclick=$('qDemo').onclick=startDemo;
+/* smAisle demo frame v1 (Nov 4, 2026). One demo for every game: Try it with a coach (change list #30).
+   Add demo-frame.css to the page, this script after it, then call:
+   smDemo({name:'Game',moves:[{cap:'What to do',nudge:'What to say after a wrong tap'},...],win:'How you win',
+     play:function(){start the real game},
+     board:function(stage){draw a tiny practice board in stage; return {to:function(n){show the board after n moves},
+       tgt:function(n){return the element to tap for move n},win:function(){show the finished board}}},
+     auto:true for fast games that can't pause (it plays itself, model B)});
+   Uses the page's --paper --card --ink --ink2 --btn --hi colors. Saves nothing and counts nothing. */
+function smDemo(o){
+ var E=function(h){var t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstChild},root=document.getElementById('smDemo'),timers=[],k=0,busy=false,B,stage,capT,capN,capH,dots,slot;
+ var HAND='<svg viewBox="0 0 38 46" aria-hidden="true"><path d="M13 2c3 0 5 2 5 5v11l11 2c4 1 6 3 6 7l-1 9c-1 5-4 8-9 8H17c-3 0-5-1-7-4L3 29c-2-3 2-6 5-4l1 1 0-19c0-3 2-5 4-5z" fill="#ffe27a" stroke="#1a1814" stroke-width="2.4" stroke-linejoin="round"/></svg>';
+ var TOP='<div class="smTop"><span><b>DEMO</b><i>Practice only. Nothing counts.</i></span><button type="button" id="smSkip">Skip</button></div>';
+ if(root)root.remove();root=E('<div id="smDemo" role="dialog" aria-label="'+o.name+' demo"></div>');document.body.appendChild(root);
+ function later(f,ms){timers.push(setTimeout(f,ms))}function stop(){timers.forEach(clearTimeout);timers=[]}
+ function close(){stop();root.remove()}
+ function run(){stop();k=0;busy=false;root.innerHTML=TOP+'<div class="smStage"></div><div class="smCap"><div class="smH"><b></b><small></small></div><p></p><div class="smDots"></div><div class="smSlot"></div></div>';root.querySelector('#smSkip').onclick=close;stage=root.querySelector('.smStage');var c=root.querySelector('.smCap');capH=c.querySelector('b');capN=c.querySelector('small');capT=c.querySelector('p');dots=c.querySelector('.smDots');slot=c.querySelector('.smSlot');B=o.board(stage);slot.innerHTML='<div class="smTurn">'+(o.auto?'Plays by itself':'Your turn. Tap where the finger points.')+'</div>';show();if(!o.auto)stage.onclick=tap}
+ function cap(h,i,n,t){capH.textContent=h;capN.textContent=n?'Step '+(i+1)+' of '+n:'Done';capT.textContent=t;capT.className='';dots.innerHTML=o.moves.map(function(m,j){return '<i class="'+(j<=i?'on':'')+'"></i>'}).join('')}
+ function fin(){var f=stage.querySelector('.smF');if(f)f.remove()}
+ function point(el){var f=stage.querySelector('.smF');if(!f){f=E('<div class="smF">'+HAND+'</div>');f.style.left=stage.clientWidth/2+'px';f.style.top=stage.clientHeight-60+'px';stage.appendChild(f);void f.offsetWidth}var a=el.getBoundingClientRect(),b=stage.getBoundingClientRect(),x=a.left-b.left+a.width/2,y=a.top-b.top+a.height-6;f.classList.toggle('up',y+46>stage.clientHeight);f.style.left=x+'px';f.style.top=(y+46>stage.clientHeight?a.top-b.top+6:y)+'px'}
+ function rip(el){var a=el.getBoundingClientRect(),b=stage.getBoundingClientRect(),r=E('<i class="smR"></i>');r.style.left=a.left-b.left+a.width/2+'px';r.style.top=a.top-b.top+a.height/2+'px';stage.appendChild(r);setTimeout(function(){r.remove()},520)}
+ function show(){B.to(k);cap('Your move',k,o.moves.length,o.moves[k].cap);var t=B.tgt(k);t.classList.add('smNow');point(t);busy=false;if(o.auto)later(function(){done(t)},1700)}
+ function done(t){busy=true;rip(t);fin();k++;if(k<o.moves.length){B.to(k);later(show,o.auto?900:450)}else{B.to(k);later(function(){B.win();cap('How you win',k-1,0,o.win);slot.innerHTML='';later(ready,1500)},900)}}
+ function tap(e){if(busy)return;var h=e.target.closest('.smNow');if(h){done(h);return}capT.textContent=o.moves[k].nudge;capT.className='nudge';var n=stage.querySelector('.smNow');if(n){n.classList.remove('smW');void n.offsetWidth;n.classList.add('smW')}}
+ function ready(){stop();fin();var p=E('<div class="smPop"><div class="smPc"><h3>You’re ready</h3><p>'+o.win+'</p><button type="button" class="smBtn" id="smPlay">Play</button><button type="button" class="smBtn alt" id="smAg">Demo again</button></div></div>');root.appendChild(p);root.querySelector('#smPlay').onclick=function(){close();o.play()};root.querySelector('#smAg').onclick=run}
+ run();return {close:close}}
+/* Try it with a coach: three real moves on one practice hand. It draws only inside the demo frame, so it saves nothing, counts nothing and leaves today's game alone. */
+function abcBoard(stage){
+  const HAND=[...'CARTS'],DEALER=[...'RATES'],WORD='CAT',THEM='RAT';
+  stage.innerHTML='<div class="abD"><div class="abTk"></div><section class="seat"><div class="label">Dealer</div><div class="row abDl"></div><div class="abDw"></div></section><section class="middle"><div class="label">Hand 1 · 3 letters</div><div class="row abWd"></div><div class="abPv"></div></section><div class="row abHd"></div><button type="button" class="go abGo">Play word</button></div>';
+  const q=s=>stage.querySelector(s),go=q('.abGo'),pips=r=>{q('.abTk').innerHTML=[3,4,5,6,7].map((n,i)=>`<div class="pip${i===0?(r?' '+r:' now'):''}">${n}</div>`).join('')};
+  const dealer=down=>q('.abDl').replaceChildren(...DEALER.map(l=>cardEl(l,{down})));
+  const hand=n=>{q('.abHd').replaceChildren(...HAND.map(l=>{const c=cardEl(l),u=WORD.slice(0,n).includes(l);if(u)c.classList.add('used');c.dataset.l=l;return c}))};
+  const word=n=>{q('.abWd').replaceChildren(...[0,1,2].map(i=>{if(i<n)return cardEl(WORD[i]);const d=document.createElement('div');d.className='slot';return d}))};
+  return {to(n){const k=Math.min(n+1,3);pips('');word(k);hand(k);dealer(n<3);q('.abDw').textContent='';q('.abPv').innerHTML=`<b>${score(WORD.slice(0,k),0,0)}</b> pts`;go.textContent=k<3?`Play word (${k}/3)`:'Play word';go.classList.toggle('off',k<3||n>=3)},
+    tgt(n){return n===0?q('[data-l="A"]'):n===1?q('[data-l="T"]'):go},
+    win(){pips('W');[...q('.abDl').children].forEach((c,i)=>{if(THEM.includes(DEALER[i]))c.classList.add('pick')});q('.abDw').textContent=`Dealer plays ${THEM} · ${score(THEM,0,0)} pts`;q('.abPv').innerHTML=`<b class="win">${WORD} ${score(WORD,0,0)}</b> beats ${THEM} ${score(THEM,0,0)}. You win the hand.`}}}
+function coachDemo(){smDemo({name:'A, B, C, Deal',moves:[{cap:'Spell a word with your cards. We played the C. Tap the A.',nudge:'Good card, but tap the A to spell CAT.'},{cap:'Now tap the T to fill the last slot.',nudge:'Tap the T to finish the word.'},{cap:`That spells CAT, worth ${score('CAT',0,0)}. Tap Play word and the dealer flips.`,nudge:'Tap Play word to play your cards.'}],win:'Higher score wins the hand. Hands get longer as you go, up to 7 letters. Win 3 of the day’s 5 for a star.',play(){cover();backTo='game';if(finished())showDone();else only('')},board:abcBoard})}
+
+$('coverDemo').onclick=$('qDemo').onclick=coachDemo;
 $('mPast').onclick=()=>{pastBack='game';showPast(MODE)};
 $('pastBack').onclick=()=>pastBack==='cover'?cover():only('');
 /* smAisle Daily Plus: one purchase that covers The Daily 15, A, B, C, Deal and Gramble; a one-time purchase in the App Store app (window.ABC_APP). The website stays free, so Deal 'Em is open to everyone there. */

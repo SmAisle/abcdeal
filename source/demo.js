@@ -1,0 +1,12 @@
+/* Try it with a coach: three real moves on one practice hand. It draws only inside the demo frame, so it saves nothing, counts nothing and leaves today's game alone. */
+function abcBoard(stage){
+  const HAND=[...'CARTS'],DEALER=[...'RATES'],WORD='CAT',THEM='RAT';
+  stage.innerHTML='<div class="abD"><div class="abTk"></div><section class="seat"><div class="label">Dealer</div><div class="row abDl"></div><div class="abDw"></div></section><section class="middle"><div class="label">Hand 1 · 3 letters</div><div class="row abWd"></div><div class="abPv"></div></section><div class="row abHd"></div><button type="button" class="go abGo">Play word</button></div>';
+  const q=s=>stage.querySelector(s),go=q('.abGo'),pips=r=>{q('.abTk').innerHTML=[3,4,5,6,7].map((n,i)=>`<div class="pip${i===0?(r?' '+r:' now'):''}">${n}</div>`).join('')};
+  const dealer=down=>q('.abDl').replaceChildren(...DEALER.map(l=>cardEl(l,{down})));
+  const hand=n=>{q('.abHd').replaceChildren(...HAND.map(l=>{const c=cardEl(l),u=WORD.slice(0,n).includes(l);if(u)c.classList.add('used');c.dataset.l=l;return c}))};
+  const word=n=>{q('.abWd').replaceChildren(...[0,1,2].map(i=>{if(i<n)return cardEl(WORD[i]);const d=document.createElement('div');d.className='slot';return d}))};
+  return {to(n){const k=Math.min(n+1,3);pips('');word(k);hand(k);dealer(n<3);q('.abDw').textContent='';q('.abPv').innerHTML=`<b>${score(WORD.slice(0,k),0,0)}</b> pts`;go.textContent=k<3?`Play word (${k}/3)`:'Play word';go.classList.toggle('off',k<3||n>=3)},
+    tgt(n){return n===0?q('[data-l="A"]'):n===1?q('[data-l="T"]'):go},
+    win(){pips('W');[...q('.abDl').children].forEach((c,i)=>{if(THEM.includes(DEALER[i]))c.classList.add('pick')});q('.abDw').textContent=`Dealer plays ${THEM} · ${score(THEM,0,0)} pts`;q('.abPv').innerHTML=`<b class="win">${WORD} ${score(WORD,0,0)}</b> beats ${THEM} ${score(THEM,0,0)}. You win the hand.`}}}
+function coachDemo(){smDemo({name:'A, B, C, Deal',moves:[{cap:'Spell a word with your cards. We played the C. Tap the A.',nudge:'Good card, but tap the A to spell CAT.'},{cap:'Now tap the T to fill the last slot.',nudge:'Tap the T to finish the word.'},{cap:`That spells CAT, worth ${score('CAT',0,0)}. Tap Play word and the dealer flips.`,nudge:'Tap Play word to play your cards.'}],win:'Higher score wins the hand. Hands get longer as you go, up to 7 letters. Win 3 of the day’s 5 for a star.',play(){cover();backTo='game';if(finished())showDone();else only('')},board:abcBoard})}
