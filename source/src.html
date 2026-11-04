@@ -248,6 +248,7 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 .go.try.more{background:var(--card)}
 .smhome{font-size:12px;opacity:1;color:var(--ink2);margin-top:-4px}.smhome a{color:inherit;padding:6px 2px}
 /* Sound toggle in the menu's top corner, like The Daily 15 */
+.donerow,#goRow{display:flex;gap:8px}#goRow .go{flex:1 1 0;min-width:0}#goRow.two .go{padding-left:4px;padding-right:4px;font-size:13px;letter-spacing:.02em;white-space:nowrap}#goRow .hubrow{background:var(--hi);color:#1a1814;text-transform:none}.donerow .go{flex:1 1 0;min-width:0;padding-left:4px;padding-right:4px;white-space:nowrap}.donerow .hubrow{background:var(--hi);color:#1a1814;text-transform:none;letter-spacing:.02em}
 .mgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mgrid .go{margin:0;padding:10px 4px;font-size:12px;white-space:nowrap}.mgrid .hubrow{background:var(--hi);color:#1a1814;text-transform:none}.mgrid[hidden]{display:none}
 .sets{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--ink);padding-top:10px}.sets button.tg{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:10px;background:transparent;border:2px solid var(--ink);border-radius:3px;font:800 12px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);cursor:pointer}.sets button.tg span{font-size:14px}.sets button.tg.on{background:var(--ink);color:#fffdf6}
 #menu h2{text-align:left}
@@ -316,7 +317,7 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
     <button id="clearBtn">Clear</button>
     <button id="foldBtn">Fold</button>
   </div>
-  <button class="go" id="goBtn">Play word</button>
+  <div id="goRow"><button class="go" id="goBtn">Play word</button><button class="go hubrow" id="goHub" hidden>‹ smAisle Daily</button></div>
 </div>
 <div id="toast"></div>
 
@@ -394,7 +395,7 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
   <table class="recap" id="doneRecap"></table>
   <p id="doneStreak" style="font-family:var(--sans);font-weight:800;font-size:14px;letter-spacing:.04em" hidden></p>
   <p class="fine" style="font-style:italic">Next deal in <span class="countdown" id="cd"></span></p>
-  <button class="go" id="shareBtn">Share result</button>
+  <div class="donerow"><button class="go" id="shareBtn">Share result</button><button class="go hubrow" id="doneHub" hidden>‹ smAisle Daily</button></div>
   <button class="go try" id="tryOther" hidden></button>
   <textarea id="shareText" readonly hidden></textarea>
   <div class="links"><button id="lookBtn">See the table</button><span>·</span><button id="doneStats">Stats</button><span id="replayDot">·</span><button id="replayBtn">Play again</button></div>
@@ -469,7 +470,7 @@ body.menuOpen #menuBtn{position:relative;z-index:31;background:var(--paper)}
 /*WORDS*/
 /*LOGIC*/
 const RESET_DAYS={'2026-10-31':3};
-const VERSION='79',VDATE='Nov 4',GAME='abc';
+const VERSION='80',VDATE='Nov 4',GAME='abc';
 /* Draw and Swap are turned off for now; set true to bring them back. */
 const DRAW_SWAP=false;
 /* ---------- Usage check-in (website copy only, after the player agrees) ---------- */
@@ -677,6 +678,8 @@ function render(deal){
   if(!h.done){g.textContent=w.length<len?`Play word (${w.length}/${len})`:'Play word';g.disabled=busy||w.length!==len}
   else if(S.hands.every(x=>x.done)){g.textContent='See today’s result';g.disabled=false}
   else{g.textContent='Next hand';g.disabled=false}
+  /* finished table: a way out beside See today's result */
+  const goOut=HUBON&&h.done&&S.hands.every(x=>x.done);$('goHub').hidden=!goOut;$('goRow').classList.toggle('two',goOut);
   /* Short screens (a phone with 8 or 9 cards, or Deal 'Em's four rows): shrink every card until the table fits above the buttons */
   /* Card size is fixed for the whole hand: it only ever shrinks, so placing letters never resizes the cards */
   const t=$('table'),hk=DATE+MODE+S.cur+'|'+t.clientWidth+'x'+t.clientHeight;if(sizeKey!==hk){sizeKey=hk;sizeK=1}
@@ -894,7 +897,7 @@ $('mD15').innerHTML=d15Tile('','Crossword-style daily puzzle').replace('<span cl
 $('mD15').onclick=()=>outLink('d15','menu');
 /* website copy only: back link to the smAisle Daily hub */
 /* website copy: the hub replaces the Daily 15 tile */
-function dailyLinks(){$('mDaily').hidden=false;$('coverHub').hidden=false;$('cover').classList.add('hub');$('mMore').hidden=true;$('mD15').hidden=true;$('mDaily').onclick=()=>{location.href='https://smaisle.app/daily/'}}
+var HUBON=false;function dailyLinks(){HUBON=true;$('doneHub').hidden=false;$('doneHub').onclick=$('goHub').onclick=()=>{location.href='https://smaisle.app/daily/'};$('mDaily').hidden=false;$('coverHub').hidden=false;$('cover').classList.add('hub');$('mMore').hidden=true;$('mD15').hidden=true;$('mDaily').onclick=()=>{location.href='https://smaisle.app/daily/'}}
 $('cvMore').onclick=e=>{e.preventDefault();outLink('sm','cover')};
 if(/github\.io$|smaisle\.app$/.test(location.hostname))dailyLinks();
 $('tryOther').onclick=()=>{if($('tryOther').dataset.to==='d15')return outLink('d15','done');if(HOLDEM()){backTo='game';setMode('deal');if(finished())return showDone();dealWaiting=true;only('')}else playHoldem()};

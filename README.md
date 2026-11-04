@@ -267,3 +267,6 @@ On smaisle.github.io the page loads `https://smaisle.github.io/gate.js`, which a
 ## v77
 - Same menu as Straight Down Spell: Back to game; a grid of Archive, Stats, How to Play, Plus (Deal ’Em if you have Plus, otherwise the Plus offer); Home Screen beside the yellow smAisle Daily; Settings; the version. How to Play in the menu now opens the card with Watch the demo. Sound, Terms and the More from smAisle tile live in Settings.
 - v79: Try it with a coach replaces the old demo: the shared smAisle demo frame (`source/demo-frame.js`, `source/demo-frame.css`) with this game's practice hand in `source/demo.js`. The sound patch from v78 now lives in `source/src.html`.
+
+## v80
+Finished game: a yellow ‹ smAisle Daily button sits beside See today's result on the table and beside Share result on the results popup, so one tap always leaves. Both deals (Classic and Deal 'Em). Same rule as the menu's smAisle Daily row.
