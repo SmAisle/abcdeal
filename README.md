@@ -270,3 +270,6 @@ On smaisle.github.io the page loads `https://smaisle.github.io/gate.js`, which a
 
 ## v80
 Finished game: a yellow ‹ smAisle Daily button sits beside See today's result on the table and beside Share result on the results popup, so one tap always leaves. Both deals (Classic and Deal 'Em). Same rule as the menu's smAisle Daily row.
+
+## v81 (Nov 5)
+Deals from Nov 6 on are no longer frozen, in both the regular game and Deal 'Em. They are built fresh from the new common list, so every hand has a common word and the dealer and best words are all on that list. Frozen deals from the old list had shown words such as VAGINAL, EROTICA, HEROIN, names and odd short words. Sep 1 through Nov 5 are unchanged.
