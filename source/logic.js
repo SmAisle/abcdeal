@@ -6,7 +6,7 @@ const MULT=[1,2,3,4,5]; /* the bonus spot's letter counts this many times, by ha
 /* The bonus spot moves around: from MOVE_FROM on, each hand puts it on a slot picked from the date (the same for everyone).
    Before that it was always the first letter, so past days score the way they did. */
 const MOVE_FROM='2026-10-30';
-function bonusSlots(date){return LENGTHS.map((len,h)=>date<MOVE_FROM||h===0?0:hashStr('bonus|'+date+'|'+h)%len)}
+function bonusSlots(date){return LENGTHS.map((len,h)=>date<MOVE_FROM||h===0?0:hashStr((NOON?'noon':'')+'bonus|'+date+'|'+h)%len)}
 const SIZES=[5,6,7,8,9]; /* cards dealt (you and the dealer): one more each hand */
 const HANDS=LENGTHS.length;
 /* Draw and Swap cost more as hands are worth more: hand 1 is 2 and 1, hand 5 is 6 and 5. */
@@ -16,6 +16,8 @@ const EPOCH='2026-09-01';
    In Hold'em, card arrays are [board..., your 2 cards] and a word must use at least one of your 2 cards.
    HOLE is 0 in the regular game, so every rule below works the same as before. */
 let HOLE=0;
+/* NOON is true while dealing the noon hand (smAisle Daily app, Plus): its own seeds, so a different deal from the midnight one, the same for everyone. */
+let NOON=false;
 function usesHole(c,letters){return !HOLE||!fits(c,count(letters.slice(0,-HOLE).join('')))}
 
 function unpack(obj){const all=[];for(const k in obj){const n=+k,s=obj[k];for(let i=0;i<s.length;i+=n)all.push(s.slice(i,i+n))}return all}
@@ -78,15 +80,15 @@ const BUST_FROM='2026-10-31';
 /* Deals published before the word lists changed (Nov 2026) are stored exactly as they were, with their difficulty, so the Archive never changes.
    FROZEN_DEALS lines: [h]YYYY-MM-DD=difficulty:you,dealer,draw,swap,yourBest,dealerBest;... one group per hand ('h' = Deal 'Em, '' = a dealer bust). */
 const FROZEN={};for(const line of (typeof FROZEN_DEALS!=='undefined'?FROZEN_DEALS:'').split('|')){const i=line.indexOf('=');if(i>0)FROZEN[line.slice(0,i)]=line.slice(i+1)}
-function frozenDay(date){const f=FROZEN[(HOLE?'h':'')+date];if(!f)return null;const[diff,hands]=f.split(':');
+function frozenDay(date){if(NOON)return null;const f=FROZEN[(HOLE?'h':'')+date];if(!f)return null;const[diff,hands]=f.split(':');
   const day={you:[],dealer:[],yourBest:[],dealerBest:[],drawCard:[],swapCard:[],bonus:bonusSlots(date),holiday:holiday(date),diff:+diff};
   hands.split(';').forEach((g,h)=>{const[y,d,dr,sw,yw,dw]=g.split(',');day.you.push(y.split(''));day.dealer.push(d.split(''));day.drawCard.push(dr);day.swapCard.push(sw);
     day.yourBest.push({word:yw,score:score(yw,h,day.bonus[h])});day.dealerBest.push({word:dw,score:score(dw,h,day.bonus[h])})});
   day.bestTotal=day.yourBest.reduce((a,b)=>a+b.score,0);return day}
-function dealDay(date){const fz=frozenDay(date);if(fz)return fz;const share=date<MOVE_FROM?WIN_SHARE:0.6,hol=holiday(date);
-  const bustHand=date<BUST_FROM?(hashStr('bust|'+date)%10<3?1+hashStr('which|'+date)%4:-1):(hashStr('bust|'+date)%10<2?1+hashStr('which|'+date)%2:-1);
+function dealDay(date){const fz=frozenDay(date);if(fz)return fz;const share=date<MOVE_FROM?WIN_SHARE:0.6,hol=NOON?null:holiday(date);
+  const bustHand=date<BUST_FROM?(hashStr('bust|'+date)%10<3?1+hashStr('which|'+date)%4:-1):(hashStr((NOON?'noon':'')+'bust|'+date)%10<2?1+hashStr((NOON?'noon':'')+'which|'+date)%2:-1);
   const day={you:[],dealer:[],yourBest:[],dealerBest:[],drawCard:[],swapCard:[],bonus:bonusSlots(date),holiday:hol};
-  for(let h=0;h<HANDS;h++){const tws=hol&&hol.words[h],b=day.bonus[h],r=rng(hashStr((HOLE?'abcholdem|':'abcdeal3|')+date+'|'+h)),n=SIZES[h];let pick=null;
+  for(let h=0;h<HANDS;h++){const tws=hol&&hol.words[h],b=day.bonus[h],r=rng(hashStr((NOON?(HOLE?'abcholdemnoon|':'abcnoon|'):(HOLE?'abcholdem|':'abcdeal3|'))+date+'|'+h)),n=SIZES[h];let pick=null;
     for(let tries=0;tries<4000&&!pick;tries++){const tw=tws&&tws[Math.floor(tries/800)%tws.length];const deck=freshDeck(r);let [you,dealer]=split(deck,n);
       if(tw&&!(()=>{/* the dealer's cards hold the festive word plus random fill */
         const ws=tw.split('');let left=deck.slice(HOLE||n,2*n).concat(deck.slice(2*n+2));for(const ch of ws){const i=left.indexOf(ch);if(i<0)return false;left.splice(i,1)}
@@ -111,4 +113,4 @@ function expectedWins(day){let E=0;for(let h=0;h<HANDS;h++){const have=count(day
   return E}
 function difficulty(day){if(day.diff)return day.diff;const e=expectedWins(day);return e>=4?1:e>=3.5?2:e>=3?3:e>=2.5?4:5}
 function dayNumber(date){return Math.round((Date.parse(date)-Date.parse(EPOCH))/864e5)+1}
-if(typeof module!=='undefined')module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,bonusSlots,holiday,isWord,best,fullList,dealDay,dayNumber,removeLetters,HANDS};
+if(typeof module!=='undefined')module.exports={split,wordScores,countWords,setHole:v=>{HOLE=v},setNoon:v=>{NOON=!!v},difficulty,expectedWins,DIFFW,VALUES,SIZES,LENGTHS,MULT,score,bonusSlots,holiday,isWord,best,fullList,dealDay,dayNumber,removeLetters,HANDS};

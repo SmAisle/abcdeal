@@ -273,3 +273,11 @@ Finished game: a yellow ‹ smAisle Daily button sits beside See today's result 
 
 ## v81 (Nov 5)
 Deals from Nov 6 on are no longer frozen, in both the regular game and Deal 'Em. They are built fresh from the new common list, so every hand has a common word and the dealer and best words are all on that list. Frozen deals from the old list had shown words such as VAGINAL, EROTICA, HEROIN, names and odd short words. Sep 1 through Nov 5 are unchanged.
+
+## v82 · Nov 6
+- Noon hand (smAisle Daily app only, Plus): Classic and Deal 'Em each get a second deal every day. It opens at 11:59 AM New York time (the game says "noon"); before that its row on the front page counts down. Free members see it locked with Plus and tapping it opens the Plus offer. The website shows none of it.
+- Same for everyone and different from the midnight deal: seeds `abcnoon|` (Classic) and `abcholdemnoon|` (Deal 'Em), plus `noon`-prefixed bonus-spot and dealer-bust seeds; no holiday words and no frozen deals for noon hands. Set by the `NOON` global in logic.js (like `HOLE`).
+- Its own saves: `abcn-` (Classic noon) and `abchn-` (Deal 'Em noon) for the game in progress, hist, stats, streak and difficulty. It never writes `abc-`/`abch-`, `smaisle_done` or check-ins, so the main streak, stats, Archive rows and the hub's Done check are untouched.
+- Front page: a slim "Noon hand" row under Classic and a "Deal 'Em noon hand" row under Deal 'Em (Plus only): Play / Keep playing / Result. Results title, game header and share text say Noon; the results card counts down to the next noon hand.
+- Archive: a Noon tab (app only) lists every past noon hand since Nov 6, Classic and Deal 'Em rows for each day, played late like other Archive deals.
+- How to Play: tighter on short phones so both pages fit 375x667; in the app the Extras page's website check-in line gives way to a Noon hand line.
